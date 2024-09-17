@@ -6,10 +6,9 @@ import { SiWindows11 } from "react-icons/si";
 import { IoIosLogIn } from "react-icons/io";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
-import { signIn, useSession  } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface User {
   username: string;
@@ -30,16 +29,16 @@ export default function Login({}: Props) {
 
   useEffect(() => {
     if (session) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [session, router]);
 
   const showForm = () => {
     return (
       <form
-        // onSubmit={handleSubmit((value: User) => {
-        //   alert(JSON.stringify(value));
-        // })}
+      // onSubmit={handleSubmit((value: User) => {
+      //   alert(JSON.stringify(value));
+      // })}
       >
         {/* Username */}
 
@@ -48,15 +47,15 @@ export default function Login({}: Props) {
           control={control}
           render={({ field }) => (
             <TextField
-            {...field}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            label="Username"
-            autoComplete="email"
-            autoFocus
-          />
-           )} 
+              {...field}
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              label="Username"
+              autoComplete="email"
+              autoFocus
+            />
+          )}
         />
 
         {/* Password */}
@@ -76,19 +75,9 @@ export default function Login({}: Props) {
           )}
         />
 
-        <button
-          className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white/50 font-medium text-gray-700 hover:bg-[#F0F2F5]"
-        >
+        <button className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white/50 font-medium text-gray-700 hover:bg-[#F0F2F5]">
           <IoIosLogIn className="mr-3" />
           Login
-        </button>
-
-        <button
-          className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white/50 font-medium text-gray-700 hover:bg-[#F0F2F5]"
-          onClick={() => signIn("azure-ad")}
-        >
-          <SiWindows11 className="mr-3" />
-          Login With Microsoft
         </button>
       </form>
     );
@@ -110,6 +99,13 @@ export default function Login({}: Props) {
             </Typography>
           </Box>
           {showForm()}
+          <button
+            className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white/50 font-medium text-gray-700 hover:bg-[#F0F2F5]"
+            onClick={() => signIn("azure-ad")}
+          >
+            <SiWindows11 className="mr-3" />
+            Login With Microsoft
+          </button>
         </CardContent>
       </Card>
     </Box>

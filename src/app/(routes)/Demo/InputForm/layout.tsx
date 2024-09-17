@@ -1,9 +1,10 @@
 "use client";
 
-import HomeLayout from "@/components/Layouts/HomeLayout";
 import SessionWrapper from "@/components/SessionWrapper";
 import "@/css/satoshi.css";
 import "@/css/style.css";
+import LayoutPage from "../component_test/LayoutPage";
+
 
 export default function RootLayout({
   children,
@@ -14,7 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <SessionWrapper>
         <body>
-          {children}
+          <LayoutPage>{children}</LayoutPage>
         </body>
       </SessionWrapper>
     </html>

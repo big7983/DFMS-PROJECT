@@ -33,16 +33,16 @@ const DropdownUser = () => {
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          <Image
+          {/* <Image
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
+            // src={session?.user?.image}
             style={{
               width: "auto",
               height: "auto",
             }}
             alt="User"
-          />
+          /> */}
         </span>
 
         <svg

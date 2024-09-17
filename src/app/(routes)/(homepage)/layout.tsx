@@ -12,11 +12,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <SessionWrapper>
         <body>
-          {children}
+          <HomeLayout>{children}</HomeLayout>
         </body>
-      </SessionWrapper>
     </html>
   );
 }
