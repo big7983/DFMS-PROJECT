@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
 const { AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID } =
   process.env;
 
@@ -9,6 +12,7 @@ if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID) {
 }
 
 const handler = NextAuth({
+  
   secret: AZURE_AD_CLIENT_SECRET,
   providers: [
     AzureADProvider({
@@ -23,6 +27,7 @@ const handler = NextAuth({
         token = Object.assign({}, token, {
           access_token: account.access_token,
         });
+        //console.log(account);
       }
       return token;
     },
@@ -32,6 +37,25 @@ const handler = NextAuth({
           access_token: token.access_token,
         });
         console.log(session);
+      }
+
+      if(session.user?.email){
+        const existingUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        })
+
+        if (!existingUser) {
+          // ถ้าไม่มีผู้ใช้ในฐานข้อมูล ให้สร้างผู้ใช้ใหม่
+          await prisma.user.create({
+            data: {
+              email: session.user.email,
+              name: session.user.name,
+              rank: "...",
+              position: "...",
+              employee_id: "T...",
+            },
+          });
+        }
       }
       return session;
     },

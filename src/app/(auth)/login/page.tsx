@@ -10,6 +10,10 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 interface User {
   username: string;
   password: string;

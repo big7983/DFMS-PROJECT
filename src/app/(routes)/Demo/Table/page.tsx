@@ -186,7 +186,7 @@ export default function ColumnGroupingTable() {
                         </TableCell>
                       );
                     })}
-                  </TableRow>
+                  </TableRow>               
                 );
               })}
           </TableBody>

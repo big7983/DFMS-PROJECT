@@ -5,9 +5,33 @@ import ClickOutside from "@/components/ClickOutside";
 import { signOut,useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import axios from "axios";
+
 
 
 const DropdownUser = () => {
+
+  const [name, setName] = useState('')
+  const [position, setPosition] = useState('')
+
+  const fetchdata = async (id: String) => {
+    try {
+      const res = await axios.get(`/api/userdata/${id}`)
+      setName(res.data.name)
+      setPosition(res.data.position)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchdata(session?.user?.email)
+    }
+  },)
+
+  const defaultImage = '/images/user/avatar-user.jpg';
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
@@ -27,22 +51,22 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {session?.user?.name}
+            {name}
           </span>
-          <span className="block text-xs">Trainnee - App Software Developer</span>
+          <span className="block text-xs">{position}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          {/* <Image
+          <Image
             width={112}
             height={112}
-            // src={session?.user?.image}
+            src={session?.user?.image ? session.user.image : defaultImage}
             style={{
               width: "auto",
               height: "auto",
             }}
             alt="User"
-          /> */}
+          />
         </span>
 
         <svg
