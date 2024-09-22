@@ -13,6 +13,11 @@ function Pagetest() {
     { page: 'Stepper', route: '/Demo/Stepper' },
     { page: 'Table', route: '/Demo/Table' },
     { page: 'Tablev2', route: '/Demo/Tablev2' },
+    { page: 'Tablev3', route: '/Demo/Tablev3' },
+    { page: 'Tablev31', route: '/Demo/Tablev31' },
+    { page: 'inputtest2', route: '/Demo/inputtest2' },
+    { page: 'inputtest3', route: '/Demo/inputtest3' },
+    { page: 'inputtest4', route: '/Demo/inputtest4' },
   ]);
 
   // ฟังก์ชันสำหรับไปยังเส้นทางใหม่
