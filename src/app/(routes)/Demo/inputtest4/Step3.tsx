@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { DataGrid, GridColDef, GridPagination, GridRowSelectionModel } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridPagination,
+  GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import { Button, TextField, Select, MenuItem, Pagination } from "@mui/material";
 
 const users = [
@@ -110,24 +115,51 @@ const Step3: React.FC<{
             }}
           />
         </div>
-
-        <div className="flex justify-between mt-4">
-          <Button
-            onClick={handlePrevStep}
-            variant="contained"
-            color="secondary"
+      </div>
+      <div className="flex justify-between mt-9">
+        <Button
+          onClick={handlePrevStep}
+          variant="contained"
+          className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="h-6 w-6"
           >
-            Previous
-          </Button>
-          <Button
-            onClick={canProceed ? handleNextStep : undefined}
-            disabled={!canProceed}
-            variant="contained"
-            color="primary"
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 19.5L8.25 12l7.5-7.5"
+            />
+          </svg>
+          Previous
+        </Button>
+        <Button
+          onClick={canProceed ? handleNextStep : undefined}
+          disabled={!canProceed}
+          variant="contained"
+          className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+        >
+          Next
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="h-6 w-6"
           >
-            Next
-          </Button>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+            />
+          </svg>
+        </Button>
       </div>
     </div>
   );

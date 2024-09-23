@@ -1,7 +1,7 @@
 // components/Step2.tsx
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-
+import { Button } from "@mui/material";
 
 interface Step1Props {
   formData: {
@@ -11,7 +11,7 @@ interface Step1Props {
     dateend: string;
     objective: string;
   };
-  handleChange: ((e: React.ChangeEvent<HTMLInputElement>) => void)
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNextStep: () => void;
   handlePrevStep: () => void;
   canProceed: boolean;
@@ -23,7 +23,7 @@ const Step1: React.FC<Step1Props> = ({
   handleNextStep,
   handlePrevStep,
   canProceed,
-}) => { 
+}) => {
   useEffect(() => {
     console.log("Step 1 Data:", formData);
   }, [formData]);
@@ -122,10 +122,9 @@ const Step1: React.FC<Step1Props> = ({
             </div>
 
             <div className="flex justify-between">
-              <button
-                disabled
-                type="button"
-                className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                disabled               
+                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -138,14 +137,17 @@ const Step1: React.FC<Step1Props> = ({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"
                   />
                 </svg>
-              </button>
-              <button
+                Previous
+              </Button>
+              <Button
                 disabled={!canProceed}
-                className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={canProceed ? handleNextStep : undefined}
+                className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
               >
+                Next
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -160,8 +162,7 @@ const Step1: React.FC<Step1Props> = ({
                     d="M8.25 4.5l7.5 7.5-7.5 7.5"
                   />
                 </svg>
-                Next
-              </button>
+              </Button>
             </div>
           </div>
 
