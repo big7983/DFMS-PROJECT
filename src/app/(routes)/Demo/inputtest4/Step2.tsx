@@ -12,6 +12,7 @@ interface Step2Props {
     other: number;
     total: number;
   };
+  handlePrevStep: () => void, 
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNextStep: () => void;
   canProceed: boolean;
@@ -19,6 +20,7 @@ interface Step2Props {
 
 const Step2: React.FC<Step2Props> = ({
   formData,
+  handlePrevStep,
   handleChange,
   handleNextStep,
   canProceed,
@@ -180,6 +182,7 @@ const Step2: React.FC<Step2Props> = ({
             <div className="flex justify-between">
               <button                
                 type="button"
+                onClick={handlePrevStep}
                 className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg

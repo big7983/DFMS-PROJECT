@@ -18,6 +18,7 @@ function Pagetest() {
     { page: 'inputtest2', route: '/Demo/inputtest2' },
     { page: 'inputtest3', route: '/Demo/inputtest3' },
     { page: 'inputtest4', route: '/Demo/inputtest4' },
+    { page: 'testlist', route: '/Demo/testlist' },
   ]);
 
   // ฟังก์ชันสำหรับไปยังเส้นทางใหม่

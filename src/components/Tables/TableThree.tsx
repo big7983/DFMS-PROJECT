@@ -35,16 +35,16 @@ const TableThree = () => {
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
               <th className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-                Package
+                รหัสพนักงาน
               </th>
               <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
-                Invoice date
+                ชื่อ-นามสกุล
               </th>
               <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
-                Status
+                ระดับ
               </th>
               <th className="px-4 py-4 font-medium text-black dark:text-white">
-                Actions
+                ตำแหน่ง
               </th>
             </tr>
           </thead>

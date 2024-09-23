@@ -1,32 +1,14 @@
-// components/MultiStepForm.tsx
 import React, { useState } from "react";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
+import Step4 from "./Step4";
 
 const steps = [
-  {
-    id: "Step 1",
-    component: Step1,
-    name: "information",
-    fields: ["course", "location", "datestart", "dateend", "objective"],
-  },
-  {
-    id: "Step 2",
-    component: Step2,
-    name: "budget",
-    fields: [
-      "received",
-      "remaining",
-      "registration",
-      "room",
-      "transportation",
-      "allowance",
-      "other",
-      "total"
-    ],
-  },
-  { id: "Step 3", component: Step3, name: "information3", fields: [] },
+  { id: "Step 1", component: Step1, name: "ข้อมูลเกี่ยวกับหลักสูตร", fields: ["course", "location", "datestart", "dateend", "objective"] },
+  { id: "Step 2", component: Step2, name: "งบประมาณ", fields: ["received", "remaining", "registration", "room", "transportation", "allowance", "other", "total"] },
+  { id: "Step 3", component: Step3, name: "รายชื่อพนักงานเข้าอบรม", fields: [] },
+  { id: "Step 4", component: Step4, name: "ตรวจสอบ", fields: [] },
 ];
 
 const MultiStepForm: React.FC = () => {
@@ -37,23 +19,32 @@ const MultiStepForm: React.FC = () => {
     datestart: "",
     dateend: "",
     objective: "",
-    received: 0,
-    remaining: 0,
-    registration: 0,
-    room: 0,
-    transportation: 0,
-    allowance: 0,
-    other: 0,
-    total: 0,
+    received: '',
+    remaining: '',
+    registration: '',
+    room: '',
+    transportation: '',
+    allowance: '',
+    other: '',
+    total: '',
   });
+  const [selectedUsers, setSelectedUsers] = useState<number[]>([]); 
+  const [stepCompleted, setStepCompleted] = useState([false, false, false, false]); // สถานะการเสร็จสิ้นของแต่ละขั้นตอน
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleNextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (isStepComplete(currentStep)) {
+      setStepCompleted((prev) => {
+        const newStepCompleted = [...prev];
+        newStepCompleted[currentStep] = true; // ทำเครื่องหมายว่าขั้นตอนนี้เสร็จแล้ว
+        return newStepCompleted;
+      });
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -68,11 +59,9 @@ const MultiStepForm: React.FC = () => {
   };
 
   const canNavigateToStep = (step: number) => {
-    if (step === 2) {
-      // Ensure Step 1 and Step 2 are complete before going to Step 3
-      return isStepComplete(0) && isStepComplete(1);
-    }
-    return isStepComplete(step);
+    // เช็คว่าได้ไปยังขั้นตอนนั้นๆ หรือยัง
+    if (step === 0) return true; // สามารถไป Step 1 ได้เสมอ
+    return stepCompleted[step - 1]; // ตรวจสอบสถานะของขั้นตอนก่อนหน้า
   };
 
   const CurrentStepComponent = steps[currentStep].component;
@@ -80,35 +69,26 @@ const MultiStepForm: React.FC = () => {
   return (
     <>
       <nav aria-label="Progress">
-        <ol role="list" className="space-y-4 md:flex md:space-x-8 md:space-y-0">
+        <ol role="list" className="space-y-4 lg:flex lg:space-x-8 lg:space-y-0">
           {steps.map((step, index) => (
             <li
               key={step.name}
-              className="md:flex-1"
+              className="lg:flex-1 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark px-10 py-5 rounded-[20px] cursor-pointer"
               onClick={() => canNavigateToStep(index) && setCurrentStep(index)}
             >
               {currentStep > index ? (
-                <div className="group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
-                  <span className="text-sm font-medium text-sky-600 transition-colors ">
-                    {step.id}
-                  </span>
+                <div className="group flex w-full flex-col border-l-4 border-primary py-2 pl-4 transition-colors lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4">
+                  <span className="text-sm font-medium text-primary transition-colors ">{step.id}</span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               ) : currentStep === index ? (
-                <div
-                  className="flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
-                  aria-current="step"
-                >
-                  <span className="text-sm font-medium text-sky-600">
-                    {step.id}
-                  </span>
+                <div className="flex w-full flex-col border-l-4 border-primary py-2 pl-4 lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4" aria-current="step">
+                  <span className="text-sm font-medium text-primary">{step.id}</span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               ) : (
-                <div className="group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
-                  <span className="text-sm font-medium text-gray-500 transition-colors">
-                    {step.id}
-                  </span>
+                <div className="group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4">
+                  <span className="text-sm font-medium text-gray-500 transition-colors">{step.id}</span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               )}
@@ -123,9 +103,11 @@ const MultiStepForm: React.FC = () => {
         handleNextStep={handleNextStep}
         handlePrevStep={handlePrevStep}
         canProceed={isStepComplete(currentStep)}
+        selectedUsers={selectedUsers}
+        setSelectedUsers={setSelectedUsers}
       />
+
     </>
   );
 };
-
 export default MultiStepForm;
