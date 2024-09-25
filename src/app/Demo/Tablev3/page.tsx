@@ -53,71 +53,29 @@ const initialRows = [
 ];
 
 // ฟังก์ชันสร้างสีตามสถานะ
-const getStatusChip = (status: any) => {
-  let colors = status === "active" ? "success" : "error";
-  return <Chip label={status} color={colors} />;
-};
+// const getStatusChip = (status: any) => {
+//   let colors = status === "active" ? "success" : "error";
+//   return <Chip label={status} color={colors} />;
+// };
+
+interface RowData {
+  name: string;
+  status: string;
+}
 
 export default function DataTable() {
-  const columns = [
-    { field: "name", headerName: "ชื่อ", width: 150 },
-    { field: "position", headerName: "ตำแหน่ง", width: 150 },
-    {
-      field: "status",
-      headerName: "สถานะ",
-      width: 150,
-      renderCell: (params: any) => getStatusChip(params.value), // ใช้ Chip แสดงสี
-    },
-    {
-      field: "actions",
-      headerName: "Action",
-      headerAlign: "center",
-      align: "center",
-      sortable: false,
-      disableColumnMenu: true,
-      width: 200,
 
-      renderCell: (params: any) => (
-        <>
-          {/* <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row.id)}
-          >
-            รายละเอียด
-          </Button> */}
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            // onClick={handleEditClick(id)}
-            color="inherit"
-          />
-
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            // onClick={handleDeleteClick(id)}
-            color="inherit"
-          />
-        </>
-      ),
-    },
-  ];
-
-  const [rows, setRows] = useState([]); // ข้อมูลทั้งหมดที่ได้จาก API
-  const [filteredRows, setFilteredRows] = useState([]); // ข้อมูลที่กรองแล้ว
+  const [rows, setRows] = useState<RowData[]>([]); // กำหนดประเภทข้อมูลของ rows เป็นอาร์เรย์ของ RowData
+  const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
   const [searchText, setSearchText] = useState(''); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(''); // ค่าสถานะที่เลือกกรอง
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/data'); // แทนที่ด้วย URL ของ API ของคุณ
-        const data = await response.json();
-        setRows(data);
-        setFilteredRows(data); // กำหนดข้อมูลเริ่มต้นที่กรองแล้ว
+        const res = await axios.get('/api/data'); // แทนที่ด้วย URL ของ API ของคุณ
+        setRows(res.data);
+        setFilteredRows(res.data); // กำหนดข้อมูลเริ่มต้นที่กรองแล้ว
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -220,7 +178,52 @@ export default function DataTable() {
         <DataGrid
           autoHeight
           rows={filteredRows}
-          columns={columns}
+          columns={[
+            { field: "name", headerName: "ชื่อ", width: 150 },
+            { field: "position", headerName: "ตำแหน่ง", width: 150 },
+            {
+              field: "status",
+              headerName: "สถานะ",
+              width: 150,
+              // renderCell: (params: any) => getStatusChip(params.value), 
+            },
+            {
+              field: "actions",
+              headerName: "Action",
+              headerAlign: "center",
+              align: "center",
+              sortable: false,
+              disableColumnMenu: true,
+              width: 200,
+        
+              renderCell: (params: any) => (
+                <>
+                  {/* <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => handleEdit(params.row.id)}
+                  >
+                    รายละเอียด
+                  </Button> */}
+                  <GridActionsCellItem
+                    icon={<EditIcon />}
+                    label="Edit"
+                    className="textPrimary"
+                    // onClick={handleEditClick(id)}
+                    color="inherit"
+                  />
+        
+                  <GridActionsCellItem
+                    icon={<DeleteIcon />}
+                    label="Delete"
+                    // onClick={handleDeleteClick(id)}
+                    color="inherit"
+                  />
+                </>
+              ),
+            },
+          ]}
           slots={{
             pagination: CustomPagination,
           }}

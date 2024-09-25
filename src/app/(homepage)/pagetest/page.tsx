@@ -19,6 +19,7 @@ function Pagetest() {
     { page: 'inputtest3', route: '/Demo/inputtest3' },
     { page: 'inputtest4', route: '/Demo/inputtest4' },
     { page: 'testlist', route: '/Demo/testlist' },
+    { page: 'trainingsurvey', route: '/trainingsurvey' },
   ]);
 
   // ฟังก์ชันสำหรับไปยังเส้นทางใหม่

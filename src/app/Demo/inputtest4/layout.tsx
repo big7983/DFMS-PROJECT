@@ -1,7 +1,6 @@
 "use client";
 
-import HomeLayout from "@/components/Layouts/HomeLayout";
-import SessionWrapper from "@/components/SessionWrapper";
+import DefaultLayout from "@/components/Layouts/layouttest";
 import "@/css/satoshi.css";
 import "@/css/style.css";
 
@@ -10,13 +9,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
-      <SessionWrapper>
-        <body>
+      <body>
+      <DefaultLayout>
           {children}
-        </body>
-      </SessionWrapper>
+      </DefaultLayout>
+      </body>
     </html>
   );
 }
