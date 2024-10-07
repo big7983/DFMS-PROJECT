@@ -13,11 +13,116 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//------------------------Model------------------------
+
 model User {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   email String  @unique
-  name  String?
+  name String?
   rank String
   position String
-  employee_id String 
+  employee_id String @unique
+  department String
 }
+
+model Training_Form {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  idform String
+  name String
+  date String
+  requester Requester?
+  stakeholders Json
+  information Information?
+  budget Budget?
+  active Boolean
+}
+
+model Training_Survey {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  idform String
+  name String
+  date String
+  requester Requester?
+  information Information?
+  survey Survey?
+  active Boolean
+}
+
+model WorkFlow {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id_form String
+  nameform String
+  course String
+  datestart String
+  dateend String
+  latestupdate String
+  status String
+  requester Requester?
+  approver Json
+  stakeholders Json
+}
+
+model RoleBased {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  namerole         String
+  access_from      String[] // Array of form names or IDs that this role can access
+  departments_access String[] // Array of departments that this role has access to
+}
+
+//--------------------type--------------------
+
+//Training_Form
+type Apply {
+  employee_id String
+  name String
+  position String
+  rank String
+}
+
+type Information {
+  course String
+  location String
+  datestart String
+  dateend String
+  objective String
+}
+
+type Budget {
+  received Float
+  remaining Float
+  registration Float
+  room Float
+  transportation Float
+  allowance Float
+  other Float
+  total Float
+}
+
+//Training_Survey
+type Survey {
+  keycontent String
+  matchesobjectives String
+  knowledge String
+  course_result String
+  course_reason String
+  lecturer_result String
+  lecturer_reason String
+  document_result String
+  document_reason String
+  service_result String
+  service_reason String
+  selectedOptions String[]
+}
+
+//WorkFlow
+type Requester {
+  user_id String
+  employee_id String
+  name String
+  position String
+  rank String
+  statusnoti String
+  textnoti String
+}
+
+//****************************************************************************

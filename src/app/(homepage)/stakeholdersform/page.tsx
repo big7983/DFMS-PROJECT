@@ -5,7 +5,6 @@ import axios from "axios";
 
 import {
   DataGrid,
-  GridActionsCellItem,
   gridPageCountSelector,
   GridPagination,
   useGridApiContext,
@@ -15,19 +14,10 @@ import {
   TextField,
   Select,
   MenuItem,
-  Chip,
   Button,
   TablePaginationProps,
-  Box,
-  IconButton,
-  Menu,
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-// ตัวอย่างข้อมูล
 
 const rows1 = [
   {
@@ -52,7 +42,7 @@ interface RowData {
   status: string;
 }
 
-export default function Participantform() {
+export default function Stakeholdersform() {
   const [rows, setRows] = useState<RowData[]>([]); // กำหนดประเภทข้อมูลของ rows เป็นอาร์เรย์ของ RowData
   const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
@@ -111,9 +101,9 @@ export default function Participantform() {
   }
 
   return (
-    <div className="bg-white p-10 rounded-[20px]">
+    <div className="bg-white dark:bg-boxdark-2 p-10 rounded-[20px]">
       <div className="w-full">
-        <p className="text-black font-bold mb-6 text-xl">
+        <p className="text-black dark:text-bodydark font-bold mb-6 text-xl">
           รับทราบการมีส่วนร่วม
         </p>
         {/* ช่องค้นหา */}
@@ -188,7 +178,7 @@ export default function Participantform() {
             {
               field: "petitioner",
               headerName: "ผู้ยื่นคำร้อง",
-              width: 200,              
+              width: 200,
             },
             {
               field: "status",

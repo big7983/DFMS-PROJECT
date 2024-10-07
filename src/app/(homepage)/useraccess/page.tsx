@@ -39,7 +39,8 @@ const List = () => {
     name: string,
     rank: string,
     position: string,
-    employee_id: string
+    employee_id: string,
+    department: string
   ) => {
     Swal.fire({
       title: "Edit User Details",
@@ -73,7 +74,14 @@ const List = () => {
         '<input type="text" id="swal-input4" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
         position +
         '" />' +
+        "</div>"+
+        '<div class="mb-4.5">' +
+        '<label class="mb-3 block text-sm font-medium text-black dark:text-white text-left">department <span class="text-meta-1">*</span></label>' +
+        '<input type="text" id="swal-input6" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
+        department +
+        '" />' +
         "</div>",
+        
 
       focusConfirm: false,
       showCancelButton: true,
@@ -100,16 +108,19 @@ const List = () => {
         const employee_id = (
           document.getElementById("swal-input5") as HTMLInputElement
         ).value;
+        const department = (
+          document.getElementById("swal-input6") as HTMLInputElement
+        ).value;
 
-        if (!email || !name || !rank || !position || !employee_id) {
+        if (!email || !name || !rank || !position || !employee_id || !department) {
           Swal.showValidationMessage("All fields are required");
         }
 
-        return { email, name, rank, position, employee_id };
+        return { email, name, rank, position, employee_id , department };
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const { email, name, rank, position, employee_id } = result.value;
+        const { email, name, rank, position, employee_id , department } = result.value;
 
         try {
           Swal.fire({
@@ -127,6 +138,7 @@ const List = () => {
             rank,
             position,
             employee_id,
+            department,
           });
           Swal.fire({
             title: "Updated!",
@@ -185,7 +197,8 @@ const List = () => {
                         post.name,
                         post.rank,
                         post.position,
-                        post.employee_id
+                        post.employee_id,
+                        post.department
                       )
                     }
                   >

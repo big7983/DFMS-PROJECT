@@ -8,7 +8,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { email, name, rank, position, employee_id } = await req.json();
+    const { email, name, rank, position, employee_id, department } = await req.json();
     const newPost = await prisma.user.create({
       data: {
         email,
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
         rank,
         position,
         employee_id,
+        department,
       },
     });
     return Response.json(newPost);

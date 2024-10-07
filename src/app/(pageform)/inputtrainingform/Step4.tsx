@@ -2,6 +2,8 @@ import { Button } from "@mui/material";
 import React from "react";
 import { IoSaveOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface Step4Props {
   formData: {
@@ -23,33 +25,97 @@ interface Step4Props {
   handlePrevStep: () => void;
 }
 
-const showAlert = () => {
-  Swal.fire({
-    title: "คุณต้องการบันทึกใช่หรือไม่?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "ใช่, บันทึก",
-    cancelButtonText: "ยกเลิก",
-    reverseButtons: true, // สลับตำแหน่งปุ่ม
-    confirmButtonColor: "#219653",
-    cancelButtonColor: "#DC3545",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      Swal.fire({
-        title: "บันทึกสำเร็จ!",
-        icon: "success",
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#219653"
-      });
-    }
-  });
-};
-
 const Step4: React.FC<Step4Props> = ({
   formData,
   selectedUsers,
   handlePrevStep,
 }) => {
+  const router = useRouter();
+  const handleSubmit = async () => {
+    Swal.fire({
+      title: "กำลังบันทึกข้อมูล...", // ข้อความที่แสดงในหัวข้อ
+      html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
+      allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
+      showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
+      didOpen: () => {
+        Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
+      },
+    });
+
+    try {
+      const response = await axios.post("/api/test/tf", {
+        idform: "T001", // or whatever field you want to use as idform
+        name: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
+        date: new Date().toISOString(), // Current date or adjust as needed
+        requester: {
+          // Add requester data here
+        }, // Example: use first user's data for requester
+        stakeholders: selectedUsers,
+        information: {
+          course: formData.course,
+          location: formData.location,
+          datestart: formData.datestart,
+          dateend: formData.dateend,
+          objective: formData.objective,
+        },
+        budget: {
+          received: parseFloat(formData.received) || 0, // ส่งเป็นหมายเลข (float)
+          remaining: parseFloat(formData.remaining) || 0,
+          registration: parseFloat(formData.registration) || 0,
+          room: parseFloat(formData.room) || 0,
+          transportation: parseFloat(formData.transportation) || 0,
+          allowance: parseFloat(formData.allowance) || 0,
+          other: parseFloat(formData.other) || 0,
+          total: parseFloat(formData.total) || 0,
+        },
+        active: true, // Set to true by default, adjust as needed
+      });
+
+      // Check if response is successful (status code 200)
+      console.log("Training Form created:", response.data);
+
+      // Show success alert
+      Swal.fire({
+        title: "บันทึกสำเร็จ!",
+        icon: "success",
+        confirmButtonText: "กลับสู่หน้าหลัก",
+        confirmButtonColor: "#219653",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/dashboard");
+        }
+      });
+      
+
+    } catch (error) {
+      console.error("Error creating training form:", error);
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด!",
+        text: "ไม่สามารถบันทึกข้อมูลได้",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+      
+    }
+  };
+
+  const showAlert = () => {
+    Swal.fire({
+      title: "คุณต้องการบันทึกใช่หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, บันทึก",
+      cancelButtonText: "ยกเลิก",
+      reverseButtons: true, // สลับตำแหน่งปุ่ม
+      confirmButtonColor: "#219653",
+      cancelButtonColor: "#DC3545",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleSubmit();
+      }
+    });
+  };
+
   return (
     <div className="mt-7 py-7">
       <div className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">

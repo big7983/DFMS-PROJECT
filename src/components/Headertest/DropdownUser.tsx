@@ -1,10 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
+import axios from "axios";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 const DropdownUser = () => {
+  const [name, setName] = useState("");
+  const [position, setPosition] = useState("");
+
+  const fetchdata = async (id: String) => {
+    try {
+      const res = await axios.get(`/api/userdata/${id}`);
+      setName(res.data.name);
+      setPosition(res.data.position);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchdata(session?.user?.email);
+    }
+  });
+
+  const defaultImage = "/images/user/avatar-user.jpg";
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false }); // signOut โดยไม่เปลี่ยนหน้าอัตโนมัติ
+    router.push("/login"); // เปลี่ยนเส้นทางไปที่หน้า login
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -15,16 +46,16 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            เสฎฐวุฒิ กสิวุฒิเชิดชูชัย
+            {name}
           </span>
-          <span className="block text-xs">Trainnee - App Software Developer</span>
+          <span className="block text-xs">{position}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
+            src={session?.user?.image ? session.user.image : defaultImage}
             style={{
               width: "auto",
               height: "auto",
@@ -128,7 +159,7 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+          <button onClick={handleLogout} className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
             <svg
               className="fill-current"
               width="22"

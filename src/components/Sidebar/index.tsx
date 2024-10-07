@@ -65,7 +65,7 @@ const menuGroups = [
           <MdSupervisorAccount />
         ),
         label: "รับทราบการมีส่วนร่วม",
-        route: "/participantform",
+        route: "/stakeholdersform",
       },
       {
         icon: (
@@ -229,7 +229,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </div>
             ))}
           </nav>
-          {/* <!-- Sidebar Menu --> */}
         </div>
       </aside>
     </ClickOutside>

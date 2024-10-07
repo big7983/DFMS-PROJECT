@@ -21,6 +21,10 @@ const handler = NextAuth({
       tenantId: AZURE_AD_TENANT_ID,
     }),
   ],
+  pages:{
+    signIn: "/dashboard",
+    signOut: "/login"
+  },
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
@@ -53,6 +57,7 @@ const handler = NextAuth({
               rank: "...",
               position: "...",
               employee_id: "T...",
+              department: "....",
             },
           });
         }
