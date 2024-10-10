@@ -17,12 +17,13 @@ datasource db {
 
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
+  employee_id String @unique
   email String  @unique
   name String?
   rank String
   position String
-  employee_id String @unique
   department String
+  role String
 }
 
 model Training_Form {
@@ -30,10 +31,13 @@ model Training_Form {
   idform String
   name String
   date String
+  requester_id String @unique
   requester Requester?
   stakeholders Json
+  approver Json
   information Information?
   budget Budget?
+  status Json
   active Boolean
 }
 
@@ -42,31 +46,24 @@ model Training_Survey {
   idform String
   name String
   date String
-  requester Requester?
+  requester Requester
   information Information?
   survey Survey?
+  status Json
   active Boolean
 }
 
 model WorkFlow {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  id_form String
+  id_form String @unique
   nameform String
-  course String
-  datestart String
-  dateend String
-  latestupdate String
-  status String
-  requester Requester?
   approver Json
-  stakeholders Json
 }
 
 model RoleBased {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  namerole         String
-  access_from      String[] // Array of form names or IDs that this role can access
-  departments_access String[] // Array of departments that this role has access to
+  id String   @id @default(auto()) @map("_id") @db.ObjectId
+  namerole String
+  member Json 
 }
 
 //--------------------type--------------------
@@ -116,8 +113,7 @@ type Survey {
 
 //WorkFlow
 type Requester {
-  user_id String
-  employee_id String
+  employee_id String 
   name String
   position String
   rank String

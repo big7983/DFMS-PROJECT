@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { signOut, useSession } from "next-auth/react";
 
 import {
   DataGrid,
@@ -27,17 +28,8 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-// ตัวอย่างข้อมูล
+import Link from 'next/link'
 
-const rows1 = [
-  {
-    id: 1,
-    course: "datawarehouse",
-    datestart: "Mon 2 May 2022",
-    status: "รับทราบแล้ว",
-    datestatus: "22 Apr 2022 13:00",
-  },
-];
 
 // ฟังก์ชันสร้างสีตามสถานะ
 // const getStatusChip = (status: any) => {
@@ -56,32 +48,39 @@ export default function Trainingform() {
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {      
-        // const res = await axios.get("/api/data"); 
-        // setRows(res.data);
-        // setFilteredRows(res.data); 
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const { data: session } = useSession();
 
-    fetchData(); // เรียกใช้งานฟังก์ชัน
+  const fetchData = async (email: string) => {
+    try {
+      const resid = await axios.get(`/api/callid/${email}`);
+      console.log("resid = ",resid.data.id)
+      const res = await axios.get(`/api/listform/${resid.data.id}`);
+      setRows(res.data);
+      setFilteredRows(res.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchData(session?.user?.email);
+    }
   }, []);
 
-  useEffect(() => {
-    const filtered = rows.filter((row) => {
-      const matchesSearch = row.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
-      const matchesStatus = statusFilter
-        ? row.status.toLowerCase() === statusFilter.toLowerCase()
-        : true; // กรองตามสถานะ
-      return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-    });
-    setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  }, [searchText, statusFilter, rows]);
+  // useEffect(() => {
+  //   const filtered = rows.filter((row) => {
+  //     const matchesSearch = row.name
+  //       .toLowerCase()
+  //       .includes(searchText.toLowerCase());
+  //     const matchesStatus = statusFilter
+  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
+  //       : true; // กรองตามสถานะ
+  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
+  //   });
+  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
+  // }, [searchText, statusFilter, rows]);
 
   function Pagination({
     page,
@@ -167,7 +166,7 @@ export default function Trainingform() {
 
         <DataGrid
           autoHeight
-          rows={rows1}
+          rows={rows}
           columns={[
             {
               field: "id",
@@ -179,13 +178,13 @@ export default function Trainingform() {
             { field: "course", headerName: "ชื่อหลักสูตร", width: 200 },
             { field: "datestart", headerName: "วันเริ่มอบรม", width: 200 },
             {
-              field: "status",
+              field: "statusfrom",
               headerName: "สถานะ",
               width: 150,
               // renderCell: (params: any) => getStatusChip(params.value),
             },
             {
-              field: "datestatus",
+              field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
               width: 150,
               // renderCell: (params: any) => getStatusChip(params.value),
@@ -209,14 +208,31 @@ export default function Trainingform() {
                   >
                     รายละเอียด
                   </Button> */}
-                  <Button
+                  {/* <Button
+                    size="small"
                     variant="contained"
                     color="primary"
-                    size="small"
+                    ref={{
+                      pathname: '/detailltrainingform',
+                      query: {
+                        search: params.row.idform
+                      }
+                    }}       
                     className="rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-opacity-90 "
-                  >                 
+                  >
                     รายละเอียด
-                  </Button>
+                  </Button> */}
+                  <Link    
+                   href={{
+                    pathname: '/detailltrainingform',
+                    query: {
+                      search: params.row.idform
+                    }
+                  }}             
+                    className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
+                  >
+                    รายละเอียด
+                  </Link>
                 </>
               ),
             },

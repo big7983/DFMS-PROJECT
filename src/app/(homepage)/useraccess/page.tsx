@@ -22,14 +22,14 @@ const List = () => {
     }
   };
 
-  const deletePost = async (id: Number) => {
-    try {
-      await axios.delete(`/api/data/${id}`);
-      fetchPosts();
-    } catch (error) {
-      console.error("Failed to delete the post", error);
-    }
-  };
+  // const deletePost = async (id: Number) => {
+  //   try {
+  //     await axios.delete(`/api/data/${id}`);
+  //     fetchPosts();
+  //   } catch (error) {
+  //     console.error("Failed to delete the post", error);
+  //   }
+  // };
 
   const router = useRouter();
 
@@ -40,7 +40,8 @@ const List = () => {
     rank: string,
     position: string,
     employee_id: string,
-    department: string
+    department: string,
+    role: string
   ) => {
     Swal.fire({
       title: "Edit User Details",
@@ -74,14 +75,22 @@ const List = () => {
         '<input type="text" id="swal-input4" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
         position +
         '" />' +
-        "</div>"+
+        "</div>" +
         '<div class="mb-4.5">' +
         '<label class="mb-3 block text-sm font-medium text-black dark:text-white text-left">department <span class="text-meta-1">*</span></label>' +
         '<input type="text" id="swal-input6" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
         department +
         '" />' +
+        "</div>" +
+        '<div class="mb-4.5">' +
+        '<label class="mb-3 block text-sm font-medium text-black dark:text-white text-left">department <span class="text-meta-1">*</span></label>' +
+        '<select id="swal-input7" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">' +
+        '<option value="" disabled selected>'+role+'</option>' +
+        '<option value="enduser">enduser</option>' +
+        '<option value="approver">approver</option>' +
+        '<option value="admin">admin</option>' +
+        "</select>" +
         "</div>",
-        
 
       focusConfirm: false,
       showCancelButton: true,
@@ -111,26 +120,38 @@ const List = () => {
         const department = (
           document.getElementById("swal-input6") as HTMLInputElement
         ).value;
+        const role = (
+          document.getElementById("swal-input7") as HTMLInputElement
+        ).value;
 
-        if (!email || !name || !rank || !position || !employee_id || !department) {
+        if (
+          !email ||
+          !name ||
+          !rank ||
+          !position ||
+          !employee_id ||
+          !department ||
+          !role
+        ) {
           Swal.showValidationMessage("All fields are required");
         }
 
-        return { email, name, rank, position, employee_id , department };
+        return { email, name, rank, position, employee_id, department, role };
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const { email, name, rank, position, employee_id , department } = result.value;
+        const { email, name, rank, position, employee_id, department, role } =
+          result.value;
 
         try {
           Swal.fire({
-            title: 'กำลังบันทึกข้อมูล...',  // ข้อความที่แสดงในหัวข้อ
+            title: "กำลังบันทึกข้อมูล...", // ข้อความที่แสดงในหัวข้อ
             html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
-            allowOutsideClick: false,  // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
-            showConfirmButton: false,  // ไม่แสดงปุ่มยืนยัน
+            allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
+            showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
             didOpen: () => {
-              Swal.showLoading();  // ใช้ showLoading() ของ SweetAlert2
-            }
+              Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
+            },
           });
           await axios.put(`/api/data/${id}`, {
             email,
@@ -139,6 +160,7 @@ const List = () => {
             position,
             employee_id,
             department,
+            role,
           });
           Swal.fire({
             title: "Updated!",
@@ -160,7 +182,7 @@ const List = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">Blog Posts</h1>
+      <h1 className="text-2xl font-semibold mb-6">จัดการสิทธิ์ผู้ใช้งานระบบ</h1>
       <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray">
@@ -198,17 +220,12 @@ const List = () => {
                         post.rank,
                         post.position,
                         post.employee_id,
-                        post.department
+                        post.department,
+                        post.role
                       )
                     }
                   >
                     Edit
-                  </button>
-                  <button
-                    onClick={() => deletePost(post.id)}
-                    className="text-meta-1 hover:text-danger"
-                  >
-                    Delete
                   </button>
                 </td>
               </tr>
@@ -216,12 +233,6 @@ const List = () => {
           </tbody>
         </table>
       </div>
-      <Link
-        className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        href="/create"
-      >
-        Create a New User
-      </Link>
     </div>
   );
 };

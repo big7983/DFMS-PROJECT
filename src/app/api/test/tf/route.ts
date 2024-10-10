@@ -8,10 +8,13 @@ export async function POST(req: Request) {
       idform,
       name,
       date,
+      requester_id,
       requester, // Changed from apply to requester
       stakeholders,
+      approver,
       information,
       budget,
+      status,
       active,
     } = await req.json();
 
@@ -20,9 +23,9 @@ export async function POST(req: Request) {
         idform,
         name,
         date,
+        requester_id,
         requester: requester
           ? {
-              user_id: requester.employee_id || "",
               employee_id: requester.employee_id || "",
               name: requester.name || "",
               position: requester.position || "",
@@ -31,7 +34,8 @@ export async function POST(req: Request) {
               textnoti: requester.textnoti || "",
             }
           : undefined,
-        stakeholders: stakeholders ? stakeholders : [], // Ensure to handle stakeholders as an array
+        stakeholders: stakeholders ? stakeholders : [],
+        approver: approver? approver : [],
         information: information
           ? {
               course: information.course,
@@ -43,16 +47,17 @@ export async function POST(req: Request) {
           : undefined,
         budget: budget
           ? {
-              received: budget.received,
-              remaining: budget.remaining,
-              registration: budget.registration,
-              room: budget.room,
-              transportation: budget.transportation,
-              allowance: budget.allowance,
-              other: budget.other,
-              total: budget.total,
+              received: parseFloat(budget.received) || 0,
+              remaining: parseFloat(budget.remaining) || 0,
+              registration: parseFloat(budget.registration) || 0,
+              room: parseFloat(budget.room) || 0,
+              transportation: parseFloat(budget.transportation) || 0,
+              allowance: parseFloat(budget.allowance) || 0,
+              other: parseFloat(budget.other) || 0,
+              total: parseFloat(budget.total) || 0,
             }
           : undefined,
+        status: status ? status : [],
         active,
       },
     });

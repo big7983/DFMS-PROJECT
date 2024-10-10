@@ -18,6 +18,8 @@ import {
   TablePaginationProps,
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const rows1 = [
   {
@@ -48,32 +50,37 @@ export default function Stakeholdersform() {
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // const res = await axios.get("/api/data");
-        // setRows(res.data);
-        // setFilteredRows(res.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const { data: session } = useSession();
 
-    fetchData(); // เรียกใช้งานฟังก์ชัน
+  const fetchData = async (email: string) => {
+    try {
+      const resid = await axios.get(`/api/callid/${email}`);
+      const res = await axios.get(`/api/liststakeholders/${resid.data.id}`);
+      setRows(res.data);
+      setFilteredRows(res.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchData(session?.user?.email);
+    }
   }, []);
 
-  useEffect(() => {
-    const filtered = rows.filter((row) => {
-      const matchesSearch = row.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
-      const matchesStatus = statusFilter
-        ? row.status.toLowerCase() === statusFilter.toLowerCase()
-        : true; // กรองตามสถานะ
-      return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-    });
-    setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  }, [searchText, statusFilter, rows]);
+  // useEffect(() => {
+  //   const filtered = rows.filter((row) => {
+  //     const matchesSearch = row.name
+  //       .toLowerCase()
+  //       .includes(searchText.toLowerCase());
+  //     const matchesStatus = statusFilter
+  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
+  //       : true; // กรองตามสถานะ
+  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
+  //   });
+  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
+  // }, [searchText, statusFilter, rows]);
 
   function Pagination({
     page,
@@ -158,7 +165,7 @@ export default function Stakeholdersform() {
 
         <DataGrid
           autoHeight
-          rows={rows1}
+          rows={rows}
           columns={[
             {
               field: "id",
@@ -176,17 +183,17 @@ export default function Stakeholdersform() {
               // renderCell: (params: any) => getStatusChip(params.value),
             },
             {
-              field: "petitioner",
+              field: "namerequester",
               headerName: "ผู้ยื่นคำร้อง",
               width: 200,
             },
             {
-              field: "status",
+              field: "statusfrom",
               headerName: "สถานะแบบอนุมัติ",
               width: 150,
             },
             {
-              field: "datestatus",
+              field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
               width: 150,
             },
@@ -209,14 +216,17 @@ export default function Stakeholdersform() {
                   >
                     รายละเอียด
                   </Button> */}
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    className="rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-opacity-90 "
+                  <Link
+                    href={{
+                      pathname: "/detaillststakeholders",
+                      query: {
+                        search: params.row.idform,
+                      },
+                    }}
+                    className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
                   >
                     รายละเอียด
-                  </Button>
+                  </Link>
                 </>
               ),
             },

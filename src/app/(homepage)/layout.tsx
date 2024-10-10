@@ -6,6 +6,7 @@ import "@/css/satoshi.css";
 import "@/css/style.css";
 import { useEffect, useState } from "react";
 
+
 export default function RootLayout({
   children,
 }: Readonly<{

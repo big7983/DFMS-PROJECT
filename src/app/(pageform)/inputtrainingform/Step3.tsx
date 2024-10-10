@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -6,14 +6,7 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import { Button, TextField, Select, MenuItem, Pagination } from "@mui/material";
-
-const users = [
-  { id: 1, name: "John Doe", department: "HR" },
-  { id: 2, name: "Jane Smith", department: "Finance" },
-  { id: 3, name: "Alice Johnson", department: "IT" },
-];
-
-const departments = ["All", "HR", "Finance", "IT"];
+import axios from "axios";
 
 const Step3: React.FC<{
   selectedUsers: { id: number; name: string; department: string }[];
@@ -25,34 +18,36 @@ const Step3: React.FC<{
 }> = ({ selectedUsers, setSelectedUsers, handlePrevStep, handleNextStep }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("All");
-  const [filteredUsers, setFilteredUsers] = useState(users);
+  // const [filteredUsers, setFilteredUsers] = useState(users);
 
   // กำหนด columns สำหรับ DataGrid
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", width: 200 },
-    { field: "department", headerName: "Department", width: 150 },
+    { field: "employee_id", headerName: "รหัสพนักงาน", width: 100 },
+    { field: "name", headerName: "ชื่อ", width: 200 },
+    { field: "rank", headerName: "ระดับ", width: 150 },
+    { field: "position", headerName: "ตำแหน่ง", width: 300 },
   ];
 
-  const filterUsers = (search: string, department: string) => {
-    const filtered = users.filter((user) => {
-      const matchesSearch = user.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesDepartment =
-        department === "All" || user.department === department;
-      return matchesSearch && matchesDepartment;
-    });
-    setFilteredUsers(filtered);
-  };
+  // const filterUsers = (search: string, department: string) => {
+  //   const filtered = users.filter((user) => {
+  //     const matchesSearch = user.name
+  //       .toLowerCase()
+  //       .includes(search.toLowerCase());
+  //     const matchesDepartment =
+  //       department === "All" || user.department === department;
+  //     return matchesSearch && matchesDepartment;
+  //   });
+  //   setFilteredUsers(filtered);
+  // };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    filterUsers(e.target.value, selectedDepartment);
+    //filterUsers(e.target.value, selectedDepartment);
   };
 
   const handleDepartmentChange = (e: React.ChangeEvent<any>) => {
     setSelectedDepartment(e.target.value as string);
-    filterUsers(searchTerm, e.target.value as string);
+    //filterUsers(searchTerm, e.target.value as string);
   };
 
   const toggleUserSelection = (selectionModel: GridRowSelectionModel) => {
@@ -64,12 +59,27 @@ const Step3: React.FC<{
 
   const canProceed = selectedUsers.length > 0;
 
+  const [users, setUser] = useState([]);
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get("/api/data");
+      setUser(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="mt-7 py-7">
       <div className="flex flex-col gap-4 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
         <div className="border-b border-stroke dark:border-strokedark justify-between flex flex-col sm:flex-row">
           <h2 className="flex mb-4 items-center justify-center text-xl text-black dark:text-white">
-            Select Users
+            พนักงานที่สามารถเข้าร่วมได้
           </h2>
           <div className="justify-between flex flex-col sm:flex-row mb-5 gap-3">
             <input
@@ -84,18 +94,18 @@ const Step3: React.FC<{
               onChange={handleDepartmentChange}
               className=" p-2 border rounded-md w-[120px] border-stroke bg-transparent text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             >
-              {departments.map((department) => (
+              {/* {departments.map((department) => (
                 <option key={department} value={department}>
                   {department}
                 </option>
-              ))}
+              ))} */}
             </select>
           </div>
         </div>
 
         <div style={{ height: 400, width: "100%" }}>
           <DataGrid
-            rows={filteredUsers}
+            rows={users}
             columns={columns}
             checkboxSelection
             onRowSelectionModelChange={toggleUserSelection}

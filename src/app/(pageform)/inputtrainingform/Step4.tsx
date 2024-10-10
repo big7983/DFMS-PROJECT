@@ -1,9 +1,10 @@
 import { Button } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IoSaveOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface Step4Props {
   formData: {
@@ -21,8 +22,29 @@ interface Step4Props {
     other: number;
     total: number;
   };
-  selectedUsers: { id: number; name: string; department: string }[];
+  selectedUsers: {
+    id: number;
+    name: string;
+    department: string;
+    employee_id: string;
+    rank: string;
+    position: string;
+  }[];
   handlePrevStep: () => void;
+}
+
+interface User {
+  id: number;
+  name: string;
+  department: string;
+  employee_id: string;
+  rank: string;
+  position: string;
+  status: string;
+}
+
+interface Stakeholders {
+  [key: number]: User; 
 }
 
 const Step4: React.FC<Step4Props> = ({
@@ -31,6 +53,52 @@ const Step4: React.FC<Step4Props> = ({
   handlePrevStep,
 }) => {
   const router = useRouter();
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchdata(session.user.email);
+    }
+  }, []);
+
+  const { data: session } = useSession();
+
+  const [user_id, setUserid] = useState("");
+  const [employee_id, setEmployeeid] = useState("");
+  const [name, setName] = useState("");
+  const [position, setPosition] = useState("");
+  const [rank, setRank] = useState("");
+  const [department, setdepartment] = useState("");
+  const [approvers, setApprovers] = useState<Record<string, any> | null>(null);
+  const [loading, setLoading] = useState(true);
+
+
+  const fetchdata = async (id: String) => {
+    try {
+      const res = await axios.get(`/api/userdata/${id}`);
+      setUserid(res.data.id);
+      setEmployeeid(res.data.employee_id);
+      setName(res.data.name);
+      setPosition(res.data.position);
+      setRank(res.data.rank);
+      setdepartment(res.data.department);
+      const response = await axios.get(`/api/workflow/listapprover/T001`); // เรียก API ตาม id_form
+      setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
+    } catch (error) {
+      console.error(error);
+    }finally {
+      setLoading(false);
+    }
+  };
+
+  // const fetchApprovers = async () => {
+  //   try {
+  //     const response = await axios.get(`/api/workflow/listapprover/T001`); // เรียก API ตาม id_form
+  //     setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
   const handleSubmit = async () => {
     Swal.fire({
       title: "กำลังบันทึกข้อมูล...", // ข้อความที่แสดงในหัวข้อ
@@ -43,14 +111,49 @@ const Step4: React.FC<Step4Props> = ({
     });
 
     try {
+      const approversObject = approvers ? Object.entries(approvers).reduce((acc:any, [key, approver]) => {
+        acc[approver.id] = {
+          id: approver.id,
+          sequence: approver.sequence,
+          name: approver.name,
+          department: approver.department,
+          employee_id: approver.employee_id,
+          rank: approver.rank,
+          position: approver.position,
+          status: "waiting", //approved, disapproved, waiting
+          opinion: "test",
+        };
+        return acc;
+      }, {}) : {};
+
+      const stakeholders: Stakeholders = selectedUsers.reduce((acc, user) => {
+        acc[user.id] = {
+          id: user.id,
+          name: user.name,
+          department: user.department,
+          employee_id: user.employee_id,
+          rank: user.rank,
+          position: user.position,
+          status: "false",
+        };
+        return acc;
+      }, {} as Stakeholders);
+
       const response = await axios.post("/api/test/tf", {
-        idform: "T001", // or whatever field you want to use as idform
+        idform: "T001",
         name: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
-        date: new Date().toISOString(), // Current date or adjust as needed
+        date: new Date().toISOString(),
+        requester_id: user_id,
         requester: {
-          // Add requester data here
-        }, // Example: use first user's data for requester
-        stakeholders: selectedUsers,
+          employee_id: employee_id,
+          name: name,
+          position: position,
+          rank: rank,
+          statusnoti: "",
+          textnoti: "",
+        },
+        approver: approversObject,
+        stakeholders,
         information: {
           course: formData.course,
           location: formData.location,
@@ -59,16 +162,26 @@ const Step4: React.FC<Step4Props> = ({
           objective: formData.objective,
         },
         budget: {
-          received: parseFloat(formData.received) || 0, // ส่งเป็นหมายเลข (float)
-          remaining: parseFloat(formData.remaining) || 0,
-          registration: parseFloat(formData.registration) || 0,
-          room: parseFloat(formData.room) || 0,
-          transportation: parseFloat(formData.transportation) || 0,
-          allowance: parseFloat(formData.allowance) || 0,
-          other: parseFloat(formData.other) || 0,
-          total: parseFloat(formData.total) || 0,
+          received: formData.received,
+          remaining: formData.remaining,
+          registration: formData.registration,
+          room: formData.room,
+          transportation: formData.transportation,
+          allowance: formData.allowance,
+          other: formData.other,
+          total: formData.total,
         },
-        active: true, // Set to true by default, adjust as needed
+        status: {
+          course: formData.course,
+          datestart: formData.datestart,
+          namerequester: name,
+          department: rank,
+          numstakeholders: selectedUsers.length,
+          datereques: new Date().toISOString(),
+          statusfrom: "รับทราบแล้ว (0/" + selectedUsers.length + ")",
+          latestupdate: new Date().toISOString(),
+        },
+        active: true,
       });
 
       // Check if response is successful (status code 200)
@@ -85,8 +198,6 @@ const Step4: React.FC<Step4Props> = ({
           router.push("/dashboard");
         }
       });
-      
-
     } catch (error) {
       console.error("Error creating training form:", error);
       Swal.fire({
@@ -95,7 +206,6 @@ const Step4: React.FC<Step4Props> = ({
         icon: "error",
         confirmButtonText: "ตกลง",
       });
-      
     }
   };
 
@@ -116,6 +226,8 @@ const Step4: React.FC<Step4Props> = ({
     });
   };
 
+  if (loading) return <div>Loading...</div>;
+
   return (
     <div className="mt-7 py-7">
       <div className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
@@ -125,20 +237,53 @@ const Step4: React.FC<Step4Props> = ({
           </h2>
         </div>
         <div className="border-b border-stroke  dark:border-strokedark ">
-          <p>วันที่ยืนอนุมัติ: 22 Apr 2022</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
+            <div className="w-35">
+              <label className=" block mb-1">วันยืนคำร้อง</label>
+              <div className="w-full">
+                <label className="text-black dark:text-white font-medium">
+                  55555
+                </label>
+              </div>
+            </div>
+            <div className="w-35">
+              <label className=" block mb-1">ผู้ยื่นคำร้อง</label>
+              <div className="w-full">
+                <label className="text-black dark:text-white font-medium">
+                  {name}
+                </label>
+              </div>
+            </div>
+            <div className="w-35">
+              <label className=" block mb-1">สังกัดฝ่าย</label>
+              <div className="w-full">
+                <label className="text-black dark:text-white font-medium">
+                  {department}
+                </label>
+              </div>
+            </div>
+            <div className="w-35">
+              <label className=" block mb-1">ตำแหน่ง</label>
+              <div className="w-full">
+                <label className="text-black dark:text-white font-medium">
+                  {position}
+                </label>
+              </div>
+            </div>
+          </div>
           <br />
         </div>
         <div className="border-b border-stroke  dark:border-strokedark ">
           <h3 className="font-semibold text-black dark:text-white mb-4">
             ข้อมูลหลักสูตร
           </h3>
+          <div className="mb-4.5 text-left">
+            <label className="block font-medium mb-1">ชื่อหลักสูตร</label>
+            <label className="font-medium text-black dark:text-white">
+              {formData.course}
+            </label>
+          </div>
           <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
-            <div className="">
-              <label className="block mb-1">ชื่อหลักสูตร</label>
-              <label className="font-medium text-left text-black dark:text-white">
-                {formData.course}
-              </label>
-            </div>
             <div>
               <label className=" block mb-1">วันที่เริ่มอบรม</label>
               <label className="text-left font-medium text-black dark:text-white">
@@ -247,6 +392,60 @@ const Step4: React.FC<Step4Props> = ({
           </div>
           <br />
         </div>
+
+        <div>
+          <div className="max-w-full overflow-x-auto">
+            <h3 className="font-semibold text-black dark:text-white mb-4">
+              ผู้อนุมัติแบบอบรม
+            </h3>
+            <table className="min-w-full table-auto">
+              <thead className="whitespace-nowrap">
+                <tr className="bg-gray-2 dark:bg-meta-4">
+                  <th className="text-center   p-4 font-medium text-black dark:text-white ">
+                    ลำดับ
+                  </th>
+                  <th className="text-left  p-4 font-medium text-black dark:text-white">
+                    ชื่อ-นามสกุล
+                  </th>
+                  <th className="text-left   p-4 font-medium text-black dark:text-white">
+                    ระดับ
+                  </th>
+                  <th className="text-left   p-4 font-medium text-black dark:text-white">
+                    ตำแหน่ง
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvers &&               
+                  Object.entries(approvers).map(([key, approver]) => (
+                    <tr className="pl-4 w-8" key={approver.sequence}>
+                      <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {approver.sequence}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {approver.name}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {approver.rank}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {approver.position}
+                        </h5>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div className="max-w-full overflow-x-auto">
           <h3 className="font-semibold text-black dark:text-white mb-4">
             รายชื่อพนักงานทั้งหมดที่เข้ารบการอบรม
@@ -270,10 +469,10 @@ const Step4: React.FC<Step4Props> = ({
             </thead>
             <tbody>
               {selectedUsers.map((user) => (
-                <tr className="pl-4 w-8" key={user.id}>
+                <tr className="pl-4 w-8" key={user.employee_id}>
                   <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark ">
                     <h5 className="font-medium text-black dark:text-white">
-                      S2000
+                      {user.employee_id}
                     </h5>
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">
@@ -283,12 +482,12 @@ const Step4: React.FC<Step4Props> = ({
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">
                     <h5 className="font-medium text-black dark:text-white">
-                      Manager
+                      {user.rank}
                     </h5>
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">
                     <h5 className="font-medium text-black dark:text-white">
-                      {user.department}
+                      {user.position}
                     </h5>
                   </td>
                 </tr>

@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const { AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID } =
@@ -12,7 +12,6 @@ if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID) {
 }
 
 const handler = NextAuth({
-  
   secret: AZURE_AD_CLIENT_SECRET,
   providers: [
     AzureADProvider({
@@ -21,9 +20,9 @@ const handler = NextAuth({
       tenantId: AZURE_AD_TENANT_ID,
     }),
   ],
-  pages:{
+  pages: {
     signIn: "/dashboard",
-    signOut: "/login"
+    signOut: "/login",
   },
   callbacks: {
     async jwt({ token, account }) {
@@ -31,22 +30,22 @@ const handler = NextAuth({
         token = Object.assign({}, token, {
           access_token: account.access_token,
         });
-        //console.log(account);
+        console.log(account);
       }
       return token;
     },
     async session({ session, token }) {
-      if (session) {
-        session = Object.assign({}, session, {
-          access_token: token.access_token,
-        });
-        console.log(session);
-      }
+      // if (session) {
+      //    session = Object.assign({}, session, {
+      //      access_token: token.access_token,
+      //    });
+      //   console.log(session);
+      // }
 
-      if(session.user?.email){
+      if (session.user?.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: session.user.email },
-        })
+        });
 
         if (!existingUser) {
           // ถ้าไม่มีผู้ใช้ในฐานข้อมูล ให้สร้างผู้ใช้ใหม่
@@ -58,10 +57,22 @@ const handler = NextAuth({
               position: "...",
               employee_id: "T...",
               department: "....",
+              role: "enduser",
             },
           });
         }
+
+        const existingUser2 = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          select: { id: true },
+        });
+
+        session = Object.assign({}, session, { 
+          id: existingUser2?.id, 
+        });
       }
+
+      console.log(session);
       return session;
     },
   },
