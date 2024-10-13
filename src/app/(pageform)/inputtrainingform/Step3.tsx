@@ -67,7 +67,7 @@ const Step3: React.FC<{
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get("/api/data");
+      const res = await axios.get("/api/user");
       setUser(res.data);
     } catch (error) {
       console.error(error);

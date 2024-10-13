@@ -12,9 +12,9 @@ const DropdownUser = () => {
   const [name, setName] = useState('')
   const [position, setPosition] = useState('')
 
-  const fetchdata = async (id: String) => {
+  const fetchdata = async (email: String) => {
     try {
-      const res = await axios.get(`/api/userdata/${id}`)
+      const res = await axios.get(`/api/user/select/${email}`);
       setName(res.data.name)
       setPosition(res.data.position)
     } catch (error) {

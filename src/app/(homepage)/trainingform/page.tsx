@@ -29,6 +29,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import Link from 'next/link'
+import Loader from "@/components/Loader";
 
 
 // ฟังก์ชันสร้างสีตามสถานะ
@@ -47,16 +48,18 @@ export default function Trainingform() {
   const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
+  const [loading, setLoading] = useState(true);
 
   const { data: session } = useSession();
 
   const fetchData = async (email: string) => {
     try {
-      const resid = await axios.get(`/api/callid/${email}`);
+      const resid = await axios.get(`/api/user/select/justid/${email}`);
       console.log("resid = ",resid.data.id)
-      const res = await axios.get(`/api/listform/${resid.data.id}`);
+      const res = await axios.get(`/api/fontend/trainingform/${resid.data.id}`);
       setRows(res.data);
       setFilteredRows(res.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -107,8 +110,12 @@ export default function Trainingform() {
     return <GridPagination ActionsComponent={Pagination} {...props} />;
   }
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
-    <div className="bg-white p-10 rounded-[20px]">
+    <div className="bg-white p-10 rounded-[20px] font-inter">
       <div className="w-full">
         <p className="text-black font-bold mb-6 text-xl">
           รายการขออนุมัติเข้าอบรม
@@ -180,14 +187,29 @@ export default function Trainingform() {
             {
               field: "statusfrom",
               headerName: "สถานะ",
-              width: 150,
-              // renderCell: (params: any) => getStatusChip(params.value),
+              width: 250,
+              renderCell: (params: any) => (
+                <>
+                  <p
+                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
+                      params.row.workflowsequence === 3
+                        ? "bg-success "
+                        : "bg-warning "
+                    }`}
+                  >
+                    {params.row.workflowsequence === 1
+                      ? `ผู้มีส่วนร่วมรับทราบแล้ว (${params.row.stakeholdersconfirmed}/${params.row.totalstakeholders})`
+                      : params.row.workflowsequence === 2
+                      ? `รอผู้อนุมัติ (${params.row.approversconfirmed}/${params.row.totalapprover})`
+                      : `สำเร็จ`}
+                  </p>
+                </>
+              ),
             },
             {
               field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
-              width: 150,
-              // renderCell: (params: any) => getStatusChip(params.value),
+              width: 150,             
             },
             {
               field: "actions",

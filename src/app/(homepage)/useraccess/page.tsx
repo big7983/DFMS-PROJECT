@@ -5,9 +5,12 @@ import axios from "axios";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/Loader";
 
 const List = () => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     fetchPosts();
@@ -15,8 +18,9 @@ const List = () => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get("/api/data");
+      const res = await axios.get("/api/user");
       setPosts(res.data);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -180,9 +184,13 @@ const List = () => {
     });
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">จัดการสิทธิ์ผู้ใช้งานระบบ</h1>
+      <h1 className="text-2xl font-semibold mb-6">แก้ไขข้อมูลผู้ใช้ในระบบ</h1>
       <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray">

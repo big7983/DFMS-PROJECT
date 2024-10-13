@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { useFormatter } from "next-intl";
 
 interface Step4Props {
   formData: {
@@ -44,7 +45,7 @@ interface User {
 }
 
 interface Stakeholders {
-  [key: number]: User; 
+  [key: number]: User;
 }
 
 const Step4: React.FC<Step4Props> = ({
@@ -53,6 +54,19 @@ const Step4: React.FC<Step4Props> = ({
   handlePrevStep,
 }) => {
   const router = useRouter();
+
+  const date = new Date();
+  const locale = "en-GB";
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const formatter = new Intl.DateTimeFormat(locale, options);
+  const formattedDate = formatter.format(date);
+  console.log(formattedDate);
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -71,33 +85,23 @@ const Step4: React.FC<Step4Props> = ({
   const [approvers, setApprovers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
 
-
-  const fetchdata = async (id: String) => {
+  const fetchdata = async (email: String) => {
     try {
-      const res = await axios.get(`/api/userdata/${id}`);
+      const res = await axios.get(`/api/user/select/${email}`);
       setUserid(res.data.id);
       setEmployeeid(res.data.employee_id);
       setName(res.data.name);
       setPosition(res.data.position);
       setRank(res.data.rank);
       setdepartment(res.data.department);
-      const response = await axios.get(`/api/workflow/listapprover/T001`); // เรียก API ตาม id_form
+      const response = await axios.get(`/api/form/trainingform/approved`); // เรียก API ตาม id_form
       setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
     } catch (error) {
       console.error(error);
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
-
-  // const fetchApprovers = async () => {
-  //   try {
-  //     const response = await axios.get(`/api/workflow/listapprover/T001`); // เรียก API ตาม id_form
-  //     setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     Swal.fire({
@@ -111,20 +115,22 @@ const Step4: React.FC<Step4Props> = ({
     });
 
     try {
-      const approversObject = approvers ? Object.entries(approvers).reduce((acc:any, [key, approver]) => {
-        acc[approver.id] = {
-          id: approver.id,
-          sequence: approver.sequence,
-          name: approver.name,
-          department: approver.department,
-          employee_id: approver.employee_id,
-          rank: approver.rank,
-          position: approver.position,
-          status: "waiting", //approved, disapproved, waiting
-          opinion: "test",
-        };
-        return acc;
-      }, {}) : {};
+      const approversObject = approvers
+        ? Object.entries(approvers).reduce((acc: any, [key, approver]) => {
+            acc[approver.id] = {
+              id: approver.id,
+              sequence: approver.sequence,
+              name: approver.name,
+              department: approver.department,
+              employee_id: approver.employee_id,
+              rank: approver.rank,
+              position: approver.position,
+              status: "waiting", //approved, disapproved, waiting
+              opinion: "test",
+            };
+            return acc;
+          }, {})
+        : {};
 
       const stakeholders: Stakeholders = selectedUsers.reduce((acc, user) => {
         acc[user.id] = {
@@ -139,10 +145,10 @@ const Step4: React.FC<Step4Props> = ({
         return acc;
       }, {} as Stakeholders);
 
-      const response = await axios.post("/api/test/tf", {
+      const response = await axios.post("/api/form/trainingform", {
         idform: "T001",
         name: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
-        date: new Date().toISOString(),
+        datesubmiss: formattedDate,
         requester_id: user_id,
         requester: {
           employee_id: employee_id,
@@ -175,11 +181,17 @@ const Step4: React.FC<Step4Props> = ({
           course: formData.course,
           datestart: formData.datestart,
           namerequester: name,
-          department: rank,
-          numstakeholders: selectedUsers.length,
-          datereques: new Date().toISOString(),
-          statusfrom: "รับทราบแล้ว (0/" + selectedUsers.length + ")",
-          latestupdate: new Date().toISOString(),
+          department: department,
+          stakeholdersconfirmed: 0,
+          totalstakeholders: selectedUsers.length,
+          approversconfirmed: 0,
+          statusapprover: "", // อนุมัติครบ , ไม่อนุมัติแบบฟอร์มนี้
+          totalapprover: Object.entries(approversObject).length || 0,
+          datereques: new Date().toLocaleString("en-GB", {
+            timeZone: "Asia/Bangkok",
+          }),
+          workflowsequence: 1, // (1 คือ ผู้มีส่วนร่วม) (2 คือ ผู้อนุมัติ) (3 คือ ได้รับการอนุมัติ / ไม่ได้รับการอนุมัติ)
+          latestupdate: formattedDate,
         },
         active: true,
       });
@@ -195,6 +207,15 @@ const Step4: React.FC<Step4Props> = ({
         confirmButtonColor: "#219653",
       }).then((result) => {
         if (result.isConfirmed) {
+          Swal.fire({
+            title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
+            html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
+            allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
+            showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
+            didOpen: () => {
+              Swal.showLoading();
+            },
+          });
           router.push("/dashboard");
         }
       });
@@ -242,7 +263,9 @@ const Step4: React.FC<Step4Props> = ({
               <label className=" block mb-1">วันยืนคำร้อง</label>
               <div className="w-full">
                 <label className="text-black dark:text-white font-medium">
-                  55555
+                  {/* {new Date().toLocaleString("en-GB", {
+                    timeZone: "Asia/Bangkok",
+                  })} ,  */}{formattedDate}
                 </label>
               </div>
             </div>
@@ -416,7 +439,7 @@ const Step4: React.FC<Step4Props> = ({
                 </tr>
               </thead>
               <tbody>
-                {approvers &&               
+                {approvers &&
                   Object.entries(approvers).map(([key, approver]) => (
                     <tr className="pl-4 w-8" key={approver.sequence}>
                       <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">

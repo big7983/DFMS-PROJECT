@@ -16,6 +16,7 @@ export default function page({}: Props) {
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
+  console.log(searchParams.get("search")); // Logs "search"
   const id = searchParams.get("search");
 
   const { data: session } = useSession();
@@ -25,7 +26,6 @@ export default function page({}: Props) {
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        setLoading(true);
         const res = await axios.get(`/api/form/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
       } catch (error) {
@@ -37,11 +37,11 @@ export default function page({}: Props) {
       try {
         const resid = await axios.get(`/api/user/select/justid/${email}`);
         setUser(resid.data.id);
-        console.log("data id = ", resid.data.id);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
+
     if (id) {
       fetchData(id);
     }
@@ -51,64 +51,77 @@ export default function page({}: Props) {
     }
 
     setLoading(false);
-  }, [id]);
+  }, [id, session?.user?.email]);
 
-  const UpdateStatus = async (sid: string,formid:string) => {
-    try {
-      // 1. แสดง SweetAlert2 แบบ loading
-      Swal.fire({
-        title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
-        html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
-        allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
-        showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
-        didOpen: () => {
-          Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
-        },
-      });
-  
-      // 2. เรียกใช้ axios.get เพื่ออัปเดตสถานะ
-      await axios.patch(`/api/updatestatus_sth/${formid}/stakeholders/${sid}`);
-
-      Swal.fire({
-        title: "บันทึกสำเร็จ!",
-        icon: "success",
-        confirmButtonText: "กลับสู่หน้าหลัก",
-        confirmButtonColor: "#219653",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/dashboard");
-        }
-      });
-  
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const handleSubmit = async (sid: string,formid:string) => {
-    Swal.fire({
-      title: "ยืนยันการมีส่วนร่วมใช่หรือไม่?",
-      icon: "warning",
+  const handleSubmit = async (
+    idform: string,
+    userid: string,
+    statusapproved: string
+  ) => {
+    const { value: inputValue } = await Swal.fire({
+      title: `เหตุผลในการ ${statusapproved} แบบขออบรม / สัมมนานี้`,
+      input: "textarea",
+      inputPlaceholder: "กรอกเหตุผล...",
       showCancelButton: true,
-      confirmButtonText: "ยืนยัน",
+      reverseButtons: true,
+      confirmButtonText: "ส่ง",
       cancelButtonText: "ยกเลิก",
-      reverseButtons: true, // สลับตำแหน่งปุ่ม
       confirmButtonColor: "#219653",
       cancelButtonColor: "#DC3545",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        UpdateStatus(formid,sid);
-        console.log("update id ",id)
-      }
     });
+
+    if (inputValue) {
+      try {
+        Swal.fire({
+          title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
+          html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
+          allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
+          showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
+          didOpen: () => {
+            Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
+          },
+        });
+
+        // ส่งคำขอ PATCH โดยใช้ axios
+        const response = await axios.patch("/api/updatestatus_approver", {
+          idform,
+          iduser: userid,
+          opinion: inputValue,
+          statusapproved,
+        });
+
+        // ตรวจสอบสถานะการตอบกลับ
+        if (response.status === 200) {
+          Swal.fire({
+            title: "บันทึกสำเร็จ!",
+            icon: "success",
+            confirmButtonText: "กลับสู่หน้าหลัก",
+            confirmButtonColor: "#219653",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push("/dashboard");
+            }
+          });
+        } else {
+          Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
+        }
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
+        Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองอีกครั้งในภายหลัง", "error");
+      }
+    } else if (inputValue === "") {
+      Swal.fire("กรุณากรอกข้อมูลก่อนกด ยืนยัน");
+    }
   };
 
   if (loading) {
     return <p>กำลังโหลดข้อมูล...</p>;
   }
 
+  console.log("data id = ", user);
+
   return (
-    <div className="w-full p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
+    <div className="w-full w-[100%] p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
       {data.map((item: any) => (
         <div
           key={item.id}
@@ -121,7 +134,7 @@ export default function page({}: Props) {
           </div>
 
           <div className="border-b border-stroke dark:border-strokedark">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="w-35">
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
@@ -279,6 +292,70 @@ export default function page({}: Props) {
             <br />
           </div>
 
+          <div>
+            <div className="max-w-full overflow-x-auto">
+              <h3 className="font-semibold text-black dark:text-white mb-4">
+                รายชื่อพนักงานทั้งหมดที่เข้ารับการอบรม
+              </h3>
+              <table className="min-w-full table-auto">
+                <thead className="whitespace-nowrap">
+                  <tr className="bg-gray-2 dark:bg-meta-4">
+                    <th className="text-center p-4 font-medium text-black dark:text-white">
+                      รหัสพนักงาน
+                    </th>
+                    <th className="text-left p-4 font-medium text-black dark:text-white">
+                      ชื่อ-นามสกุล
+                    </th>
+                    <th className="text-left p-4 font-medium text-black dark:text-white">
+                      ระดับ
+                    </th>
+                    <th className="text-left p-4 font-medium text-black dark:text-white">
+                      ตำแหน่ง
+                    </th>
+                    <th className="text-center p-4 font-medium text-black dark:text-white">
+                      สถานะ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.values(item.stakeholders).map((stakeholder: any) => (
+                    <tr className="pl-4 w-8" key={stakeholder.id}>
+                      <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.employee_id}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.name}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.rank}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.position}
+                        </h5>
+                      </td>
+                      <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="flex justify-center font-medium text-black dark:text-white">
+                          {stakeholder.status === "true" ? (
+                            <HiBadgeCheck />
+                          ) : (
+                            <HiExclamationCircle />
+                          )}
+                        </h5>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div className=" ">
             <div className="max-w-full overflow-x-auto">
               <h3 className="font-semibold text-black dark:text-white mb-4">
@@ -309,7 +386,7 @@ export default function page({}: Props) {
                     .sort(
                       (a: any, b: any) =>
                         parseInt(a.sequence) - parseInt(b.sequence)
-                    ) // เรียงตาม sequence
+                    )
                     .map((approver: any) => (
                       <tr className="pl-4 w-8" key={approver.sequence}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
@@ -333,89 +410,49 @@ export default function page({}: Props) {
                           </h5>
                         </td>
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="flex justify-center font-medium text-black dark:text-white">
-                            {approver.status === "waiting" ? (
+                          <div className="flex justify-center font-medium text-black dark:text-white">
+                            {(approver.status === "waiting") &&
+                            (approver.id === user) && (approver.sequence === item.status.approversconfirmed.toString()) ? (
+                              <div className="flex space-x-3 ">
+                                <button
+                                  className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
+                                  onClick={() =>
+                                    handleSubmit(
+                                      item.id,
+                                      approver.id,
+                                      "approved"
+                                    )
+                                  }
+                                >
+                                  อนุมัติ
+                                </button>
+                                <button
+                                  className="bg-meta-1 text-white px-4 py-2 rounded-[20px] whitespace-nowrap"
+                                  onClick={() =>
+                                    handleSubmit(
+                                      item.id,
+                                      approver.id,
+                                      "unapproved"
+                                    )
+                                  }
+                                >
+                                  ไม่อนุมัติ
+                                </button>
+                              </div>
+                            ) : approver.status === "approved" ? (
                               <HiBadgeCheck />
+                            ) : approver.status === "waiting" ? (
+                              <HiExclamationCircle />
                             ) : (
                               <HiExclamationCircle />
                             )}
-                          </h5>
+                          </div>
                         </td>
                       </tr>
                     ))}
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <div className="max-w-full overflow-x-auto">
-            <h3 className="font-semibold text-black dark:text-white mb-4">
-              รายชื่อพนักงานทั้งหมดที่เข้ารับการอบรม
-            </h3>
-            <table className="min-w-full table-auto">
-              <thead className="whitespace-nowrap">
-                <tr className="bg-gray-2 dark:bg-meta-4">
-                  <th className="text-center p-4 font-medium text-black dark:text-white">
-                    รหัสพนักงาน
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ชื่อ-นามสกุล
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ระดับ
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ตำแหน่ง
-                  </th>
-                  <th className="text-center p-4 font-medium text-black dark:text-white">
-                    สถานะ
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.values(item.stakeholders).map((stakeholder: any) => (
-                  <tr className="pl-4 w-8" key={stakeholder.id}>
-                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.employee_id}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.name}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.rank}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.position}
-                      </h5>
-                    </td>
-                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="flex justify-center font-medium text-black dark:text-white">
-                        {stakeholder.status === "false" &&
-                        stakeholder.id === user ? (
-                          <button
-                            className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                            onClick={() => handleSubmit(item.id,stakeholder.id)}
-                          >
-                            ยืนยัน
-                          </button>
-                        ) : stakeholder.status === "true" ? (
-                          <HiBadgeCheck />
-                        ) : (
-                          <HiExclamationCircle />
-                        )}
-                      </h5>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       ))}

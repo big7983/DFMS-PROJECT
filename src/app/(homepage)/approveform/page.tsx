@@ -27,6 +27,9 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import Loader from "@/components/Loader";
 // ตัวอย่างข้อมูล
 
 const rows1 = [
@@ -43,12 +46,6 @@ const rows1 = [
   },
 ];
 
-// ฟังก์ชันสร้างสีตามสถานะ
-// const getStatusChip = (status: any) => {
-//   let colors = status === "active" ? "success" : "error";
-//   return <Chip label={status} color={colors} />;
-// };
-
 interface RowData {
   name: string;
   status: string;
@@ -59,33 +56,40 @@ export default function Approveform() {
   const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
+  const [loading, setLoading] = useState(true);
+
+  const { data: session } = useSession();
+
+  const fetchData = async (email: string) => {
+    try {
+      const resid = await axios.get(`/api/user/select/justid/${email}`);
+      const res = await axios.get(`/api/fontend/approveform/${resid.data.id}`);
+      setRows(res.data);
+      setFilteredRows(res.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // const res = await axios.get("/api/data");
-        // setRows(res.data);
-        // setFilteredRows(res.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData(); // เรียกใช้งานฟังก์ชัน
+    if (session?.user?.email) {
+      fetchData(session?.user?.email);
+    }
   }, []);
 
-  useEffect(() => {
-    const filtered = rows.filter((row) => {
-      const matchesSearch = row.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
-      const matchesStatus = statusFilter
-        ? row.status.toLowerCase() === statusFilter.toLowerCase()
-        : true; // กรองตามสถานะ
-      return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-    });
-    setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  }, [searchText, statusFilter, rows]);
+  // useEffect(() => {
+  //   const filtered = rows.filter((row) => {
+  //     const matchesSearch = row.name
+  //       .toLowerCase()
+  //       .includes(searchText.toLowerCase());
+  //     const matchesStatus = statusFilter
+  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
+  //       : true; // กรองตามสถานะ
+  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
+  //   });
+  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
+  // }, [searchText, statusFilter, rows]);
 
   function Pagination({
     page,
@@ -110,6 +114,10 @@ export default function Approveform() {
 
   function CustomPagination(props: any) {
     return <GridPagination ActionsComponent={Pagination} {...props} />;
+  }
+
+  if (loading) {
+    return <Loader />;
   }
 
   return (
@@ -150,27 +158,13 @@ export default function Approveform() {
               <MenuItem value="active">Active</MenuItem>
               <MenuItem value="inactive">Inactive</MenuItem>
             </Select>
-            {/* <div className="ml-4">
-              <Button
-                variant="contained"
-                color="primary"
-                style={{
-                  marginBottom: "1rem",
-                  width: "130px",
-                  border: 0,
-                }}
-                className="bg-meta-4"
-              >
-                <AddCircleIcon className="mr-1" />
-                เพิ่มคำร้อง
-              </Button>
-            </div> */}
+
           </div>
         </div>
 
         <DataGrid
           autoHeight
-          rows={rows1}
+          rows={rows}
           columns={[
             {
               field: "id",
@@ -182,13 +176,13 @@ export default function Approveform() {
             { field: "course", headerName: "ชื่อหลักสูตร", width: 200 },
             { field: "datestart", headerName: "วันอบรม", width: 200 },
             {
-              field: "petitioner",
+              field: "namerequester",
               headerName: "ผู้ยื่นคำร้อง",
               width: 150,
               
             },
             {
-              field: "agency",
+              field: "department",
               headerName: "หน่วยงาน",
               width: 150,
               align: "center",
@@ -196,7 +190,7 @@ export default function Approveform() {
               
             },
             {
-              field: "stakeholders",
+              field: "totalstakeholders",
               headerName: "ผู้เข้าร่วมจำนวน",
               width: 130,
               align: "center",
@@ -204,7 +198,7 @@ export default function Approveform() {
               
             },
             {
-              field: "submissdate",
+              field: "datesubmiss",
               headerName: "วันยืนคำร้อง",
               width: 150,
               
@@ -213,10 +207,26 @@ export default function Approveform() {
               field: "status",
               headerName: "สถานะแบบอนุมัติ",
               width: 150,
-              // renderCell: (params: any) => getStatusChip(params.value),
+              renderCell: (params: any) => (
+                <>
+                  <p
+                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
+                      params.row.workflowsequence === 3
+                        ? "bg-success "
+                        : "bg-warning "
+                    }`}
+                  >
+                    {params.row.workflowsequence === 1
+                      ? `ผู้มีส่วนร่วมรับทราบแล้ว (${params.row.stakeholdersconfirmed}/${params.row.totalstakeholders})`
+                      : params.row.workflowsequence === 2
+                      ? `รอผู้อนุมัติ (${params.row.approversconfirmed}/${params.row.totalapprover})`
+                      : `สำเร็จแล้ว `}
+                  </p>
+                </>
+              ),
             },
             {
-              field: "datestatus",
+              field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
               width: 150,
               
@@ -232,22 +242,17 @@ export default function Approveform() {
 
               renderCell: (params: any) => (
                 <>
-                  {/* <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(params.row.id)}
+                  <Link
+                    href={{
+                      pathname: "/detaillapprover",
+                      query: {
+                        search: params.row.idform,
+                      },
+                    }}
+                    className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
                   >
                     รายละเอียด
-                  </Button> */}
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    className="rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-opacity-90 "
-                  >
-                    รายละเอียด
-                  </Button>
+                  </Link>
                 </>
               ),
             },

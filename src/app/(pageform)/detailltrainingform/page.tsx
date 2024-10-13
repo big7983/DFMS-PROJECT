@@ -11,20 +11,16 @@ type Props = {};
 
 export default function page({}: Props) {
   const [data, setData] = useState([]);
-  const [user, setUser] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
-  console.log(searchParams.get("search")); // Logs "search"
   const id = searchParams.get("search");
-
-  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        const res = await axios.get(`/api/detailltrainingform/${id}`); // แก้ URL ตามที่ต้องการ
+        const res = await axios.get(`/api/form/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
         setLoading(false);
       } catch (error) {
@@ -33,32 +29,18 @@ export default function page({}: Props) {
       }
     };
 
-    const fetchUser = async (email: string) => {
-      try {
-        const resid = await axios.get(`/api/callid/${email}`);
-        const res = await axios.get(`/api/liststakeholders/${resid.data.id}`);
-        setUser(res.data.id);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     if (id) {
       fetchData(id);
     }
 
-    if (session?.user?.email) {
-      fetchUser(session?.user?.email);
-    }
-    
-  }, [id , session?.user?.email]);
+  }, [id]);
 
   if (loading) {
     return <p>กำลังโหลดข้อมูล...</p>;
   }
 
   return (
-    <div className="w-full w-[100%] p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
+    <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
       {data.map((item: any) => (
         <div
           key={item.id}
@@ -71,16 +53,16 @@ export default function page({}: Props) {
           </div>
 
           <div className="border-b border-stroke dark:border-strokedark">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 ">
               <div className="w-35">
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.date}
+                    {item.datesubmiss}
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">ผู้ยื่นคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
@@ -88,19 +70,19 @@ export default function page({}: Props) {
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">สังกัดฝ่าย</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.status.department}
+                    {item.status.department} 
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.position}
+                    {item.requester.position} 
                   </label>
                 </div>
               </div>
@@ -118,7 +100,7 @@ export default function page({}: Props) {
                 {item.information.course}
               </label>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1  lg:grid-cols-2 gap-2">
               <div>
                 <label className="block mb-1">วันที่เริ่มอบรม</label>
                 <label className="text-left font-medium text-black dark:text-white">
@@ -151,7 +133,7 @@ export default function page({}: Props) {
             <h3 className="font-semibold text-black dark:text-white mb-4">
               ประมาณการค่าใช้จ่าย
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div className="w-35 sm:text-right text-left">
                 <label className=" block mb-1">งบประมาณที่ได้รับ</label>
                 <div className="w-full">

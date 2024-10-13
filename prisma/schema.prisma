@@ -28,9 +28,9 @@ model User {
 
 model Training_Form {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  idform String
+  idform String @unique
   name String
-  date String
+  datesubmiss String
   requester_id String @unique
   requester Requester?
   stakeholders Json
@@ -43,7 +43,7 @@ model Training_Form {
 
 model Training_Survey {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  idform String
+  idform String @unique
   name String
   date String
   requester Requester

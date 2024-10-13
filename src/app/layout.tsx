@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        <SessionWrapper>{children}</SessionWrapper>
+          <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );

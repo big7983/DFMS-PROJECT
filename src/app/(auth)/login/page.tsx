@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Card, CardContent, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { SiWindows11 } from "react-icons/si";
 import { IoIosLogIn } from "react-icons/io";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { PrismaClient } from '@prisma/client';
+import Loader from "@/components/Loader";
 
 const prisma = new PrismaClient();
 
@@ -29,13 +30,22 @@ export default function Login({}: Props) {
   });
 
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     if (session) {
       router.push("/dashboard");
+      <Loader />;
     }
   }, [session, router]);
+
+  const loginms = () => {
+    signIn("azure-ad")
+    return(
+      <Loader />
+    )
+  };
 
   const showForm = () => {
     return (
@@ -105,7 +115,7 @@ export default function Login({}: Props) {
           {showForm()}
           <button
             className="mt-4 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white/50 font-medium text-gray-700 hover:bg-[#F0F2F5]"
-            onClick={() => signIn("azure-ad")}
+            onClick={loginms}
           >
             <SiWindows11 className="mr-3" />
             Login With Microsoft
