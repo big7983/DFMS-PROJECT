@@ -4,9 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  req: Request,
-) {
+export async function GET() {
   try {
     const workflow = await prisma.workFlow.findUnique({
       where: { id_form: "T001" },

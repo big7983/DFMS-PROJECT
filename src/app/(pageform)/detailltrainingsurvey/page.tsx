@@ -20,7 +20,7 @@ export default function page({}: Props) {
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        const res = await axios.get(`/api/form/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
+        const res = await axios.get(`/api/form/trainingsurvey/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
         setLoading(false);
       } catch (error) {
@@ -130,86 +130,120 @@ export default function page({}: Props) {
           </div>
 
           <div className="border-b border-stroke  dark:border-strokedark ">
-            <h3 className="font-semibold text-black dark:text-white mb-4">
-              ประมาณการค่าใช้จ่าย
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">งบประมาณที่ได้รับ</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.received} บาท
-                  </label>
-                </div>
-              </div>
+          <h3 className="font-semibold text-black dark:text-white mb-9">
+            รายงานผลการอบรม/สัมมนา
+          </h3>
 
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">งบประมาณคงเหลือ</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.remaining} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">ค่าลงทะเบียน</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.registration} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">ค่าที่พัก</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.room} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1" htmlFor="number2">
-                  ค่าพาหนะ
-                </label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.transportation} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">ค่าเบี้ยเลี้ยง</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.allowance} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">ค่าอื่น ๆ</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.other} บาท
-                  </label>
-                </div>
-              </div>
-
-              <div className="w-35 sm:text-right text-left">
-                <label className=" block mb-1">รวมทั้งหมด</label>
-                <div className="w-full">
-                  <label className="text-black dark:text-white font-medium">
-                    {item.budget.total} บาท
-                  </label>
-                </div>
-              </div>
-            </div>
-            <br />
+          <div className="mb-9">
+            <label className="mb-3 block font-medium ">
+              เนื้อหาสาระสำคัญโดยสรุปของผู้รายงาน
+            </label>
+            <label className="block text-sm font-medium text-black dark:text-white">
+              {item.survey.keycontent}
+            </label>
           </div>
+
+          <div className="mb-9">
+            <label className="mb-3 block font-medium ">
+              เนื้อหาวิชาที่สอน สอดคล้องกับวัตถุประสงค์ของการอบรม ของผู้รายงาน
+            </label>
+            <label className="block text-sm font-medium text-black dark:text-white">
+              {item.survey.remaining}
+            </label>
+          </div>
+
+          <div className="mb-9">
+            <label className="mb-3 block font-medium ">
+              เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
+            </label>
+            <label className="block text-sm font-medium text-black dark:text-white">
+              {item.survey.matchesobjectives}
+            </label>
+          </div>
+
+          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">
+                คุณภาพหลักสูตรหรือหัวข้อวิชา
+              </label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.course_result}
+              </label>
+            </div>
+
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">เหตุผล</label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.course_reason}
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">
+                คุณภาพหลักสูตรหรือหัวข้อวิชา
+              </label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.lecturer_result}
+              </label>
+            </div>
+
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">เหตุผล</label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.lecturer_reason}
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">
+                คุณภาพของเอกสารประกอบการอบรม
+              </label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.document_result}
+              </label>
+            </div>
+
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">เหตุผล</label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.document_reason}
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-9 flex flex-col gap-6 md:flex-row">
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">
+                คุณภาพการบริการของสถาบันที่จัดฝึกอบรม
+              </label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.service_result}
+              </label>
+            </div>
+
+            <div className="w-full xl:w-1/2">
+              <label className="mb-3 block font-medium ">เหตุผล</label>
+              <label className=" block text-sm font-medium text-black dark:text-white">
+                {item.survey.service_reason}
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-4.5">
+            <label className="mb-3 block font-medium ">
+              เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
+            </label>
+            <label className="block text-sm font-medium text-black dark:text-white">
+              {item.survey.selectedOptions}
+            </label>
+          </div>
+
+          <br />
+        </div>
 
           <div className=" ">
             <div className="max-w-full overflow-x-auto">
@@ -267,9 +301,9 @@ export default function page({}: Props) {
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
                             {approver.status === "waiting" ? (
-                              <HiBadgeCheck />
-                            ) : (
                               <HiExclamationCircle />
+                            ) : (
+                              <HiBadgeCheck />
                             )}
                           </h5>
                         </td>
@@ -278,70 +312,7 @@ export default function page({}: Props) {
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <div className="max-w-full overflow-x-auto">
-            <h3 className="font-semibold text-black dark:text-white mb-4">
-              รายชื่อพนักงานทั้งหมดที่เข้ารับการอบรม
-            </h3>
-            <table className="min-w-full table-auto">
-              <thead className="whitespace-nowrap">
-                <tr className="bg-gray-2 dark:bg-meta-4">
-                  <th className="text-center p-4 font-medium text-black dark:text-white">
-                    รหัสพนักงาน
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ชื่อ-นามสกุล
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ระดับ
-                  </th>
-                  <th className="text-left p-4 font-medium text-black dark:text-white">
-                    ตำแหน่ง
-                  </th>
-                  <th className="text-center p-4 font-medium text-black dark:text-white">
-                    สถานะ
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.values(item.stakeholders).map((stakeholder: any) => (
-                  <tr className="pl-4 w-8" key={stakeholder.id}>
-                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.employee_id}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.name}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.rank}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.position}
-                      </h5>
-                    </td>
-                    
-                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="flex justify-center font-medium text-black dark:text-white">
-                        {stakeholder.status === "true" ? (
-                          <HiBadgeCheck />
-                        ) : (
-                          <HiExclamationCircle />
-                        )}
-                      </h5>
-                    </td>                  
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          </div>     
         </div>
       ))}
     </div>

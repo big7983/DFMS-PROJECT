@@ -34,7 +34,7 @@ const MultiStepForm: React.FC = () => {
     service_reason: "",
     selectedOptions: [],
   });
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]); 
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]); 
   const [stepCompleted, setStepCompleted] = useState([false, false, false, false]); // สถานะการเสร็จสิ้นของแต่ละขั้นตอน
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

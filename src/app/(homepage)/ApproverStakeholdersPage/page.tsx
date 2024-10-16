@@ -60,6 +60,7 @@ export default function ApproverStakeholdersPage() {
       Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
       console.error("Error updating stakeholder status:", error);
     }
+    fetchData();
   };
 
   const updateApproverStatus = async (

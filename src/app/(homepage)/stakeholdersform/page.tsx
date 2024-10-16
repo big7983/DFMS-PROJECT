@@ -14,34 +14,13 @@ import {
   TextField,
   Select,
   MenuItem,
-  Button,
   TablePaginationProps,
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-import { HiCheckCircle, HiClock, HiExclamationCircle } from "react-icons/hi";
 import Loader from "@/components/Loader";
-
-
-const rows1 = [
-  {
-    id: 1,
-    course: "datawarehouse",
-    datestart: "Mon 2 May 2022",
-    statuslist: "รอการตอบกลับ",
-    petitioner: "คุณภัคษนัญฐ์ พฤทธิ์ศุภกานต์",
-    status: "รับทราบแล้ว",
-    datestatus: "22 Apr 2022 13:00",
-  },
-];
-
-// ฟังก์ชันสร้างสีตามสถานะ
-// const getStatusChip = (status: any) => {
-//   let colors = status === "active" ? "success" : "error";
-//   return <Chip label={status} color={colors} />;
-// };
 
 interface RowData {
   name: string;
@@ -60,7 +39,9 @@ export default function Stakeholdersform() {
   const fetchData = async (email: string) => {
     try {
       const resid = await axios.get(`/api/user/select/justid/${email}`);
-      const res = await axios.get(`/api/fontend/stakeholdersform/${resid.data.id}`);
+      const res = await axios.get(
+        `/api/fontend/stakeholdersform/${resid.data.id}`
+      );
       setRows(res.data);
       setFilteredRows(res.data);
       setLoading(false);
@@ -210,23 +191,50 @@ export default function Stakeholdersform() {
             {
               field: "statusfrom",
               headerName: "สถานะแบบอนุมัติ",
-              width: 150,
+              width: 250,
 
+              //`ผู้มีส่วนร่วมรับทราบแล้ว (${params.row.stakeholdersconfirmed}/${params.row.totalstakeholders})`
               renderCell: (params: any) => (
                 <>
-                  <p
-                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                      params.row.workflowsequence === 3
-                        ? "bg-success "
-                        : "bg-warning "
-                    }`}
-                  >
-                    {params.row.workflowsequence === 1
-                      ? `ผู้มีส่วนร่วมรับทราบแล้ว (${params.row.stakeholdersconfirmed}/${params.row.totalstakeholders})`
-                      : params.row.workflowsequence === 2
-                      ? `รอผู้อนุมัติ (${params.row.approversconfirmed}/${params.row.totalapprover})`
-                      : `สำเร็จแล้ว`}
-                  </p>
+                  {params.row.workflowsequence === 1 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        ผู้มีส่วนร่วมรับทราบแล้ว (
+                        {params.row.stakeholdersconfirmed}/
+                        {params.row.totalstakeholders})
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 2 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        รอผู้อนุมัติ ({params.row.approversconfirmed}/
+                        {params.row.totalapprover})
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 3 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        อนุมัติแล้ว
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 4 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        ไม่ได้รับการอนุมัติ
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        เกิดข้อผิดพลาด
+                      </div>
+                    </div>
+                  )}
                 </>
               ),
             },

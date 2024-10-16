@@ -42,7 +42,6 @@ export async function GET(
             totalstakeholders: status.totalstakeholders,
             approversconfirmed : status.approversconfirmed,
             totalapprover : status.totalapprover,
-            datereques: status.datereques,
             workflowsequence: status.workflowsequence,
             statuslist: stakeholderData.status,
             latestupdate: status.latestupdate,

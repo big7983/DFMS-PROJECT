@@ -1,6 +1,4 @@
 "use client";
-
-import { Url } from 'next/dist/shared/lib/router/router';
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
 
@@ -15,11 +13,13 @@ function Pagetest() {
     { page: 'Tablev2', route: '/Demo/Tablev2' },
     { page: 'Tablev3', route: '/Demo/Tablev3' },
     { page: 'Tablev31', route: '/Demo/Tablev31' },
+    { page: 'Tablev4', route: '/Demo/Tablev4' },
     { page: 'inputtest2', route: '/Demo/inputtest2' },
     { page: 'inputtest3', route: '/Demo/inputtest3' },
     { page: 'inputtest4', route: '/Demo/inputtest4' },
     { page: 'testlist', route: '/Demo/testlist' },
     { page: 'trainingsurvey', route: '/trainingsurvey' },
+    { page: 'seedmail', route: '/Demo/seedmail' },
   ]);
 
   // ฟังก์ชันสำหรับไปยังเส้นทางใหม่

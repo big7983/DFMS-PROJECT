@@ -45,10 +45,13 @@ model Training_Survey {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   idform String @unique
   name String
-  date String
-  requester Requester
+  datesubmiss String
+  requester_id String @unique
+  requester Requester?
+  approver Json
   information Information?
   survey Survey?
+  approverfeedback approverfeedback?
   status Json
   active Boolean
 }
@@ -99,7 +102,7 @@ type Budget {
 type Survey {
   keycontent String
   matchesobjectives String
-  knowledge String
+  remaining String
   course_result String
   course_reason String
   lecturer_result String
@@ -109,6 +112,16 @@ type Survey {
   service_result String
   service_reason String
   selectedOptions String[]
+}
+
+type approverfeedback{
+  objective String
+  costEffectiveness String
+  workBenefit String
+  objectiveAlignment String
+  futureRecommendation String
+  reasonfutureRecommendation String
+  additionalcomments String
 }
 
 //WorkFlow

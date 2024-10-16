@@ -11,13 +11,14 @@ export async function GET(
     //const requesterId = "6705eef25f0f0c6cb046b729"; // Get the requester ID
 
     // Find all Training_Form entries where the requester's employee_id matches the specified value
-    const trainingForms = await prisma.training_Form.findMany({
+    const trainingForms = await prisma.training_Survey.findMany({
       where: {
         requester_id: params.id,
       },
       select: {
         status: true,
         id: true,
+        datesubmiss: true
       },
     });
 
@@ -26,35 +27,26 @@ export async function GET(
       //const idform = form.id
       const status = form.status as {
         //idform: string;
+        datesubmiss: string;
         course: string;
         datestart: string;
         namerequester: string;
         department: string;
-        numstakeholders: string;
-        stakeholdersconfirmed: number;
-        totalstakeholders: number;
-        approversconfirmed: number;
-        totalapprover: number;
-        workflowsequence: number;
         datereques: string;
-        statusfrom: string;
+        workflow: string;
         latestupdate: string;
       };
 
       return {
         id: index + 1,
         idform: form.id,
+        datesubmiss: form.datesubmiss,
         course: status.course,
         datestart: status.datestart,
         namerequester: status.namerequester,
         department: status.department,
-        numstakeholders: status.numstakeholders,
-        stakeholdersconfirmed: status.stakeholdersconfirmed,
-        totalstakeholders: status.totalstakeholders,
-        approversconfirmed : status.approversconfirmed,
-        totalapprover : status.totalapprover,
-        workflowsequence: status.workflowsequence,
-        statusfrom: status.statusfrom,
+        datereques: status.datereques,
+        workflow: status.workflow,
         latestupdate: status.latestupdate,
       };
     });

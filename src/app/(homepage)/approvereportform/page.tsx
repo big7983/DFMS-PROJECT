@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 
 import {
   DataGrid,
@@ -14,29 +13,13 @@ import {
   TextField,
   Select,
   MenuItem,
-  Button,
   TablePaginationProps,
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-
-const rows1 = [
-  {
-    id: 1,
-    course: "datawarehouse",
-    datestart: "Mon 2 May 2022",
-    petitioner: "คุณภัคษนัญฐ์ พฤทธิ์ศุภกานต์",
-    rank: "Trainnee",
-    submissdate: "22 Apr 2022 13:00",
-    status: "รอการตอบรับ",
-  },
-];
-
-// ฟังก์ชันสร้างสีตามสถานะ
-// const getStatusChip = (status: any) => {
-//   let colors = status === "active" ? "success" : "error";
-//   return <Chip label={status} color={colors} />;
-// };
+import { useSession } from "next-auth/react";
+import axios from "axios";
+import Link from "next/link";
+import Loader from "@/components/Loader";
 
 interface RowData {
   name: string;
@@ -48,33 +31,40 @@ export default function Approvereportform() {
   const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
   const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
   const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
+  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+
+  const fetchData = async (email: string) => {
+    try {
+      const resid = await axios.get(`/api/user/select/justid/${email}`);
+      console.log("resid = ", resid.data.id);
+      const res = await axios.get(`/api/fontend/evaluation/${resid.data.id}`);
+      setRows(res.data);
+      setFilteredRows(res.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // const res = await axios.get("/api/data");
-        // setRows(res.data);
-        // setFilteredRows(res.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData(); // เรียกใช้งานฟังก์ชัน
+    if (session?.user?.email) {
+      fetchData(session?.user?.email);
+    }
   }, []);
 
-  useEffect(() => {
-    const filtered = rows.filter((row) => {
-      const matchesSearch = row.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
-      const matchesStatus = statusFilter
-        ? row.status.toLowerCase() === statusFilter.toLowerCase()
-        : true; // กรองตามสถานะ
-      return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-    });
-    setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  }, [searchText, statusFilter, rows]);
+  // useEffect(() => {
+  //   const filtered = rows.filter((row) => {
+  //     const matchesSearch = row.name
+  //       .toLowerCase()
+  //       .includes(searchText.toLowerCase());
+  //     const matchesStatus = statusFilter
+  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
+  //       : true; // กรองตามสถานะ
+  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
+  //   });
+  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
+  // }, [searchText, statusFilter, rows]);
 
   function Pagination({
     page,
@@ -101,6 +91,10 @@ export default function Approvereportform() {
     return <GridPagination ActionsComponent={Pagination} {...props} />;
   }
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="bg-white p-10 rounded-[20px]">
       <div className="w-full">
@@ -118,6 +112,11 @@ export default function Approvereportform() {
               minWidth: "225px",
               width: "100%",
               maxWidth: "350px",
+            }}
+            InputProps={{
+              sx: {
+                borderRadius: "20px",
+              },
             }}
           />
           <div className="flex justify-between max-w-[350px]">
@@ -157,7 +156,7 @@ export default function Approvereportform() {
 
         <DataGrid
           autoHeight
-          rows={rows1}
+          rows={rows}
           columns={[
             {
               field: "id",
@@ -176,15 +175,40 @@ export default function Approvereportform() {
               // renderCell: (params: any) => getStatusChip(params.value),
             },
             {
-              field: "submissdate",
+              field: "datesubmiss",
               headerName: "วันยื่นคำประเมิน",
               width: 200,
             },
             {
-              field: "status",
+              field: "workflow",
               headerName: "สถานะ",
               width: 150,
-              // renderCell: (params: any) => getStatusChip(params.value),
+              renderCell: (params: any) => (
+                <>
+                  {params.row.workflow === "waiting" ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        รอประเมิน
+                      </div>
+                    </div>
+                  ) : params.row.workflow === "approved" ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        ประเมินสำเร็จ
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        เกิดข้อผิดพลาด
+                      </div>
+                    </div>
+                  )}
+                </>
+              ),
             },
             {
               field: "actions",
@@ -196,24 +220,17 @@ export default function Approvereportform() {
               width: 200,
 
               renderCell: (params: any) => (
-                <>
-                  {/* <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(params.row.id)}
-                  >
-                    รายละเอียด
-                  </Button> */}
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    className="rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-opacity-90 "
-                  >
-                    รายละเอียด
-                  </Button>
-                </>
+                <Link
+                  href={{
+                    pathname: "/detaillevaluation",
+                    query: {
+                      search: params.row.idform,
+                    },
+                  }}
+                  className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
+                >
+                  รายละเอียด
+                </Link>
               ),
             },
           ]}
@@ -224,6 +241,12 @@ export default function Approvereportform() {
             pagination: {
               paginationModel: {
                 pageSize: 10,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [],
+                quickFilterExcludeHiddenColumns: false,
               },
             },
           }}

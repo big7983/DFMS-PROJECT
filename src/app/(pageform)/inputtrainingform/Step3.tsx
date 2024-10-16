@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   DataGrid,
   GridColDef,
-  GridPagination,
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
-import { Button, TextField, Select, MenuItem, Pagination } from "@mui/material";
+import { Button } from "@mui/material";
 import axios from "axios";
 
 const Step3: React.FC<{

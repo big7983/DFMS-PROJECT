@@ -34,7 +34,7 @@ const handler = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       // if (session) {
       //    session = Object.assign({}, session, {
       //      access_token: token.access_token,

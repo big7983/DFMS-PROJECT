@@ -10,27 +10,21 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { PrismaClient } from '@prisma/client';
 import Loader from "@/components/Loader";
-
-const prisma = new PrismaClient();
 
 interface User {
   username: string;
   password: string;
 }
 
-type Props = {};
-
-export default function Login({}: Props) {
+export default function Login() {
   const initialValue: User = { username: "admin", password: "admin" };
 
-  const { control, handleSubmit } = useForm<User>({
+  const { control } = useForm<User>({
     defaultValues: initialValue,
   });
 
   const { data: session } = useSession();
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {

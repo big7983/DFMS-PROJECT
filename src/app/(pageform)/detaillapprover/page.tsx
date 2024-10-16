@@ -7,10 +7,10 @@ import { HiBadgeCheck } from "react-icons/hi";
 import { HiExclamationCircle } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
+import Loader from "@/components/Loader";
 
-type Props = {};
 
-export default function page({}: Props) {
+export default function page() {
   const [data, setData] = useState([]);
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,7 @@ export default function page({}: Props) {
         });
 
         // ส่งคำขอ PATCH โดยใช้ axios
-        const response = await axios.patch("/api/updatestatus_approver", {
+        const response = await axios.patch("/api/form/trainingform/update/status/approver", {
           idform,
           iduser: userid,
           opinion: inputValue,
@@ -115,7 +115,7 @@ export default function page({}: Props) {
   };
 
   if (loading) {
-    return <p>กำลังโหลดข้อมูล...</p>;
+    return <div className="w-full"><Loader /></div>;
   }
 
   console.log("data id = ", user);
@@ -412,7 +412,7 @@ export default function page({}: Props) {
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <div className="flex justify-center font-medium text-black dark:text-white">
                             {(approver.status === "waiting") &&
-                            (approver.id === user) && (approver.sequence === item.status.approversconfirmed.toString()) ? (
+                            (approver.id === user) && (approver.sequence === item.status.approversconfirmed.toString()) && (item.status.workflowsequence != 4) ? (
                               <div className="flex space-x-3 ">
                                 <button
                                   className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"

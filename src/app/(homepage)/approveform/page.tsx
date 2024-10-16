@@ -5,7 +5,6 @@ import axios from "axios";
 
 import {
   DataGrid,
-  GridActionsCellItem,
   gridPageCountSelector,
   GridPagination,
   useGridApiContext,
@@ -15,36 +14,13 @@ import {
   TextField,
   Select,
   MenuItem,
-  Chip,
-  Button,
   TablePaginationProps,
-  Box,
-  IconButton,
-  Menu,
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Loader from "@/components/Loader";
 // ตัวอย่างข้อมูล
-
-const rows1 = [
-  {
-    id: 1,
-    course: "datawarehouse",
-    datestart: "Mon 2 May 2022",
-    petitioner: "คุณภัคษนัญฐ์ พฤทธิ์ศุภกานต์",
-    agency: "SDM",
-    stakeholders: "7 ท่าน",
-    submissdate: "22 Apr 2022 13:00",
-    status: "รอผู้อนุมัติลำดับ 1",
-    datestatus: "22 Apr 2022 13:00",
-  },
-];
 
 interface RowData {
   name: string;
@@ -76,7 +52,7 @@ export default function Approveform() {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   // useEffect(() => {
   //   const filtered = rows.filter((row) => {
@@ -209,19 +185,45 @@ export default function Approveform() {
               width: 150,
               renderCell: (params: any) => (
                 <>
-                  <p
-                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                      params.row.workflowsequence === 3
-                        ? "bg-success "
-                        : "bg-warning "
-                    }`}
-                  >
-                    {params.row.workflowsequence === 1
-                      ? `ผู้มีส่วนร่วมรับทราบแล้ว (${params.row.stakeholdersconfirmed}/${params.row.totalstakeholders})`
-                      : params.row.workflowsequence === 2
-                      ? `รอผู้อนุมัติ (${params.row.approversconfirmed}/${params.row.totalapprover})`
-                      : `สำเร็จแล้ว `}
-                  </p>
+                  {params.row.workflowsequence === 1 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        ผู้มีส่วนร่วมรับทราบแล้ว (
+                        {params.row.stakeholdersconfirmed}/
+                        {params.row.totalstakeholders})
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 2 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        รอผู้อนุมัติ ({params.row.approversconfirmed}/
+                        {params.row.totalapprover})
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 3 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        อนุมัติแล้ว
+                      </div>
+                    </div>
+                  ) : params.row.workflowsequence === 4 ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        ไม่ได้รับการอนุมัติ
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="font-normal font-['Inter']">
+                        เกิดข้อผิดพลาด
+                      </div>
+                    </div>
+                  )}
                 </>
               ),
             },

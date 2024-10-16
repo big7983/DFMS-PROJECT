@@ -1,9 +1,7 @@
 import React from 'react'
 import Image from "next/image";
 
-type Props = {}
-
-export default function Addformapprover({}: Props) {
+export default function Addformapprover() {
   return (
           <div className="mx-auto max-w-270">
             <div className="grid grid-cols-5 gap-8">

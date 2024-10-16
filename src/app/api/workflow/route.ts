@@ -3,7 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const workflows = await prisma.workFlow.findMany();
     return new Response(JSON.stringify(workflows), {

@@ -76,7 +76,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const trainingForms = await prisma.training_Form.findMany(); // Fetch all training forms
     return new Response(JSON.stringify(trainingForms), {

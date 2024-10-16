@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useFormatter } from "next-intl";
 
 interface Step4Props {
   formData: {
@@ -67,14 +66,13 @@ const Step4: React.FC<Step4Props> = ({
   const formatter = new Intl.DateTimeFormat(locale, options);
   const formattedDate = formatter.format(date);
   console.log(formattedDate);
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (session?.user?.email) {
       fetchdata(session.user.email);
     }
-  }, []);
-
-  const { data: session } = useSession();
+  }, [session?.user?.email]);
 
   const [user_id, setUserid] = useState("");
   const [employee_id, setEmployeeid] = useState("");
@@ -216,7 +214,7 @@ const Step4: React.FC<Step4Props> = ({
               Swal.showLoading();
             },
           });
-          router.push("/dashboard");
+          router.push("/trainingform");
         }
       });
     } catch (error) {

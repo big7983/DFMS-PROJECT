@@ -7,10 +7,9 @@ import { HiBadgeCheck } from "react-icons/hi";
 import { HiExclamationCircle } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
+import Loader from "@/components/Loader";
 
-type Props = {};
-
-export default function page({}: Props) {
+export default function page() {
   const [data, setData] = useState([]);
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,8 +66,8 @@ export default function page({}: Props) {
       });
   
       // 2. เรียกใช้ axios.get เพื่ออัปเดตสถานะ
-      await axios.patch(`/api/updatestatus_sth/${formid}/stakeholders/${sid}`);
-
+      await axios.patch(`/api/form/trainingform/update/status/stakeholders/${formid}/stakeholders/${sid}`);
+      
       Swal.fire({
         title: "บันทึกสำเร็จ!",
         icon: "success",
@@ -82,6 +81,7 @@ export default function page({}: Props) {
   
     } catch (error) {
       console.error("Error fetching data:", error);
+      Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองอีกครั้งในภายหลัง", "error");
     }
   };
 
@@ -104,7 +104,7 @@ export default function page({}: Props) {
   };
 
   if (loading) {
-    return <p>กำลังโหลดข้อมูล...</p>;
+    return <div className="w-full"><Loader /></div>;
   }
 
   return (

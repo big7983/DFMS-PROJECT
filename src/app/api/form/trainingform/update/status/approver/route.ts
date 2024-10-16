@@ -55,6 +55,11 @@ export async function PATCH(req: Request) {
       status.workflowsequence = (status.workflowsequence || 0) + 1;
     }
 
+    if(statusapproved == "unapproved"){
+      status.workflowsequence = 4
+      console.log("อัปเดตสถานะของ workflowsequence 4 ", status.workflowsequence);
+    }
+
     // อัปเดตข้อมูลในฐานข้อมูล
     await prisma.training_Form.update({
       where: { id: idform },
