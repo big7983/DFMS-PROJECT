@@ -20,7 +20,7 @@ model User {
   employee_id String @unique
   email String  @unique
   name String?
-  rank String
+  rank String //level
   position String
   department String
   role String

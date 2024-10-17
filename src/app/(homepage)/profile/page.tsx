@@ -24,7 +24,7 @@ export default function Profile() {
       if (session?.user?.email) {
         try {
           const response = await axios.get<UserData>(
-            `/api/userdata/${session.user.email}`
+            `/api/user/select/${session.user.email}`
           );
           setUserData(response.data);
         } catch (error) {

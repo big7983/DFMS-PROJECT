@@ -52,7 +52,7 @@ export default function page() {
     setLoading(false);
   }, [id]);
 
-  const UpdateStatus = async (sid: string,formid:string) => {
+  const UpdateStatus = async (sid: string, formid: string) => {
     try {
       // 1. แสดง SweetAlert2 แบบ loading
       Swal.fire({
@@ -64,10 +64,12 @@ export default function page() {
           Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
         },
       });
-  
+
       // 2. เรียกใช้ axios.get เพื่ออัปเดตสถานะ
-      await axios.patch(`/api/form/trainingform/update/status/stakeholders/${formid}/stakeholders/${sid}`);
-      
+      await axios.patch(
+        `/api/form/trainingform/update/status/stakeholders/${formid}/stakeholders/${sid}`
+      );
+
       Swal.fire({
         title: "บันทึกสำเร็จ!",
         icon: "success",
@@ -78,14 +80,13 @@ export default function page() {
           router.push("/dashboard");
         }
       });
-  
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองอีกครั้งในภายหลัง", "error");
     }
   };
 
-  const handleSubmit = async (sid: string,formid:string) => {
+  const handleSubmit = async (sid: string, formid: string) => {
     Swal.fire({
       title: "ยืนยันการมีส่วนร่วมใช่หรือไม่?",
       icon: "warning",
@@ -97,14 +98,18 @@ export default function page() {
       cancelButtonColor: "#DC3545",
     }).then((result) => {
       if (result.isConfirmed) {
-        UpdateStatus(formid,sid);
-        console.log("update id ",id)
+        UpdateStatus(formid, sid);
+        console.log("update id ", id);
       }
     });
   };
 
   if (loading) {
-    return <div className="w-full"><Loader /></div>;
+    return (
+      <div className="w-full">
+        <Loader />
+      </div>
+    );
   }
 
   return (
@@ -401,14 +406,44 @@ export default function page() {
                         stakeholder.id === user ? (
                           <button
                             className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                            onClick={() => handleSubmit(item.id,stakeholder.id)}
+                            onClick={() =>
+                              handleSubmit(item.id, stakeholder.id)
+                            }
                           >
                             ยืนยัน
                           </button>
                         ) : stakeholder.status === "true" ? (
-                          <HiBadgeCheck />
+                          <svg
+                            className="w-6 h-6 text-meta-3 dark:text-white"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
                         ) : (
-                          <HiExclamationCircle />
+                          <svg
+                            className="w-6 h-6 text-meta-8 dark:text-white"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
                         )}
                       </h5>
                     </td>

@@ -17,6 +17,9 @@ export async function GET(
         stakeholders: true, 
         id: true,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
 
     // Filter out entries that contain the stakeholder ID in their stakeholders object

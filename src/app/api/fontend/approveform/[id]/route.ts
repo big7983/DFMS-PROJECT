@@ -17,6 +17,9 @@ export async function GET(
         approver: true, 
         id: true,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
     
     let numform = 0;

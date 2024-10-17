@@ -160,7 +160,7 @@ export default function Approveform() {
             {
               field: "department",
               headerName: "หน่วยงาน",
-              width: 150,
+              width: 100,
               align: "center",
               headerAlign: "center",
               

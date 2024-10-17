@@ -20,6 +20,9 @@ export async function GET(
         id: true,
         datesubmiss: true
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
 
     // Map the result to extract only the desired fields and add a sequential ID
