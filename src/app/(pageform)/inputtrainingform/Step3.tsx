@@ -6,6 +6,7 @@ import {
 } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const Step3: React.FC<{
   selectedUsers: { id: number; name: string; department: string }[];
@@ -21,9 +22,9 @@ const Step3: React.FC<{
 
   // กำหนด columns สำหรับ DataGrid
   const columns: GridColDef[] = [
-    { field: "employee_id", headerName: "รหัสพนักงาน", width: 100 },
+    { field: "employeeid", headerName: "รหัสพนักงาน", width: 100 },
     { field: "name", headerName: "ชื่อ", width: 200 },
-    { field: "rank", headerName: "ระดับ", width: 150 },
+    { field: "level", headerName: "ระดับ", width: 150 },
     { field: "position", headerName: "ตำแหน่ง", width: 300 },
   ];
 
@@ -59,14 +60,20 @@ const Step3: React.FC<{
   const canProceed = selectedUsers.length > 0;
 
   const [users, setUser] = useState([]);
+  const { data: session } = useSession();
+
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (session?.user?.email) {
+      fetchUser(session.user.email);
+    }
+  }, [session?.user?.email]);
 
-  const fetchUser = async () => {
+  const fetchUser = async (email:string) => {
     try {
-      const res = await axios.get("/api/user");
+      const resuser = await axios.get(`/api/v2/user/select/${email}`);
+      const res = await axios.get(`/api/v3/organization/select?name=${resuser.data.section}`);
+      //const res = await axios.get("/api/v2/user");
       setUser(res.data);
     } catch (error) {
       console.error(error);

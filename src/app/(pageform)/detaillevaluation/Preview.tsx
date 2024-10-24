@@ -25,15 +25,21 @@ export default function FirstComponent({ data, handleNext }: Props) {
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.datesubmiss}
+                    {new Date().toLocaleString("th-TH", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </label>
                 </div>
               </div>
               <div className="w-full">
-                <label className="block mb-1">ผู้ยื่นคำร้อง</label>
+                <label className="block mb-1">ผู้ทำรายงาน</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.name}
+                    {item.reporter.name}
                   </label>
                 </div>
               </div>
@@ -41,7 +47,7 @@ export default function FirstComponent({ data, handleNext }: Props) {
                 <label className="block mb-1">สังกัดฝ่าย</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.status.department}
+                    {item.department} / {item.section}
                   </label>
                 </div>
               </div>
@@ -49,7 +55,7 @@ export default function FirstComponent({ data, handleNext }: Props) {
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.position}
+                    {item.reporter.position}
                   </label>
                 </div>
               </div>
@@ -238,43 +244,36 @@ export default function FirstComponent({ data, handleNext }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(item.approver)
-                    .sort(
-                      (a: any, b: any) =>
-                        parseInt(a.sequence) - parseInt(b.sequence)
-                    ) // เรียงตาม sequence
-                    .map((approver: any) => (
-                      <tr className="pl-4 w-8" key={approver.sequence}>
-                        <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.sequence}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.name}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.rank}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.position}
-                          </h5>
-                        </td>
-                        <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <button
-                            className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                            onClick={handleNext}
-                          >
-                            ประเมิน
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                  <tr className="pl-4 w-8">
+                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        1
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.name}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.level}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.position}
+                      </h5>
+                    </td>
+                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <button
+                        className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
+                        onClick={handleNext}
+                      >
+                        ประเมิน
+                      </button>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -283,4 +282,15 @@ export default function FirstComponent({ data, handleNext }: Props) {
       ))}
     </div>
   );
+}
+
+{
+  /* <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                          <button
+                            className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
+                            onClick={handleNext}
+                          >
+                            ประเมิน
+                          </button>
+                        </td> */
 }

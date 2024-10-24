@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {  useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 import {
   DataGrid,
@@ -20,62 +20,55 @@ import {
 } from "@mui/material";
 import MuiPagination from "@mui/material/Pagination";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import Link from 'next/link'
+import Link from "next/link";
 import Loader from "@/components/Loader";
 
-
-// ฟังก์ชันสร้างสีตามสถานะ
-// const getStatusChip = (status: any) => {
-//   let colors = status === "active" ? "success" : "error";
-//   return <Chip label={status} color={colors} />;
-// };
-
 interface RowData {
-  name: string;
-  status: string;
+  id: number;
+  course: string; // ฟิลด์นี้ควรมีอยู่
+  datestart: string;
+  dateend: string;
+  datesubmiss: string;
+  statusfrom: string;
+  acknowledged: boolean;
+  acknowledgedStakeholders: number;
+  totalStakeholders: number;
+  approvedApprovers: number;
+  totalApprovers: number;
+  latestupdate: string;
+  isfullyacknowledged: boolean;
+  isfullyapproved: string; // เปลี่ยนเป็น string แทนที่จะเป็น boolean
+  idform: string;
 }
 
 export default function Trainingform() {
   const [rows, setRows] = useState<RowData[]>([]); // กำหนดประเภทข้อมูลของ rows เป็นอาร์เรย์ของ RowData
-  const [filteredRows, setFilteredRows] = useState<RowData[]>([]);
-  const [searchText, setSearchText] = useState(""); // ค่าที่ผู้ใช้กรอก
-  const [statusFilter, setStatusFilter] = useState(""); // ค่าสถานะที่เลือกกรอง
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState<string>(""); // state สำหรับค้นหา
+  const [statusFilter, setStatusFilter] = useState<string>(""); // state สำหรับกรองสถานะ
 
   const { data: session } = useSession();
 
   const fetchData = async (email: string) => {
     try {
-      const resid = await axios.get(`/api/user/select/justid/${email}`);
-      console.log("resid = ",resid.data.id)
-      const res = await axios.get(`/api/fontend/trainingform/${resid.data.id}`);
+      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
+      console.log("resid = ", resid.data.id);
+      const res = await axios.get(
+        `/api/v3/fontend/trainingform/${resid.data.id}`
+      );
       setRows(res.data);
-      setFilteredRows(res.data);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
   }, []);
-
-  // useEffect(() => {
-  //   const filtered = rows.filter((row) => {
-  //     const matchesSearch = row.name
-  //       .toLowerCase()
-  //       .includes(searchText.toLowerCase());
-  //     const matchesStatus = statusFilter
-  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
-  //       : true; // กรองตามสถานะ
-  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-  //   });
-  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  // }, [searchText, statusFilter, rows]);
 
   function Pagination({
     page,
@@ -102,6 +95,23 @@ export default function Trainingform() {
     return <GridPagination ActionsComponent={Pagination} {...props} />;
   }
 
+  const filteredRows = rows.filter((row) => {
+    const matchesCourse = row.course
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "acknowledged"
+        ? row.isfullyacknowledged === true // ตรวจสอบสถานะการรับทราบ
+        : statusFilter === "notacknowledged"
+        ? row.isfullyacknowledged === false // ตรวจสอบสถานะการไม่รับทราบ
+        : statusFilter
+        ? row.isfullyapproved === statusFilter // ค้นหาสถานะการอนุมัติ
+        : true; // คืนค่า true ถ้าไม่มีการกรอง
+
+    return matchesCourse && matchesStatus;
+  });
+
   if (loading) {
     return <Loader />;
   }
@@ -117,7 +127,7 @@ export default function Trainingform() {
           <TextField
             label="ค้นหา"
             variant="outlined"
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => setSearchText(e.target.value)} // ค้นหาจากชื่อหลักสูตร
             size="small"
             style={{
               marginBottom: "1rem",
@@ -130,8 +140,8 @@ export default function Trainingform() {
           <div className="flex justify-between max-w-[350px]">
             {/* ตัวกรองสถานะ */}
             <Select
-              // value={statusFilter}
-              // onChange={(e) => setStatusFilter(e.target.value)}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)} // ตั้งค่าสถานะ
               displayEmpty
               size="small"
               style={{
@@ -141,8 +151,16 @@ export default function Trainingform() {
               }}
             >
               <MenuItem value="">ทั้งหมด</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
+              <MenuItem value="acknowledged">
+                ผู้มีส่วนร่วมรับทราบแล้ว
+              </MenuItem>{" "}
+              <MenuItem value="notacknowledged">
+                ผู้มีส่วนร่วมยังไม่ได้รับทราบ
+              </MenuItem>{" "}
+              <MenuItem value="fullyapproved">คำร้องถูกอนุมัติครบแล้ว</MenuItem>
+              <MenuItem value="unapproved">คำร้องไม่ได้รับอนุมัติ</MenuItem>
+              <MenuItem value="pending">รออนุมัติ</MenuItem>
+              
             </Select>
             <div className="ml-4">
               <Button
@@ -165,7 +183,7 @@ export default function Trainingform() {
 
         <DataGrid
           autoHeight
-          rows={rows}
+          rows={filteredRows}
           columns={[
             {
               field: "id",
@@ -175,38 +193,52 @@ export default function Trainingform() {
               headerAlign: "center",
             },
             { field: "course", headerName: "ชื่อหลักสูตร", width: 200 },
-            { field: "datestart", headerName: "วันเริ่มอบรม", width: 200 },
+            {
+              field: "datestart",
+              headerName: "วันอบรม",
+              width: 200,
+              renderCell: (params: any) => (
+                <>
+                  {params.row.datestart} ถึง {params.row.dateend}
+                </>
+              ),
+            },
+            {
+              field: "datesubmiss",
+              headerName: "วันยื่นคำร้อง",
+              width: 200,
+            },
             {
               field: "statusfrom",
               headerName: "สถานะ",
               width: 250,
               renderCell: (params: any) => (
                 <>
-                  {params.row.workflowsequence === 1 ? (
+                  {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         ผู้มีส่วนร่วมรับทราบแล้ว (
-                        {params.row.stakeholdersconfirmed}/
-                        {params.row.totalstakeholders})
+                        {params.row.acknowledgedStakeholders}/
+                        {params.row.totalStakeholders})
                       </div>
                     </div>
-                  ) : params.row.workflowsequence === 2 ? (
+                  ) : params.row.isfullyapproved === "pending" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
                       <div className="font-normal font-['Inter']">
-                        รอผู้อนุมัติ ({params.row.approversconfirmed}/
-                        {params.row.totalapprover})
+                        รอผู้อนุมัติ ({params.row.approvedApprovers}/
+                        {params.row.totalApprovers})
                       </div>
                     </div>
-                  ) : params.row.workflowsequence === 3 ? (
+                  ) : params.row.isfullyapproved === "fullyapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         อนุมัติแล้ว
                       </div>
                     </div>
-                  ) : params.row.workflowsequence === 4 ? (
+                  ) : params.row.isfullyapproved === "unapproval" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
                       <div className="font-normal font-['Inter']">
@@ -227,7 +259,7 @@ export default function Trainingform() {
             {
               field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
-              width: 150,             
+              width: 150,
             },
             {
               field: "actions",
@@ -240,35 +272,13 @@ export default function Trainingform() {
 
               renderCell: (params: any) => (
                 <>
-                  {/* <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(params.row.id)}
-                  >
-                    รายละเอียด
-                  </Button> */}
-                  {/* <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    ref={{
-                      pathname: '/detailltrainingform',
+                  <Link
+                    href={{
+                      pathname: "/detailltrainingform",
                       query: {
-                        search: params.row.idform
-                      }
-                    }}       
-                    className="rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-opacity-90 "
-                  >
-                    รายละเอียด
-                  </Button> */}
-                  <Link    
-                   href={{
-                    pathname: '/detailltrainingform',
-                    query: {
-                      search: params.row.idform
-                    }
-                  }}             
+                        search: params.row.idform,
+                      },
+                    }}
                     className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
                   >
                     รายละเอียด

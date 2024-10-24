@@ -25,7 +25,7 @@ export default function page() {
     const fetchData = async (id: string) => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/form/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
+        const res = await axios.get(`/api/v3/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -34,7 +34,7 @@ export default function page() {
 
     const fetchUser = async (email: string) => {
       try {
-        const resid = await axios.get(`/api/user/select/justid/${email}`);
+        const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
         setUser(resid.data.id);
         console.log("data id = ", resid.data.id);
       } catch (error) {
@@ -67,7 +67,10 @@ export default function page() {
 
       // 2. เรียกใช้ axios.get เพื่ออัปเดตสถานะ
       await axios.patch(
-        `/api/form/trainingform/update/status/stakeholders/${formid}/stakeholders/${sid}`
+        `/api/v3/trainingform/updatestatus/stakeholders`,{
+          id:formid,
+          stakeholderId:sid
+        }
       );
 
       Swal.fire({
@@ -126,7 +129,7 @@ export default function page() {
           </div>
 
           <div className="border-b border-stroke dark:border-strokedark">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 ">
               <div className="w-35">
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
@@ -135,27 +138,27 @@ export default function page() {
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">ผู้ยื่นคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.name}
+                    {item.requester_name}
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">สังกัดฝ่าย</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.status.department}
+                    {item.requester_section}
                   </label>
                 </div>
               </div>
-              <div className="w-35">
+              <div className="w-full">
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.position}
+                    {item.requester_position}
                   </label>
                 </div>
               </div>
@@ -310,16 +313,13 @@ export default function page() {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(item.approver)
-                    .sort(
-                      (a: any, b: any) =>
-                        parseInt(a.sequence) - parseInt(b.sequence)
-                    ) // เรียงตาม sequence
-                    .map((approver: any) => (
-                      <tr className="pl-4 w-8" key={approver.sequence}>
+                  {Object.values(item.approver.member)
+                    .sort()
+                    .map((approver: any, index: number) => (
+                      <tr className="pl-4 w-8" key={approver.index}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
-                            {approver.sequence}
+                            {index + 1}
                           </h5>
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -329,7 +329,7 @@ export default function page() {
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
-                            {approver.rank}
+                            {approver.level}
                           </h5>
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -339,10 +339,12 @@ export default function page() {
                         </td>
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
-                            {approver.status === "waiting" ? (
+                            {approver.approved === "approved" ? (
                               <HiBadgeCheck />
-                            ) : (
+                            ) : approver.approved === "pending" ? (
                               <HiExclamationCircle />
+                            ) : (
+                              <>???</>
                             )}
                           </h5>
                         </td>
@@ -378,11 +380,11 @@ export default function page() {
                 </tr>
               </thead>
               <tbody>
-                {Object.values(item.stakeholders).map((stakeholder: any) => (
+                {Object.values(item.stakeholders.member).map((stakeholder: any) => (
                   <tr className="pl-4 w-8" key={stakeholder.id}>
                     <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.employee_id}
+                        {stakeholder.employeeid}
                       </h5>
                     </td>
                     <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -392,7 +394,7 @@ export default function page() {
                     </td>
                     <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.rank}
+                        {stakeholder.level}
                       </h5>
                     </td>
                     <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -402,7 +404,7 @@ export default function page() {
                     </td>
                     <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="flex justify-center font-medium text-black dark:text-white">
-                        {stakeholder.status === "false" &&
+                        {stakeholder.acknowledged === false &&
                         stakeholder.id === user ? (
                           <button
                             className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
@@ -412,7 +414,7 @@ export default function page() {
                           >
                             ยืนยัน
                           </button>
-                        ) : stakeholder.status === "true" ? (
+                        ) : stakeholder.acknowledged === true ? (
                           <svg
                             className="w-6 h-6 text-meta-3 dark:text-white"
                             aria-hidden="true"

@@ -24,7 +24,7 @@ export default function Page({}: Props) {
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        const res = await axios.get(`/api/form/trainingsurvey/${id}`);
+        const res = await axios.get(`/api/v3/trainingsurvey/${id}`);
         setData(res.data);
         setLoading(false);
       } catch (error) {
@@ -33,21 +33,8 @@ export default function Page({}: Props) {
       }
     };
 
-    const fetchUser = async (email: string) => {
-      try {
-        const resid = await axios.get(`/api/user/select/justid/${email}`);
-        setUser(resid.data.id);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     if (id) {
       fetchData(id);
-    }
-
-    if (session?.user?.email) {
-      fetchUser(session?.user?.email);
     }
   }, [id]);
 
@@ -74,12 +61,16 @@ export default function Page({}: Props) {
       });
 
       const response = await axios.patch(
-        `/api/form/trainingsurvey/approved/feedback`,
+        `/api/v3/trainingsurvey/evaluator/${id}`,
         {
-          id: id,
-          userid: user,
-          feedback: {
-            ...formData,
+          evaluatorfeedback: {
+            objective: formData.objective,
+            costEffectiveness: formData.costEffectiveness,
+            workBenefit: formData.workBenefit,
+            objectiveAlignment: formData.objectiveAlignment,
+            futureRecommendation: formData.futureRecommendation,
+            reasonfutureRecommendation: formData.reasonfutureRecommendation,
+            additionalcomments: formData.additionalcomments,
           },
         }
       );

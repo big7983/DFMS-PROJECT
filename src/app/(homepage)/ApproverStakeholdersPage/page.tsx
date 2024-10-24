@@ -12,7 +12,7 @@ export default function ApproverStakeholdersPage() {
   useEffect(() => {
     const fetchFormIds = async () => {
       try {
-        const response = await axios.get("/api/form/trainingform");
+        const response = await axios.get("/api/v3/trainingform");
         setFormIds(response.data);
       } catch (error) {
         console.error("Error fetching form IDs:", error);
@@ -31,7 +31,7 @@ export default function ApproverStakeholdersPage() {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `/api/form/trainingform/${selectedFormId}`
+        `/api/v3/trainingform/${selectedFormId}`
       );
       console.log("dd", response.data);
       setData(response.data);
@@ -52,9 +52,10 @@ export default function ApproverStakeholdersPage() {
     });
 
     try {
-      await axios.patch(
-        `/api/form/trainingform/update/status/stakeholders/${selectedFormId}/stakeholders/${sid}`
-      );
+      await axios.patch(`/api/v3/trainingform/updatestatus/stakeholders`, {
+        id: selectedFormId,
+        stakeholderId: sid,
+      });
       Swal.fire("สำเร็จ", "อัปเดตสถานะสำเร็จ", "success");
     } catch (error) {
       Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
@@ -81,10 +82,10 @@ export default function ApproverStakeholdersPage() {
 
       // ส่งคำขอ PATCH โดยใช้ axios
       const response = await axios.patch(
-        "/api/form/trainingform/update/status/approver",
+        "/api/v3/trainingform/updatestatus/approver/",
         {
-          idform,
-          iduser: userid,
+          id: idform,
+          approverId: userid,
           opinion: "test updateApproverStatus",
           statusapproved,
         }
@@ -103,7 +104,7 @@ export default function ApproverStakeholdersPage() {
     fetchData();
   };
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: any) => {
     setSelectedFormId(e.target.value); // เก็บค่าจาก input ลงใน state
   };
 
@@ -121,7 +122,10 @@ export default function ApproverStakeholdersPage() {
         >
           <option value="">Select a Form</option>
           {formIds.map((forma) => (
-            <option key={(forma as { id: string }).id} value={(forma as { id: string }).id}>
+            <option
+              key={(forma as { id: string }).id}
+              value={(forma as { id: string }).id}
+            >
               {(forma as { id: string }).id}
             </option>
           ))}
@@ -143,14 +147,16 @@ export default function ApproverStakeholdersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.values(item.stakeholders).map(
+                    {Object.values(item.stakeholders.member).map(
                       (stakeholder: any) => (
                         <tr key={stakeholder.id}>
                           <td className="py-2 px-4 border">
                             {stakeholder.name}
                           </td>
                           <td className="py-2 px-4 border">
-                            {stakeholder.status}
+                            {stakeholder.acknowledged === true
+                              ? "รับทราบแล้ว"
+                              : "ยังไม่ได้รับทราบ"}
                           </td>
                           <td className="py-2 px-4 border">
                             <button
@@ -160,14 +166,6 @@ export default function ApproverStakeholdersPage() {
                               }
                             >
                               Set True
-                            </button>
-                            <button
-                              className="bg-red-500 text-white px-2 py-1 ml-2 rounded"
-                              onClick={() =>
-                                updateStakeholderStatus(stakeholder.id)
-                              }
-                            >
-                              Set False
                             </button>
                           </td>
                         </tr>
@@ -188,47 +186,43 @@ export default function ApproverStakeholdersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.values(item.approver)
-                      .sort(
-                        (a: any, b: any) =>
-                          parseInt(a.sequence) - parseInt(b.sequence)
-                      ) // เรียงตาม sequence
-                      .map((approver: any) => (
-                        <tr key={approver.id}>
-                          <td className="py-2 px-4 border">{approver.name}</td>
-                          <td className="py-2 px-4 border">
-                            {approver.status}
-                          </td>
-                          <td className="py-2 px-4 border">
-                            <div className="flex space-x-3 ">
-                              <button
-                                className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                                onClick={() =>
-                                  updateApproverStatus(
-                                    item.id,
-                                    approver.id,
-                                    "approved"
-                                  )
-                                }
-                              >
-                                อนุมัติ
-                              </button>
-                              <button
-                                className="bg-meta-1 text-white px-4 py-2 rounded-[20px] whitespace-nowrap"
-                                onClick={() =>
-                                  updateApproverStatus(
-                                    item.id,
-                                    approver.id,
-                                    "unapproved"
-                                  )
-                                }
-                              >
-                                ไม่อนุมัติ
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                    {Object.values(item.approver.member)
+                    .map((approver: any) => (
+                      <tr key={approver.id}>
+                        <td className="py-2 px-4 border">{approver.name}</td>
+                        <td className="py-2 px-4 border">
+                          {approver.approved}
+                        </td>
+                        <td className="py-2 px-4 border">
+                          <div className="flex space-x-3 ">
+                            <button
+                              className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
+                              onClick={() =>
+                                updateApproverStatus(
+                                  item.id,
+                                  approver.id,
+                                  "approved"
+                                )
+                              }
+                            >
+                              อนุมัติ
+                            </button>
+                            <button
+                              className="bg-meta-1 text-white px-4 py-2 rounded-[20px] whitespace-nowrap"
+                              onClick={() =>
+                                updateApproverStatus(
+                                  item.id,
+                                  approver.id,
+                                  "unapproved"
+                                )
+                              }
+                            >
+                              ไม่อนุมัติ
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

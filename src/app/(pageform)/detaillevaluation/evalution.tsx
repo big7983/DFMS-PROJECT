@@ -35,7 +35,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
 
   const Submit = () => {
     Swal.fire({
-      title: "ยืนยันการมีส่วนร่วมใช่หรือไม่?",
+      title: "ยืนยันการประเมินใช่หรือไม่?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "ยืนยัน",

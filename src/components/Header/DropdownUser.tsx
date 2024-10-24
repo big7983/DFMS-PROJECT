@@ -14,7 +14,7 @@ const DropdownUser = () => {
 
   const fetchdata = async (email: string) => {
     try {
-      const res = await axios.get(`/api/user/select/${email}`);
+      const res = await axios.get(`/api/v2/user/select/${email}`);
       setName(res.data.name)
       setPosition(res.data.position)
     } catch (error) {
@@ -25,6 +25,10 @@ const DropdownUser = () => {
   useEffect(() => {
     if (session?.user?.email) {
       fetchdata(session?.user?.email)
+    }
+
+    if(!session){
+      router.push('/login');
     }
   },)
 

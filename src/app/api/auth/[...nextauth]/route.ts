@@ -53,23 +53,15 @@ const handler = NextAuth({
             data: {
               email: session.user.email,
               name: session.user.name,
-              rank: "...",
+              level: "...",
               position: "...",
               employee_id: "T...",
+              section: "...",
               department: "....",
               role: "enduser",
             },
           });
         }
-
-        const existingUser2 = await prisma.user.findUnique({
-          where: { email: session.user.email },
-          select: { id: true },
-        });
-
-        session = Object.assign({}, session, { 
-          id: existingUser2?.id, 
-        });
       }
 
       console.log(session);

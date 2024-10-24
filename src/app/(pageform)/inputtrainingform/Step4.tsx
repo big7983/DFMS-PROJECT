@@ -25,10 +25,12 @@ interface Step4Props {
   selectedUsers: {
     id: number;
     name: string;
+    section: string;
     department: string;
-    employee_id: string;
-    rank: string;
+    employeeid: string;
+    level: string;
     position: string;
+    userid:string
   }[];
   handlePrevStep: () => void;
 }
@@ -37,8 +39,8 @@ interface User {
   id: number;
   name: string;
   department: string;
-  employee_id: string;
-  rank: string;
+  employeeid: string;
+  level: string;
   position: string;
   status: string;
 }
@@ -75,24 +77,28 @@ const Step4: React.FC<Step4Props> = ({
   }, [session?.user?.email]);
 
   const [user_id, setUserid] = useState("");
-  const [employee_id, setEmployeeid] = useState("");
+  const [employeeid, setEmployeeid] = useState("");
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
   const [rank, setRank] = useState("");
+  const [section, setsection] = useState("");
   const [department, setdepartment] = useState("");
   const [approvers, setApprovers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchdata = async (email: String) => {
     try {
-      const res = await axios.get(`/api/user/select/${email}`);
+      const res = await axios.get(`/api/v2/user/select/${email}`);
       setUserid(res.data.id);
-      setEmployeeid(res.data.employee_id);
+      setEmployeeid(res.data.employeeid);
       setName(res.data.name);
       setPosition(res.data.position);
-      setRank(res.data.rank);
+      setRank(res.data.level);
+      setsection(res.data.section);
       setdepartment(res.data.department);
-      const response = await axios.get(`/api/form/trainingform/approved`); // เรียก API ตาม id_form
+      const response = await axios.get(
+        `/api/v3/trainingform/getlistapprover?section=SDM&department=GIT`
+      ); // เรียก API ตาม id_form
       setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
     } catch (error) {
       console.error(error);
@@ -102,62 +108,66 @@ const Step4: React.FC<Step4Props> = ({
   };
 
   const handleSubmit = async () => {
+    // แสดง Loading spinner
     Swal.fire({
-      title: "กำลังบันทึกข้อมูล...", // ข้อความที่แสดงในหัวข้อ
-      html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
-      allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
-      showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
+      title: "กำลังบันทึกข้อมูล...",
+      html: '<div class="spinner"></div>',
+      allowOutsideClick: false,
+      showConfirmButton: false,
       didOpen: () => {
-        Swal.showLoading(); // ใช้ showLoading() ของ SweetAlert2
+        Swal.showLoading();
       },
     });
 
     try {
+      // จัดการข้อมูล approvers และ stakeholders
       const approversObject = approvers
-        ? Object.entries(approvers).reduce((acc: any, [key, approver]) => {
-            acc[approver.id] = {
-              id: approver.id,
-              sequence: approver.sequence,
+        ? Object.entries(approvers).reduce((acc: any, [_, approver], index) => {
+            acc[index] = {
+              id: approver.userid,
               name: approver.name,
-              department: approver.department,
-              employee_id: approver.employee_id,
-              rank: approver.rank,
+              level: approver.level,
               position: approver.position,
-              status: "waiting", //approved, disapproved, waiting
-              opinion: "test",
+              approved: "pending",
+              opinion: " ",
             };
             return acc;
           }, {})
         : {};
 
-      const stakeholders: Stakeholders = selectedUsers.reduce((acc, user) => {
-        acc[user.id] = {
-          id: user.id,
-          name: user.name,
-          department: user.department,
-          employee_id: user.employee_id,
-          rank: user.rank,
-          position: user.position,
-          status: "false",
-        };
-        return acc;
-      }, {} as Stakeholders);
+      const stakeholdersObject = selectedUsers.reduce(
+        (acc: any, user, index) => {
+          acc[index] = {
+            id: user.userid,
+            employeeid: user.employeeid,
+            name: user.name,
+            level: user.level,
+            position: user.position,
+            acknowledged: false,
+          };
+          return acc;
+        },
+        {}
+      );
 
-      const response = await axios.post("/api/form/trainingform", {
+      // ส่งข้อมูลไปยัง API
+      await axios.post("/api/v3/trainingform", {
         idform: "T001",
-        name: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
+        nameform: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
         datesubmiss: formattedDate,
         requester_id: user_id,
-        requester: {
-          employee_id: employee_id,
-          name: name,
-          position: position,
-          rank: rank,
-          statusnoti: "",
-          textnoti: "",
+        requester_name: name,
+        requester_section: section,
+        requester_department: department,
+        requester_position: position,
+        approver: {
+          member: approversObject,
+          isfullyapproved: "pending", // กำหนดสถานะเริ่มต้น
         },
-        approver: approversObject,
-        stakeholders,
+        stakeholders: {
+          member: stakeholdersObject,
+          isfullyacknowledged: false,
+        },
         information: {
           course: formData.course,
           location: formData.location,
@@ -175,29 +185,10 @@ const Step4: React.FC<Step4Props> = ({
           other: formData.other,
           total: formData.total,
         },
-        status: {
-          course: formData.course,
-          datestart: formData.datestart,
-          namerequester: name,
-          department: department,
-          stakeholdersconfirmed: 0,
-          totalstakeholders: selectedUsers.length,
-          approversconfirmed: 0,
-          statusapprover: "", // อนุมัติครบ , ไม่อนุมัติแบบฟอร์มนี้
-          totalapprover: Object.entries(approversObject).length || 0,
-          datereques: new Date().toLocaleString("en-GB", {
-            timeZone: "Asia/Bangkok",
-          }),
-          workflowsequence: 1, // (1 คือ ผู้มีส่วนร่วม) (2 คือ ผู้อนุมัติ) (3 คือ ได้รับการอนุมัติ / ไม่ได้รับการอนุมัติ)
-          latestupdate: formattedDate,
-        },
-        active: true,
+        trainingstatus: "wait_stakeholders", // ตั้งค่า default status
       });
 
-      // Check if response is successful (status code 200)
-      console.log("Training Form created:", response.data);
-
-      // Show success alert
+      // แสดงข้อความสำเร็จ
       Swal.fire({
         title: "บันทึกสำเร็จ!",
         icon: "success",
@@ -205,15 +196,6 @@ const Step4: React.FC<Step4Props> = ({
         confirmButtonColor: "#219653",
       }).then((result) => {
         if (result.isConfirmed) {
-          Swal.fire({
-            title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
-            html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
-            allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
-            showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
-            didOpen: () => {
-              Swal.showLoading();
-            },
-          });
           router.push("/trainingform");
         }
       });
@@ -263,7 +245,8 @@ const Step4: React.FC<Step4Props> = ({
                 <label className="text-black dark:text-white font-medium">
                   {/* {new Date().toLocaleString("en-GB", {
                     timeZone: "Asia/Bangkok",
-                  })} ,  */}{formattedDate}
+                  })} ,  */}
+                  {formattedDate}
                 </label>
               </div>
             </div>
@@ -276,10 +259,10 @@ const Step4: React.FC<Step4Props> = ({
               </div>
             </div>
             <div className="w-35">
-              <label className=" block mb-1">สังกัดฝ่าย</label>
+              <label className=" block mb-1">สังกัด/ฝ่าย</label>
               <div className="w-full">
                 <label className="text-black dark:text-white font-medium">
-                  {department}
+                  {department}/{section}
                 </label>
               </div>
             </div>
@@ -438,11 +421,11 @@ const Step4: React.FC<Step4Props> = ({
               </thead>
               <tbody>
                 {approvers &&
-                  Object.entries(approvers).map(([key, approver]) => (
-                    <tr className="pl-4 w-8" key={approver.sequence}>
+                  Object.entries(approvers).map(([key, approver], index) => (
+                    <tr className="pl-4 w-8" key={index}>
                       <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="font-medium text-black dark:text-white">
-                          {approver.sequence}
+                          {index + 1}
                         </h5>
                       </td>
                       <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -452,7 +435,7 @@ const Step4: React.FC<Step4Props> = ({
                       </td>
                       <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="font-medium text-black dark:text-white">
-                          {approver.rank}
+                          {approver.level}
                         </h5>
                       </td>
                       <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -490,10 +473,10 @@ const Step4: React.FC<Step4Props> = ({
             </thead>
             <tbody>
               {selectedUsers.map((user) => (
-                <tr className="pl-4 w-8" key={user.employee_id}>
+                <tr className="pl-4 w-8" key={user.employeeid}>
                   <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark ">
                     <h5 className="font-medium text-black dark:text-white">
-                      {user.employee_id}
+                      {user.employeeid}
                     </h5>
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">
@@ -503,7 +486,7 @@ const Step4: React.FC<Step4Props> = ({
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">
                     <h5 className="font-medium text-black dark:text-white">
-                      {user.rank}
+                      {user.level}
                     </h5>
                   </td>
                   <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark ">

@@ -6,21 +6,26 @@ import axios from "axios";
 import { HiBadgeCheck } from "react-icons/hi";
 import { HiExclamationCircle } from "react-icons/hi";
 import Loader from "@/components/Loader";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 type Props = {};
 
 export default function page({}: Props) {
   const [data, setData] = useState([]);
+  const [stakeholders, setStakeholders] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
   const id = searchParams.get("search");
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        const res = await axios.get(`/api/form/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
+        const res = await axios.get(`/api/v3/trainingform/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
         setLoading(false);
       } catch (error) {
@@ -32,12 +37,104 @@ export default function page({}: Props) {
     if (id) {
       fetchData(id);
     }
-
   }, [id]);
 
+  const showAlert = () => {
+    Swal.fire({
+      title: "คุณต้องการส่งแบบประเมินให้ผู้มีส่วนร่วมใช่หรือไม่ ?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, บันทึก",
+      cancelButtonText: "ยกเลิก",
+      reverseButtons: true, // สลับตำแหน่งปุ่ม
+      confirmButtonColor: "#219653",
+      cancelButtonColor: "#DC3545",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleSubmit();
+      }
+    });
+  };
+
+  const handleSubmit = async () => {
+    // แสดง Loading spinner
+    Swal.fire({
+      title: "กำลังบันทึกข้อมูล...",
+      html: '<div class="spinner"></div>',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+  
+    try {
+      // ฟังก์ชัน trainingsurveyData เพื่อทำการ POST ข้อมูล
+      const trainingsurveyData = async (data: any) => {
+        // ใช้ Promise.all เพื่อรอให้ axios.post เสร็จในแต่ละการเรียก
+        await Promise.all(
+          Object.values(data).map(async (item: any) => {
+            // ใช้ Object.values กับ stakeholders
+            const stakeholders = Object.values(item.stakeholders?.member || {});
+            
+            // ส่ง axios.post ตามจำนวน stakeholders
+            return Promise.all(
+              stakeholders.map(async (stakeholder: any) => {
+                // สร้างข้อมูลที่ต้องการส่งไป
+                const postData = {
+                  trainingform_id: item.id || "ไม่มีข้อมูล",
+                  reporter_id: stakeholder.id || "ไม่มีข้อมูล",
+                  reporter_name: stakeholder.name || "ไม่มีข้อมูล",
+                  reporter_level: stakeholder.level || "ไม่มีข้อมูล",
+                  reporter_position: stakeholder.position || "ไม่มีข้อมูล",
+                };
+  
+                // รอ axios.post ในแต่ละรายการ
+                await axios.post("/api/v3/trainingsurvey", postData);
+              })
+            );
+          })
+        );
+      };
+  
+      // เรียกใช้ trainingsurveyData และรอให้สำเร็จ
+      await trainingsurveyData(data);  // ส่งข้อมูลไปยัง API
+  
+      // ถ้าไม่มี error แสดงข้อความสำเร็จ
+      Swal.fire({
+        title: "บันทึกสำเร็จ!",
+        icon: "success",
+        confirmButtonText: "กลับสู่หน้าหลัก",
+        confirmButtonColor: "#219653",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/trainingform");
+        }
+      });
+  
+    } catch (error) {
+      console.error("Error creating training form:", error);
+      // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด!",
+        text: "ไม่สามารถบันทึกข้อมูลได้",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+    }
+  };
+  
+
+
   if (loading) {
-    return <div className="w-full"><Loader /></div>;
+    return (
+      <div className="w-full">
+        <Loader />
+      </div>
+    );
   }
+
+  console.log(data)
 
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
@@ -66,7 +163,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">ผู้ยื่นคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.name}
+                    {item.requester_name}
                   </label>
                 </div>
               </div>
@@ -74,7 +171,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">สังกัดฝ่าย</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.status.department} 
+                    {item.requester_section}
                   </label>
                 </div>
               </div>
@@ -82,7 +179,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.position} 
+                    {item.requester_position}
                   </label>
                 </div>
               </div>
@@ -237,16 +334,12 @@ export default function page({}: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(item.approver)
-                    .sort(
-                      (a: any, b: any) =>
-                        parseInt(a.sequence) - parseInt(b.sequence)
-                    ) // เรียงตาม sequence
-                    .map((approver: any) => (
-                      <tr className="pl-4 w-8" key={approver.sequence}>
+                  {Object.values(item.approver.member)
+                    .map((approver: any, index: number) => (
+                      <tr className="pl-4 w-8" key={approver.index}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
-                            {approver.sequence}
+                            {index + 1}
                           </h5>
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -256,7 +349,7 @@ export default function page({}: Props) {
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
-                            {approver.rank}
+                            {approver.level}
                           </h5>
                         </td>
                         <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
@@ -266,10 +359,12 @@ export default function page({}: Props) {
                         </td>
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
-                            {approver.status === "waiting" ? (
+                            {approver.approved === "approved" ? (
                               <HiBadgeCheck />
-                            ) : (
+                            ) : approver.approved === "pending" ? (
                               <HiExclamationCircle />
+                            ) : (
+                              <>???</>
                             )}
                           </h5>
                         </td>
@@ -305,45 +400,55 @@ export default function page({}: Props) {
                 </tr>
               </thead>
               <tbody>
-                {Object.values(item.stakeholders).map((stakeholder: any) => (
-                  <tr className="pl-4 w-8" key={stakeholder.id}>
-                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.employee_id}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.name}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.rank}
-                      </h5>
-                    </td>
-                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {stakeholder.position}
-                      </h5>
-                    </td>
-                    
-                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <h5 className="flex justify-center font-medium text-black dark:text-white">
-                        {stakeholder.status === "true" ? (
-                          <HiBadgeCheck />
-                        ) : (
-                          <HiExclamationCircle />
-                        )}
-                      </h5>
-                    </td>                  
-                  </tr>
-                ))}
+                {Object.values(item.stakeholders.member).map(
+                  (stakeholder: any) => (
+                    <tr className="pl-4 w-8" key={stakeholder.id}>
+                      <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.employeeid}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.name}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.level}
+                        </h5>
+                      </td>
+                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {stakeholder.position}
+                        </h5>
+                      </td>
+
+                      <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                        <h5 className="flex justify-center font-medium text-black dark:text-white">
+                          {stakeholder.acknowledged === true ? (
+                            <HiBadgeCheck />
+                          ) : stakeholder.acknowledged === false ? (
+                            <HiExclamationCircle />
+                          ) : (
+                            <>???</>
+                          )}
+                        </h5>
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
         </div>
       ))}
+
+      <div>
+        <button className="bg-meta-3 text-white p-5 rounded-md" onClick={showAlert}>
+          ส่งให้ผู้มีส่วนร่วมทำแบบประเมิน
+        </button>
+      </div>
     </div>
   );
 }

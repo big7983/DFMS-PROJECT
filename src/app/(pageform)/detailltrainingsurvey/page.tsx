@@ -20,7 +20,7 @@ export default function page({}: Props) {
   useEffect(() => {
     const fetchData = async (id: string) => {
       try {
-        const res = await axios.get(`/api/form/trainingsurvey/${id}`); // แก้ URL ตามที่ต้องการ
+        const res = await axios.get(`/api/v3/trainingsurvey/${id}`); // แก้ URL ตามที่ต้องการ
         setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
         setLoading(false);
       } catch (error) {
@@ -32,11 +32,14 @@ export default function page({}: Props) {
     if (id) {
       fetchData(id);
     }
-
   }, [id]);
 
   if (loading) {
-    return <div className="w-full"><Loader /></div>;
+    return (
+      <div className="w-full">
+        <Loader />
+      </div>
+    );
   }
 
   return (
@@ -58,15 +61,21 @@ export default function page({}: Props) {
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.datesubmiss}
+                    {new Date().toLocaleString("th-TH", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </label>
                 </div>
               </div>
               <div className="w-full">
-                <label className="block mb-1">ผู้ยื่นคำร้อง</label>
+                <label className="block mb-1">ผู้ทำรายงาน</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.name}
+                    {item.reporter.name}
                   </label>
                 </div>
               </div>
@@ -74,7 +83,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">สังกัดฝ่าย</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.status.department} 
+                    {item.department} / {item.section}
                   </label>
                 </div>
               </div>
@@ -82,7 +91,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.requester.position} 
+                    {item.reporter.position} 
                   </label>
                 </div>
               </div>
@@ -130,120 +139,120 @@ export default function page({}: Props) {
           </div>
 
           <div className="border-b border-stroke  dark:border-strokedark ">
-          <h3 className="font-semibold text-black dark:text-white mb-9">
-            รายงานผลการอบรม/สัมมนา
-          </h3>
+            <h3 className="font-semibold text-black dark:text-white mb-9">
+              รายงานผลการอบรม/สัมมนา
+            </h3>
 
-          <div className="mb-9">
-            <label className="mb-3 block font-medium ">
-              เนื้อหาสาระสำคัญโดยสรุปของผู้รายงาน
-            </label>
-            <label className="block text-sm font-medium text-black dark:text-white">
-              {item.survey.keycontent}
-            </label>
-          </div>
-
-          <div className="mb-9">
-            <label className="mb-3 block font-medium ">
-              เนื้อหาวิชาที่สอน สอดคล้องกับวัตถุประสงค์ของการอบรม ของผู้รายงาน
-            </label>
-            <label className="block text-sm font-medium text-black dark:text-white">
-              {item.survey.remaining}
-            </label>
-          </div>
-
-          <div className="mb-9">
-            <label className="mb-3 block font-medium ">
-              เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
-            </label>
-            <label className="block text-sm font-medium text-black dark:text-white">
-              {item.survey.matchesobjectives}
-            </label>
-          </div>
-
-          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-            <div className="w-full xl:w-1/2">
+            <div className="mb-9">
               <label className="mb-3 block font-medium ">
-                คุณภาพหลักสูตรหรือหัวข้อวิชา
+                เนื้อหาสาระสำคัญโดยสรุปของผู้รายงาน
               </label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.course_result}
+              <label className="block text-sm font-medium text-black dark:text-white">
+                {item.survey.keycontent}
               </label>
             </div>
 
-            <div className="w-full xl:w-1/2">
-              <label className="mb-3 block font-medium ">เหตุผล</label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.course_reason}
-              </label>
-            </div>
-          </div>
-
-          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-            <div className="w-full xl:w-1/2">
+            <div className="mb-9">
               <label className="mb-3 block font-medium ">
-                คุณภาพหลักสูตรหรือหัวข้อวิชา
+                เนื้อหาวิชาที่สอน สอดคล้องกับวัตถุประสงค์ของการอบรม ของผู้รายงาน
               </label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.lecturer_result}
+              <label className="block text-sm font-medium text-black dark:text-white">
+                {item.survey.remaining}
               </label>
             </div>
 
-            <div className="w-full xl:w-1/2">
-              <label className="mb-3 block font-medium ">เหตุผล</label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.lecturer_reason}
-              </label>
-            </div>
-          </div>
-
-          <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-            <div className="w-full xl:w-1/2">
+            <div className="mb-9">
               <label className="mb-3 block font-medium ">
-                คุณภาพของเอกสารประกอบการอบรม
+                เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
               </label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.document_result}
+              <label className="block text-sm font-medium text-black dark:text-white">
+                {item.survey.matchesobjectives}
               </label>
             </div>
 
-            <div className="w-full xl:w-1/2">
-              <label className="mb-3 block font-medium ">เหตุผล</label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.document_reason}
-              </label>
-            </div>
-          </div>
+            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">
+                  คุณภาพหลักสูตรหรือหัวข้อวิชา
+                </label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.course_result}
+                </label>
+              </div>
 
-          <div className="mb-9 flex flex-col gap-6 md:flex-row">
-            <div className="w-full xl:w-1/2">
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">เหตุผล</label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.course_reason}
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">
+                  คุณภาพหลักสูตรหรือหัวข้อวิชา
+                </label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.lecturer_result}
+                </label>
+              </div>
+
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">เหตุผล</label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.lecturer_reason}
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">
+                  คุณภาพของเอกสารประกอบการอบรม
+                </label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.document_result}
+                </label>
+              </div>
+
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">เหตุผล</label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.document_reason}
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-9 flex flex-col gap-6 md:flex-row">
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">
+                  คุณภาพการบริการของสถาบันที่จัดฝึกอบรม
+                </label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.service_result}
+                </label>
+              </div>
+
+              <div className="w-full xl:w-1/2">
+                <label className="mb-3 block font-medium ">เหตุผล</label>
+                <label className=" block text-sm font-medium text-black dark:text-white">
+                  {item.survey.service_reason}
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-4.5">
               <label className="mb-3 block font-medium ">
-                คุณภาพการบริการของสถาบันที่จัดฝึกอบรม
+                เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
               </label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.service_result}
-              </label>
-            </div>
-
-            <div className="w-full xl:w-1/2">
-              <label className="mb-3 block font-medium ">เหตุผล</label>
-              <label className=" block text-sm font-medium text-black dark:text-white">
-                {item.survey.service_reason}
+              <label className="block text-sm font-medium text-black dark:text-white">
+                {item.survey.selectedOptions}
               </label>
             </div>
-          </div>
 
-          <div className="mb-4.5">
-            <label className="mb-3 block font-medium ">
-              เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
-            </label>
-            <label className="block text-sm font-medium text-black dark:text-white">
-              {item.survey.selectedOptions}
-            </label>
+            <br />
           </div>
-
-          <br />
-        </div>
 
           <div className=" ">
             <div className="max-w-full overflow-x-auto">
@@ -271,48 +280,42 @@ export default function page({}: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(item.approver)
-                    .sort(
-                      (a: any, b: any) =>
-                        parseInt(a.sequence) - parseInt(b.sequence)
-                    ) // เรียงตาม sequence
-                    .map((approver: any) => (
-                      <tr className="pl-4 w-8" key={approver.sequence}>
-                        <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.sequence}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.name}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.rank}
-                          </h5>
-                        </td>
-                        <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {approver.position}
-                          </h5>
-                        </td>
-                        <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <h5 className="flex justify-center font-medium text-black dark:text-white">
-                            {approver.status === "waiting" ? (
-                              <HiExclamationCircle />
-                            ) : (
-                              <HiBadgeCheck />
-                            )}
-                          </h5>
-                        </td>
-                      </tr>
-                    ))}
+
+                  <tr className="pl-4 w-8">
+                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        1
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.name}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.level}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {item.evaluator.position}
+                      </h5>
+                    </td>
+                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="flex justify-center font-medium text-black dark:text-white">
+                        {item.isevaluated === false ? (
+                          <HiExclamationCircle />
+                        ) : (
+                          <HiBadgeCheck />
+                        )}
+                      </h5>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
-          </div>     
+          </div>
         </div>
       ))}
     </div>
