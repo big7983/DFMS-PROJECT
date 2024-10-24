@@ -36,7 +36,7 @@ interface RowData {
   approved: string;
   totalApprovers: number;
   latestupdate: string;
-  isfullyacknowledged: boolean;
+  isfullyacknowledged: string;
   isfullyapproved: string; // เปลี่ยนเป็น string แทนที่จะเป็น boolean
   idform: string;
 }
@@ -113,23 +113,26 @@ export default function Approveform() {
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course.toLowerCase().includes(searchText.toLowerCase());
-    
-    const matchesStatus =
-      statusFilter === "approved"
-        ? row.approved === "approved" // ตรวจสอบสถานะการรับทราบ
-        : statusFilter === "unapproved"
-        ? row.approved === "unapproved"
-        : statusFilter === "pending"
-        ? row.approved === "pending"
-        : statusFilter === "acknowledged"
-        ? row.acknowledged === true
-        : statusFilter === "unacknowledged"
-        ? row.acknowledged === false
-        : statusFilter
-        ? row.isfullyapproved === statusFilter // ค้นหาสถานะการอนุมัติ
-        : true; // คืนค่า true ถ้าไม่มีการกรอง
   
-    return matchesCourse && matchesStatus; 
+    let matchesStatus = true; // เริ่มต้นด้วยค่า true
+  
+    if (statusFilter === "approved") {
+      matchesStatus = row.approved === "approved"; // ตรวจสอบสถานะการอนุมัติ
+    } else if (statusFilter === "unapproved") {
+      matchesStatus = row.approved === "unapproved"; // ตรวจสอบสถานะการไม่อนุมัติ
+    } else if (statusFilter === "pending") {
+      matchesStatus = row.approved === "pending"; // ตรวจสอบสถานะรอการอนุมัติ
+    } else if (statusFilter === "fullyapproved") {
+      matchesStatus = row.isfullyapproved === "fullyapproved"; // ตรวจสอบสถานะการรับทราบ
+    } else if (statusFilter === "fullyunapproved") {
+      matchesStatus = row.isfullyapproved === "unapproved"; // ตรวจสอบสถานะการรอการรับทราบ
+    }else if (statusFilter === "fullypending") {
+      matchesStatus = row.isfullyapproved === "pending"; // ตรวจสอบสถานะการรอการรับทราบ
+    } else if (statusFilter) {
+      matchesStatus = row.isfullyapproved === statusFilter; // ค้นหาสถานะการอนุมัติ
+    }
+  
+    return matchesCourse && matchesStatus;
   });
 
   if (loading) {
@@ -173,8 +176,8 @@ export default function Approveform() {
               <MenuItem value="unapproved">คำร้องที่ฉันไม่อนุมัติ</MenuItem>
               <MenuItem value="pending">คำร้องที่รอฉันพิจาณา</MenuItem>             
               <MenuItem value="fullyapproved">คำร้องที่ถูกอนุมัติ</MenuItem>
-              <MenuItem value="unapproved">คำร้องที่ไม่ได้รับอนุมัติ</MenuItem>
-              <MenuItem value="pending">คำร้องที่รออนุมัติ</MenuItem>
+              <MenuItem value="fullyunapproved">คำร้องที่ไม่ได้รับอนุมัติ</MenuItem>
+              <MenuItem value="fullypending">คำร้องที่รออนุมัติ</MenuItem>
             </Select>
           </div>
         </div>

@@ -1,6 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import nodemailer from "nodemailer";
 
 const prisma = new PrismaClient();
+
+async function sendNotificationEmail(approverEmail:any, course:any) {
+  // สร้าง transporter
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST, // ใช้ host ของ Mailtrap
+    port: 2525,
+    // service: "gmail",
+    auth: {
+      user: process.env.MAIL_USER, // ใส่ User ของ Mailtrap
+      pass: process.env.MAIL_PASSWORD, // ใส่ Password ของ Mailtrap
+    },
+  });
+
+  // สร้างข้อความ
+  const mailOptions = {
+    from: ' <your_email@example.com>', // ส่งจากอีเมลของคุณ
+    to: approverEmail, // ส่งถึงอีเมลของผู้อนุมัติ
+    subject: "แบบฟอร์มการฝึกอบรมใหม่ต้องได้รับการอนุมัติ",
+    text: `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`,
+  };
+
+  // ส่งอีเมล
+  await transporter.sendMail(mailOptions);
+}
 
 export async function PATCH(req: Request) {
   const date = new Date();
@@ -21,6 +46,7 @@ export async function PATCH(req: Request) {
       where: { id:id },
       select: {
         approver: true,
+        information: true,
       },
     });
 
@@ -63,6 +89,13 @@ export async function PATCH(req: Request) {
         latestupdate: formattedDate, 
       },
     });
+
+    if (statusapproved === 'approved') {
+      const nextApprover = (trainingForm.approver as any)?.member[approver.approvalorder];
+      if (nextApprover && nextApprover.email) {
+        await sendNotificationEmail(nextApprover.email, trainingForm.information?.course);
+      }
+    }
 
     return new Response(JSON.stringify(updatedApprover), { status: 200 });
   } catch (error) {

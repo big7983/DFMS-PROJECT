@@ -54,7 +54,9 @@ export default function page() {
 
   const handleSubmit = async (
     idform: string,
+    course: string,
     userid: string,
+    name: string,
     statusapproved: string
   ) => {
     const { value: inputValue } = await Swal.fire({
@@ -89,6 +91,14 @@ export default function page() {
             approverId: userid,
             opinion: inputValue,
             statusapproved,
+          }
+        );
+
+        await axios.patch(
+          `/api/v3/history`,{
+            id:idform,
+            name:name,
+            action: "พิจารณาแบบคำร้อง "+course+" สำเร็จ ผลการพิจารณาคือ "+statusapproved+" "
           }
         );
 
@@ -410,7 +420,7 @@ export default function page() {
                               <button
                                 className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
                                 onClick={() =>
-                                  handleSubmit(item.id, "6707541eeb1d6f37899f42ac", "approved")
+                                  handleSubmit(item.id, item.information.course ,"6707541eeb1d6f37899f42ac", approver.name, "approved")
                                 }
                               >
                                 อนุมัติ
@@ -420,7 +430,9 @@ export default function page() {
                                 onClick={() =>
                                   handleSubmit(
                                     item.id,
+                                    item.information.course ,
                                     approver.id,
+                                    approver.name,
                                     "unapproved"
                                   )
                                 }

@@ -147,7 +147,7 @@ const Step4: React.FC<Step4Props> = ({
               Swal.showLoading();
             },
           });
-          router.push("/reporttrainingform");
+          router.push("/trainingsurvey");
         }
       });
     } catch (error) {

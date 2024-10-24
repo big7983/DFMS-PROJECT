@@ -38,6 +38,7 @@ model Training_Form {
   latestupdate          String          @unique
   active                Boolean         @default(true)
   trainingstatus        String          @unique
+  history               Json?
 }
 
 model Training_Survey {
@@ -134,6 +135,7 @@ type detailuser {
   name                String
   level               String 
   position            String
+  email               String
 }
 
 //****************************************************************************

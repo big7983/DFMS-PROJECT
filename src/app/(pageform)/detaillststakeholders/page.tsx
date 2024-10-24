@@ -52,7 +52,7 @@ export default function page() {
     setLoading(false);
   }, [id]);
 
-  const UpdateStatus = async (sid: string, formid: string) => {
+  const UpdateStatus = async (sid: string, formid: string, name:string, course:string) => {
     try {
       // 1. แสดง SweetAlert2 แบบ loading
       Swal.fire({
@@ -73,6 +73,15 @@ export default function page() {
         }
       );
 
+      //เก็บ history
+      await axios.patch(
+        `/api/v3/history`,{
+          id:formid,
+          name:name,
+          action: "รับทราบการมีส่วนร่วมแล้วแบบคำร้อง "+course+" สำเร็จ"
+        }
+      );
+
       Swal.fire({
         title: "บันทึกสำเร็จ!",
         icon: "success",
@@ -80,7 +89,7 @@ export default function page() {
         confirmButtonColor: "#219653",
       }).then((result) => {
         if (result.isConfirmed) {
-          router.push("/dashboard");
+          router.push("/stakeholdersform");
         }
       });
     } catch (error) {
@@ -89,7 +98,8 @@ export default function page() {
     }
   };
 
-  const handleSubmit = async (sid: string, formid: string) => {
+
+  const handleSubmit = async (sid: string, formid: string, name:string, course:string) => {
     Swal.fire({
       title: "ยืนยันการมีส่วนร่วมใช่หรือไม่?",
       icon: "warning",
@@ -101,7 +111,7 @@ export default function page() {
       cancelButtonColor: "#DC3545",
     }).then((result) => {
       if (result.isConfirmed) {
-        UpdateStatus(formid, sid);
+        UpdateStatus(formid, sid, name, course);
         console.log("update id ", id);
       }
     });
@@ -409,7 +419,7 @@ export default function page() {
                           <button
                             className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
                             onClick={() =>
-                              handleSubmit(item.id, stakeholder.id)
+                              handleSubmit(item.id, stakeholder.id, stakeholder.name, item.information.course)
                             }
                           >
                             ยืนยัน

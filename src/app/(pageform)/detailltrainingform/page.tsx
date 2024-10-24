@@ -11,6 +11,18 @@ import Swal from "sweetalert2";
 
 type Props = {};
 
+const date = new Date();
+const locale = "en-GB";
+const options: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+};
+const formatter = new Intl.DateTimeFormat(locale, options);
+const formattedDate = formatter.format(date);
+
 export default function page({}: Props) {
   const [data, setData] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -87,7 +99,20 @@ export default function page({}: Props) {
                   reporter_name: stakeholder.name || "ไม่มีข้อมูล",
                   reporter_level: stakeholder.level || "ไม่มีข้อมูล",
                   reporter_position: stakeholder.position || "ไม่มีข้อมูล",
+                  reporter_email: stakeholder.email || "ไม่มีข้อมูล",
                 };
+
+                // await axios.post("/api/v2/sendemail", {
+                //   recipient: stakeholder.email, // อีเมลผู้ใช้
+                //   subject: `แจ้งเตือน: มีแบบรายงาน ${item.information.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
+                //   message: `เรียน  ${stakeholder.name} 
+                  
+                //   คุณได้แบบรายงาน ${item.information.course} ขอความร่วมมือในการทำแบบรายงานนี้ด้วย
+                                   
+                  
+                //   ${formattedDate}`, // เนื้อหา
+                // });
+                
   
                 // รอ axios.post ในแต่ละรายการ
                 await axios.post("/api/v3/trainingsurvey", postData);

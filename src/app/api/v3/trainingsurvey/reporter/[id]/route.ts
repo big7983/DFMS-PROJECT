@@ -1,6 +1,33 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import nodemailer from "nodemailer";
 
 const prisma = new PrismaClient();
+
+async function sendEvaluatorEmail(approverEmail:any, course:any) {
+  // สร้าง transporter
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST, // ใช้ host ของ Mailtrap
+    port: 2525,
+    // service: "gmail",
+    auth: {
+      user: process.env.MAIL_USER, // ใส่ User ของ Mailtrap
+      pass: process.env.MAIL_PASSWORD, // ใส่ Password ของ Mailtrap
+    },
+  });
+
+  // สร้างข้อความ
+  const mailOptions = {
+    from: ' <your_email@example.com>', // ส่งจากอีเมลของคุณ
+    to: approverEmail, // ส่งถึงอีเมลของผู้อนุมัติ
+    subject: "แจ้งเตือน : แบบประเมินการฝึกอบรมใหม่ต้องได้รับการประเมิน",
+    text: `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`,
+  };
+
+  // ส่งอีเมล
+  await transporter.sendMail(mailOptions);
+}
+
+
 
 export async function PATCH(
   req: Request,
@@ -48,6 +75,8 @@ export async function PATCH(
         }),
       },
     });
+
+    await sendEvaluatorEmail(trainingSurvey.evaluator.email, trainingSurvey.information?.course);
 
     return new Response(JSON.stringify(updatedSurvey), { status: 200 });
   } catch (error) {

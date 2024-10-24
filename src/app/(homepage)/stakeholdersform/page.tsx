@@ -116,7 +116,7 @@ export default function Stakeholdersform() {
         ? row.isfullyacknowledged === false // ตรวจสอบสถานะการไม่รับทราบ
         : statusFilter === "acknowledged"
         ? row.acknowledged === true
-        : statusFilter === "unacknowledged"
+        : statusFilter === "notacknowledged"
         ? row.acknowledged === false
         : statusFilter
         ? row.isfullyapproved === statusFilter // ค้นหาสถานะการอนุมัติ

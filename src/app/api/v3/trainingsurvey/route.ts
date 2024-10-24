@@ -23,6 +23,7 @@ export async function POST(req: Request) {
       reporter_name,
       reporter_level,
       reporter_position,
+      reporter_email
     } = body;
 
     // ค้นหาข้อมูล Training_Form ที่ต้องการ
@@ -90,12 +91,14 @@ export async function POST(req: Request) {
             name: reporter_name,
             level: reporter_level,
             position: reporter_position,
+            email:reporter_email,
           },
           evaluator_id: (section.head as any)?.userid || "ไม่มีข้อมูล",
           evaluator: {
             name: (section.head as any)?.name || "ไม่มีข้อมูล",
             level: (section.head as any)?.level || "ไม่มีข้อมูล",
             position: (section.head as any)?.position || "ไม่มีข้อมูล",
+            email: (section.head as any)?.email || "ไม่มีข้อมูล",
           },
           section: section.name,
           department: section.affiliation,

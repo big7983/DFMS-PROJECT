@@ -30,7 +30,8 @@ interface Step4Props {
     employeeid: string;
     level: string;
     position: string;
-    userid:string
+    email: string;
+    userid: string;
   }[];
   handlePrevStep: () => void;
 }
@@ -43,6 +44,7 @@ interface User {
   level: string;
   position: string;
   status: string;
+  email: string;
 }
 
 interface Stakeholders {
@@ -109,15 +111,7 @@ const Step4: React.FC<Step4Props> = ({
 
   const handleSubmit = async () => {
     // แสดง Loading spinner
-    Swal.fire({
-      title: "กำลังบันทึกข้อมูล...",
-      html: '<div class="spinner"></div>',
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
+
 
     try {
       // จัดการข้อมูล approvers และ stakeholders
@@ -128,6 +122,7 @@ const Step4: React.FC<Step4Props> = ({
               name: approver.name,
               level: approver.level,
               position: approver.position,
+              email: approver.email,
               approved: "pending",
               opinion: " ",
             };
@@ -143,6 +138,7 @@ const Step4: React.FC<Step4Props> = ({
             name: user.name,
             level: user.level,
             position: user.position,
+            email: user.email,
             acknowledged: false,
           };
           return acc;
@@ -189,21 +185,55 @@ const Step4: React.FC<Step4Props> = ({
       });
 
       // แสดงข้อความสำเร็จ
-      Swal.fire({
-        title: "บันทึกสำเร็จ!",
-        icon: "success",
-        confirmButtonText: "กลับสู่หน้าหลัก",
-        confirmButtonColor: "#219653",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/trainingform");
-        }
-      });
     } catch (error) {
       console.error("Error creating training form:", error);
       Swal.fire({
         title: "เกิดข้อผิดพลาด!",
         text: "ไม่สามารถบันทึกข้อมูลได้",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+    }
+  };
+
+  const sendemail = async () => {
+    Swal.fire({
+      title: "กำลังส่งอีเมล...",
+      html: '<div class="spinner"></div>',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      // สร้าง array สำหรับการส่งอีเมล
+      const emailPromises = selectedUsers.map(async (user) => {
+        const response = await axios.post("/api/v2/sendemail", {
+          recipient: user.email, // อีเมลผู้ใช้
+          subject: `แจ้งเตือน: มีฟอร์มการฝึกอบรม ${formData.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
+          message: `เรียน  ${user.name} 
+          
+          คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course}.
+          
+          ขอแสดงความนับถือ 
+          ${name} 
+          
+          ${formattedDate}`, // เนื้อหา
+        });
+        console.log(`Email sent to ${user.email}: ${response.data.message}`);
+      });
+
+      // รอให้ส่งอีเมลทั้งหมดเสร็จสิ้น
+      await Promise.all(emailPromises);
+
+      
+    } catch (error) {
+      console.error("Error sending emails:", error);
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด!",
+        text: "ไม่สามารถส่งอีเมลได้",
         icon: "error",
         confirmButtonText: "ตกลง",
       });
@@ -222,7 +252,27 @@ const Step4: React.FC<Step4Props> = ({
       cancelButtonColor: "#DC3545",
     }).then((result) => {
       if (result.isConfirmed) {
+        Swal.fire({
+          title: "กำลังบันทึกข้อมูล...",
+          html: '<div class="spinner"></div>',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
         handleSubmit();
+        //sendemail();
+        Swal.fire({
+          title: "บันทึกสำเร็จ!",
+          icon: "success",
+          confirmButtonText: "กลับสู่หน้าหลัก",
+          confirmButtonColor: "#219653",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/trainingform");
+          }
+        });
       }
     });
   };
