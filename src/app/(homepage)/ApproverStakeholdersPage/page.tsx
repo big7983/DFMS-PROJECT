@@ -40,7 +40,7 @@ export default function ApproverStakeholdersPage() {
     }
   };
 
-  const updateStakeholderStatus = async (sid: any) => {
+  const updateStakeholderStatus = async (sid: any,name:any,course:any) => {
     Swal.fire({
       title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
       html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
@@ -56,6 +56,16 @@ export default function ApproverStakeholdersPage() {
         id: selectedFormId,
         stakeholderId: sid,
       });
+
+      await axios.patch(
+        `/api/v3/history`,{
+          id:selectedFormId,
+          name:name,
+          action: "รับทราบการมีส่วนร่วมแล้วแบบคำร้อง "+course+" สำเร็จ"
+        }
+      );
+
+
       Swal.fire("สำเร็จ", "อัปเดตสถานะสำเร็จ", "success");
     } catch (error) {
       Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
@@ -66,7 +76,9 @@ export default function ApproverStakeholdersPage() {
 
   const updateApproverStatus = async (
     idform: string,
+    course: string,
     userid: string,
+    name: string,
     statusapproved: string
   ) => {
     try {
@@ -90,6 +102,14 @@ export default function ApproverStakeholdersPage() {
           statusapproved,
         }
       );
+
+      await axios.patch(
+        `/api/v3/history`,{
+          id:idform,
+          name:name,
+          action: "พิจารณาแบบคำร้อง "+course+" สำเร็จ ผลการพิจารณาคือ "+statusapproved+" "
+        }
+      );    
 
       // ตรวจสอบสถานะการตอบกลับ
       if (response.status === 200) {
@@ -162,7 +182,7 @@ export default function ApproverStakeholdersPage() {
                             <button
                               className="bg-blue-500 text-white px-2 py-1 rounded"
                               onClick={() =>
-                                updateStakeholderStatus(stakeholder.id)
+                                updateStakeholderStatus(stakeholder.id,stakeholder.name,item.information.course)
                               }
                             >
                               Set True
@@ -200,8 +220,10 @@ export default function ApproverStakeholdersPage() {
                               onClick={() =>
                                 updateApproverStatus(
                                   item.id,
-                                  approver.id,
-                                  "approved"
+                                    item.information.course ,
+                                    approver.id,
+                                    approver.name,
+                                    "approved"
                                 )
                               }
                             >
@@ -212,8 +234,10 @@ export default function ApproverStakeholdersPage() {
                               onClick={() =>
                                 updateApproverStatus(
                                   item.id,
-                                  approver.id,
-                                  "unapproved"
+                                    item.information.course ,
+                                    approver.id,
+                                    approver.name,
+                                    "unapproved"
                                 )
                               }
                             >

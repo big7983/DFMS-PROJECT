@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 
 type UserData = {
   employee_id: string;
   name: string;
   position: string;
-  rank: string;
+  level: string;
+  section: string;
   department: string;
   email: string;
 };
@@ -24,7 +24,7 @@ export default function Profile() {
       if (session?.user?.email) {
         try {
           const response = await axios.get<UserData>(
-            `/api/user/select/${session.user.email}`
+            `/api/v2/user/select/${session.user.email}`
           );
           setUserData(response.data);
         } catch (error) {
@@ -37,9 +37,9 @@ export default function Profile() {
   }, [session?.user?.email]);
 
   return (
-    <div className="mx-auto max-w-270">
+    <div className="mx-auto max-w-180">
       {userData ? (
-      <div className="grid grid-cols-5 gap-8">
+      <div className="">
         <div className="col-span-5 xl:col-span-3">
           <div className="rounded-[20px] border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke px-7 py-5 dark:border-strokedark">
@@ -160,7 +160,7 @@ export default function Profile() {
                         className="w-full rounded border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                         type="text"
                         placeholder="ระดับ ?"
-                        defaultValue={userData?.rank || ""}
+                        defaultValue={userData?.level || ""}
                         disabled
                       />
                     </div>
@@ -230,7 +230,7 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <div className="col-span-5 xl:col-span-2">
+        {/* <div className="col-span-5 xl:col-span-2">
           <div className="rounded-[20px] border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke px-7 py-5 dark:border-strokedark">
               <h3 className="font-medium text-black dark:text-white">
@@ -327,7 +327,7 @@ export default function Profile() {
               </form>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
       ) : (
         <p>กำลังโหลดข้อมูล...</p>

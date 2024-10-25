@@ -8,26 +8,21 @@ export async function GET(req: NextRequest) {
     // ดึง query parameter จาก URL
     const { searchParams } = new URL(req.url);
     const section = searchParams.get('section');
-    const department = searchParams.get('department');
 
     // ตรวจสอบว่ามี section และ department ถูกส่งเข้ามาหรือไม่
     if (!section) {
       return NextResponse.json({ message: 'Section parameter is required' }, { status: 400 });
     }
 
-    if (!department) {
-      return NextResponse.json({ message: 'Department parameter is required' }, { status: 400 });
-    }
-
     // ค้นหา Organization ที่ตรงกับ section
     const sectionhead = await prisma.organization.findFirst({
       where: { name: section },
-      select: { head: true }, // ดึงเฉพาะฟิลด์ head
+      select: { head: true , affiliation: true }, // ดึงเฉพาะฟิลด์ head
     });
 
     // ค้นหา Organization ที่ตรงกับ department
     const departmenthead = await prisma.organization.findFirst({
-      where: { name: department },
+      where: { name: sectionhead?.affiliation },
       select: { head: true }, // ดึงเฉพาะฟิลด์ head
     });
 

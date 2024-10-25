@@ -1,32 +1,27 @@
+import { sendEmail } from "@/utils/sendEmail";
+import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
 import { PrismaClient } from "@prisma/client";
-import nodemailer from "nodemailer";
 
 const prisma = new PrismaClient();
 
-async function sendEvaluatorEmail(approverEmail:any, course:any) {
-  // สร้าง transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST, // ใช้ host ของ Mailtrap
-    port: 2525,
-    // service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER, // ใส่ User ของ Mailtrap
-      pass: process.env.MAIL_PASSWORD, // ใส่ Password ของ Mailtrap
-    },
-  });
+async function sendEvaluatorEmail(approverEmail:any, recieverName: string, course:any) {
 
-  // สร้างข้อความ
-  const mailOptions = {
-    from: ' <your_email@example.com>', // ส่งจากอีเมลของคุณ
-    to: approverEmail, // ส่งถึงอีเมลของผู้อนุมัติ
-    subject: "แจ้งเตือน : แบบประเมินการฝึกอบรมใหม่ต้องได้รับการประเมิน",
-    text: `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`,
-  };
-
-  // ส่งอีเมล
-  await transporter.sendMail(mailOptions);
+  try {
+    const message = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการประเมินจากคุณ.`;
+    const messages = verificationEmailTemplate(recieverName, message);
+    // Send verification email
+    await sendEmail(
+      approverEmail,
+      "แจ้งเตือน : แบบประเมินการฝึกอบรมใหม่ต้องได้รับการประเมิน",
+      messages
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
 }
-
 
 
 export async function PATCH(
@@ -76,7 +71,7 @@ export async function PATCH(
       },
     });
 
-    await sendEvaluatorEmail(trainingSurvey.evaluator.email, trainingSurvey.information?.course);
+    await sendEvaluatorEmail(trainingSurvey.evaluator.email, trainingSurvey.evaluator.name, trainingSurvey.information?.course);
 
     return new Response(JSON.stringify(updatedSurvey), { status: 200 });
   } catch (error) {

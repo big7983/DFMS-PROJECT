@@ -1,30 +1,30 @@
-import { PrismaClient } from '@prisma/client';
+import { sendEmail } from "@/utils/sendEmail";
+import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
+import { PrismaClient } from "@prisma/client";
 import nodemailer from "nodemailer";
 
 const prisma = new PrismaClient();
 
-async function sendNotificationEmail(approverEmail:any, course:any) {
-  // สร้าง transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST, // ใช้ host ของ Mailtrap
-    port: 2525,
-    // service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER, // ใส่ User ของ Mailtrap
-      pass: process.env.MAIL_PASSWORD, // ใส่ Password ของ Mailtrap
-    },
-  });
-
-  // สร้างข้อความ
-  const mailOptions = {
-    from: ' <your_email@example.com>', // ส่งจากอีเมลของคุณ
-    to: approverEmail, // ส่งถึงอีเมลของผู้อนุมัติ
-    subject: "แบบฟอร์มการฝึกอบรมใหม่ต้องได้รับการอนุมัติ",
-    text: `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`,
-  };
-
-  // ส่งอีเมล
-  await transporter.sendMail(mailOptions);
+async function sendNotificationEmail(
+  approverEmail: any,
+  recieverName: string,
+  course: any
+) {
+  try {
+    const message = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`;
+    const messages = verificationEmailTemplate(recieverName, message);
+    // Send verification email
+    await sendEmail(
+      approverEmail,
+      "แจ้งเตือน : แบบฟอร์มการฝึกอบรมใหม่ต้องได้รับการอนุมัติ",
+      messages
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
 }
 
 export async function PATCH(req: Request) {
@@ -43,7 +43,7 @@ export async function PATCH(req: Request) {
   try {
     const { id, approverId, opinion, statusapproved } = await req.json();
     const trainingForm = await prisma.training_Form.findFirst({
-      where: { id:id },
+      where: { id: id },
       select: {
         approver: true,
         information: true,
@@ -51,7 +51,7 @@ export async function PATCH(req: Request) {
     });
 
     if (!trainingForm) {
-      return new Response('Training Form not found', { status: 404 });
+      return new Response("Training Form not found", { status: 404 });
     }
 
     // ค้นหา stakeholder ตาม id
@@ -61,7 +61,7 @@ export async function PATCH(req: Request) {
     const updatedMember = Object.keys(member).reduce((acc, key) => {
       const approver = member[key];
       if (approver.id === approverId) {
-        approver.approved = statusapproved; 
+        approver.approved = statusapproved;
         approver.opinion = opinion;
       }
       acc[key] = approver;
@@ -70,37 +70,54 @@ export async function PATCH(req: Request) {
 
     let isfullyapproved: string;
 
-    if (Object.values(updatedMember).every((app: { approved: string }) => app.approved === 'approved')) {
-      isfullyapproved = 'fullyapproved';
-    } else if (Object.values(updatedMember).some((app: { approved: string }) => app.approved === 'unapproved')) {
-      isfullyapproved = 'unapproved';
+    if (
+      Object.values(updatedMember).every(
+        (app: { approved: string }) => app.approved === "approved"
+      )
+    ) {
+      isfullyapproved = "fullyapproved";
+    } else if (
+      Object.values(updatedMember).some(
+        (app: { approved: string }) => app.approved === "unapproved"
+      )
+    ) {
+      isfullyapproved = "unapproved";
     } else {
-      isfullyapproved = 'pending';
+      isfullyapproved = "pending";
     }
 
     const updatedApprover = await prisma.training_Form.update({
-      where: { id:id },
+      where: { id: id },
       data: {
         approver: {
           member: updatedMember,
           isfullyapproved: isfullyapproved,
-          approvalorder: trainingForm.approver.approvalorder+1
+          approvalorder: trainingForm.approver.approvalorder + 1,
         },
-        latestupdate: formattedDate, 
+        latestupdate: formattedDate,
       },
     });
 
-    if (statusapproved === 'approved') {
-      const nextApprover = (trainingForm.approver as any)?.member[approver.approvalorder];
+    if (statusapproved === "approved") {
+      const nextApprover = (trainingForm.approver as any)?.member[
+        approver.approvalorder
+      ];
+      const recieverName = (trainingForm.approver as any)?.member[
+        approver.approvalorder
+      ];
       if (nextApprover && nextApprover.email) {
-        await sendNotificationEmail(nextApprover.email, trainingForm.information?.course);
+        await sendNotificationEmail(
+          nextApprover.email,
+          recieverName.name,
+          trainingForm.information?.course
+        );
       }
     }
 
     return new Response(JSON.stringify(updatedApprover), { status: 200 });
   } catch (error) {
-    console.error('Error updating approver:', error);
-    return new Response('Error updating approver'+error, { status: 500 });
+    console.error("Error updating approver:", error);
+    return new Response("Error updating approver" + error, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

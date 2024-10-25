@@ -56,7 +56,7 @@ export async function GET(
           (approverMember) => approverMember.id === id && approverMember.approved === 'pending'
         ).length;
 
-        const isfullyapprovedCount = approver.isfullyapproved !== 'fullyapproved' ? 1 : 0;
+        const isfullyapprovedCount = approver.isfullyapproved === 'pending' ? 1 : 0;
 
         // เพิ่มค่าเข้า accumulator
         acc.totalNotAcknowledged += notAcknowledgedCount;

@@ -18,7 +18,7 @@ const List = () => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get("/api/user");
+      const res = await axios.get("/api/v2/user");
       setPosts(res.data);
       setLoading(false);
     } catch (error) {
@@ -42,6 +42,7 @@ const List = () => {
     email: string,
     name: string,
     rank: string,
+    section:string,
     position: string,
     employee_id: string,
     department: string,
@@ -79,10 +80,15 @@ const List = () => {
         '<input type="text" id="swal-input4" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
         position +
         '" />' +
+        '<div class="mb-4.5">' +
+        '<label class="mb-3 block text-sm font-medium text-black dark:text-white text-left">Position <span class="text-meta-1">*</span></label>' +
+        '<input type="text" id="swal-input8" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your section" value="' +
+        section +
+        '" />' +
         "</div>" +
         '<div class="mb-4.5">' +
         '<label class="mb-3 block text-sm font-medium text-black dark:text-white text-left">department <span class="text-meta-1">*</span></label>' +
-        '<input type="text" id="swal-input6" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your position" value="' +
+        '<input type="text" id="swal-input6" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" placeholder="Enter your department" value="' +
         department +
         '" />' +
         "</div>" +
@@ -127,6 +133,9 @@ const List = () => {
         const role = (
           document.getElementById("swal-input7") as HTMLInputElement
         ).value;
+        const section = (
+          document.getElementById("swal-input8") as HTMLInputElement
+        ).value;
 
         if (
           !email ||
@@ -134,17 +143,18 @@ const List = () => {
           !rank ||
           !position ||
           !employee_id ||
+          !section ||
           !department ||
           !role
         ) {
           Swal.showValidationMessage("All fields are required");
         }
 
-        return { email, name, rank, position, employee_id, department, role };
+        return { email, name, rank, position, employee_id, section, department, role };
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const { email, name, rank, position, employee_id, department, role } =
+        const { email, name, rank, position, employee_id, section, department, role } =
           result.value;
 
         try {
@@ -160,7 +170,8 @@ const List = () => {
           await axios.put(`/api/data/${id}`, {
             email,
             name,
-            rank,
+            level:rank,
+            section,
             position,
             employee_id,
             department,
@@ -225,9 +236,10 @@ const List = () => {
                         post.id,
                         post.email,
                         post.name,
-                        post.rank,
+                        post.level,
                         post.position,
                         post.employee_id,
+                        post.section,
                         post.department,
                         post.role
                       )

@@ -258,7 +258,7 @@ export default function Approveform() {
                         อนุมัติแล้ว
                       </div>
                     </div>
-                  ) : params.row.isfullyapproved === "unapproval" ? (
+                  ) : params.row.isfullyapproved === "unapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
                       <div className="font-normal font-['Inter']">

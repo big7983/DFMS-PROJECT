@@ -81,9 +81,9 @@ export async function POST(req: Request) {
         latestupdate:formattedDate,
         active: active ?? true,
         trainingstatus,
-        history:{
-          0:{
-          name:requester_name,
+        history:[
+  
+          {name:requester_name,
           action: "สร้างคำร้องแบบอนุมัติอบรม"+information.course,
           datetime:new Date().toLocaleString('th-TH', {
             day: 'numeric',
@@ -91,8 +91,10 @@ export async function POST(req: Request) {
             year: 'numeric',       
             hour: '2-digit',
             minute: '2-digit',
-          }),     
-        }}
+          })}  
+          
+        ]   
+        
       },
     });
 

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     // ส่งอีเมล
     const messages = verificationEmailTemplate(recieverName,message);
     // Send verification email
-    await sendEmail(recipient, subject,  messages);
+    await sendEmail(recipient, subject, messages);
     return new Response("Email sent successfully", {
       status: 201,
     });

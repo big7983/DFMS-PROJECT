@@ -20,7 +20,7 @@ const DropdownNotification = () => {
     try {
       const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
       const historyResponse = await axios.get(
-        `/api/v3/history/6705eef25f0f0c6cb046b729`
+        `/api/v3/history/${resid.data.id}`
       );
       const historyData = historyResponse.data;
 

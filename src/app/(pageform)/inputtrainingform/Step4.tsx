@@ -99,7 +99,7 @@ const Step4: React.FC<Step4Props> = ({
       setsection(res.data.section);
       setdepartment(res.data.department);
       const response = await axios.get(
-        `/api/v3/trainingform/getlistapprover?section=SDM&department=GIT`
+        `/api/v3/trainingform/getlistapprover?section=${res.data.section}`
       ); // เรียก API ตาม id_form
       setApprovers(response.data); // ตั้งค่า state ด้วยข้อมูลที่ได้รับ
     } catch (error) {
@@ -111,7 +111,15 @@ const Step4: React.FC<Step4Props> = ({
 
   const handleSubmit = async () => {
     // แสดง Loading spinner
-
+    Swal.fire({
+      title: "กำลังบันทึกข้อมูล...",
+      html: '<div class="spinner"></div>',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
 
     try {
       // จัดการข้อมูล approvers และ stakeholders
@@ -183,8 +191,7 @@ const Step4: React.FC<Step4Props> = ({
         },
         trainingstatus: "wait_stakeholders", // ตั้งค่า default status
       });
-
-      // แสดงข้อความสำเร็จ
+   
     } catch (error) {
       console.error("Error creating training form:", error);
       Swal.fire({
@@ -198,7 +205,7 @@ const Step4: React.FC<Step4Props> = ({
 
   const sendemail = async () => {
     Swal.fire({
-      title: "กำลังส่งอีเมล...",
+      title: "กำลังบันทึกข้อมูล...",
       html: '<div class="spinner"></div>',
       allowOutsideClick: false,
       showConfirmButton: false,
@@ -210,17 +217,12 @@ const Step4: React.FC<Step4Props> = ({
     try {
       // สร้าง array สำหรับการส่งอีเมล
       const emailPromises = selectedUsers.map(async (user) => {
-        const response = await axios.post("/api/v2/sendemail", {
+        const response = await axios.post("/api/v3/sendemail", {
           recipient: user.email, // อีเมลผู้ใช้
           subject: `แจ้งเตือน: มีฟอร์มการฝึกอบรม ${formData.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
-          message: `เรียน  ${user.name} 
-          
-          คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course}.
-          
-          ขอแสดงความนับถือ 
-          ${name} 
-          
-          ${formattedDate}`, // เนื้อหา
+          recieverName: user.name,
+          message: `
+          คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`, // เนื้อหา
         });
         console.log(`Email sent to ${user.email}: ${response.data.message}`);
       });
@@ -228,7 +230,6 @@ const Step4: React.FC<Step4Props> = ({
       // รอให้ส่งอีเมลทั้งหมดเสร็จสิ้น
       await Promise.all(emailPromises);
 
-      
     } catch (error) {
       console.error("Error sending emails:", error);
       Swal.fire({
@@ -240,8 +241,8 @@ const Step4: React.FC<Step4Props> = ({
     }
   };
 
-  const showAlert = () => {
-    Swal.fire({
+  const showAlert = async () => {
+    const result = await Swal.fire({
       title: "คุณต้องการบันทึกใช่หรือไม่?",
       icon: "warning",
       showCancelButton: true,
@@ -250,19 +251,14 @@ const Step4: React.FC<Step4Props> = ({
       reverseButtons: true, // สลับตำแหน่งปุ่ม
       confirmButtonColor: "#219653",
       cancelButtonColor: "#DC3545",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: "กำลังบันทึกข้อมูล...",
-          html: '<div class="spinner"></div>',
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-        handleSubmit();
-        //sendemail();
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await handleSubmit(); // รอการทำงานของ handleSubmit สำเร็จ
+        await sendemail(); // รอการทำงานของ sendemail สำเร็จ
+
+        // แสดงการแจ้งเตือนสำเร็จ
         Swal.fire({
           title: "บันทึกสำเร็จ!",
           icon: "success",
@@ -273,8 +269,18 @@ const Step4: React.FC<Step4Props> = ({
             router.push("/trainingform");
           }
         });
+      } catch (error) {
+        // แสดงข้อผิดพลาดถ้ามีปัญหาในการทำงาน
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด!",
+          text: "การบันทึกข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง",
+          icon: "error",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#DC3545",
+        });
+        console.log(error);
       }
-    });
+    }
   };
 
   if (loading) return <div>Loading...</div>;

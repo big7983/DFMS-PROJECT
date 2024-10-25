@@ -22,16 +22,26 @@ const Dashboard: React.FC = () => {
     try {
       const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
       console.log("resid = ", resid.data.id);
+
       const res = await axios.get(`/api/v3/dashboard/${resid.data.id}`);
       setTotalNotFullyApproved(res.data.totalNotFullyApproved + " คำร้อง");
       setTotalNotAcknowledged(res.data.totalNotAcknowledged + " คำร้อง");
       setTotalApproved(res.data.totalApproved + " คำร้อง");
       setReporterCount(res.data.reporterCount + " รายงาน");
       setEvaluatorCount(res.data.evaluatorCount + " คำร้อง");
-      setLoading(false);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // ถ้าเป็น 404 ให้ตั้งค่าทั้งหมดเป็น 0
+        setTotalNotFullyApproved("0 คำร้อง");
+        setTotalNotAcknowledged("0 คำร้อง");
+        setTotalApproved("0 คำร้อง");
+        setReporterCount("0 รายงาน");
+        setEvaluatorCount("0 คำร้อง");
+      } else {
+        console.error("Error fetching data:", error);
+      }
+    } finally {
+      setLoading(false); // หยุด loading ไม่ว่าจะสำเร็จหรือไม่
     }
   };
 
@@ -40,7 +50,7 @@ const Dashboard: React.FC = () => {
       fetchData(session?.user?.email);
     }
 
-    if(!session){
+    if (!session) {
       router.push("/login");
     }
   }, []);
@@ -160,11 +170,7 @@ const Dashboard: React.FC = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                fill-rule="evenodd"
-                d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
-                clip-rule="evenodd"
-              />
+              <path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" />
             </svg>
           </CardDataStats>
         </Link>
@@ -179,11 +185,7 @@ const Dashboard: React.FC = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                fill-rule="evenodd"
-                d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
-                clip-rule="evenodd"
-              />
+              <path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" />
             </svg>
           </CardDataStats>
         </Link>

@@ -79,7 +79,7 @@ export default function page({}: Props) {
         Swal.showLoading();
       },
     });
-  
+
     try {
       // ฟังก์ชัน trainingsurveyData เพื่อทำการ POST ข้อมูล
       const trainingsurveyData = async (data: any) => {
@@ -88,7 +88,7 @@ export default function page({}: Props) {
           Object.values(data).map(async (item: any) => {
             // ใช้ Object.values กับ stakeholders
             const stakeholders = Object.values(item.stakeholders?.member || {});
-            
+
             // ส่ง axios.post ตามจำนวน stakeholders
             return Promise.all(
               stakeholders.map(async (stakeholder: any) => {
@@ -102,18 +102,14 @@ export default function page({}: Props) {
                   reporter_email: stakeholder.email || "ไม่มีข้อมูล",
                 };
 
-                // await axios.post("/api/v2/sendemail", {
-                //   recipient: stakeholder.email, // อีเมลผู้ใช้
-                //   subject: `แจ้งเตือน: มีแบบรายงาน ${item.information.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
-                //   message: `เรียน  ${stakeholder.name} 
-                  
-                //   คุณได้แบบรายงาน ${item.information.course} ขอความร่วมมือในการทำแบบรายงานนี้ด้วย
-                                   
-                  
-                //   ${formattedDate}`, // เนื้อหา
-                // });
-                
-  
+                await axios.post("/api/v3/sendemail", {
+                  recipient: stakeholder.email, // อีเมลผู้ใช้
+                  subject: `แจ้งเตือน: มีแบบรายงาน ${item.information.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
+                  recieverName: stakeholder.name,
+                  message: `
+                  คุณได้แบบรายงาน ${item.information.course} `, // เนื้อหา
+                });
+
                 // รอ axios.post ในแต่ละรายการ
                 await axios.post("/api/v3/trainingsurvey", postData);
               })
@@ -121,10 +117,10 @@ export default function page({}: Props) {
           })
         );
       };
-  
+
       // เรียกใช้ trainingsurveyData และรอให้สำเร็จ
-      await trainingsurveyData(data);  // ส่งข้อมูลไปยัง API
-  
+      await trainingsurveyData(data); // ส่งข้อมูลไปยัง API
+
       // ถ้าไม่มี error แสดงข้อความสำเร็จ
       Swal.fire({
         title: "บันทึกสำเร็จ!",
@@ -136,7 +132,6 @@ export default function page({}: Props) {
           router.push("/trainingform");
         }
       });
-  
     } catch (error) {
       console.error("Error creating training form:", error);
       // แสดงข้อความเมื่อเกิดข้อผิดพลาด
@@ -148,8 +143,6 @@ export default function page({}: Props) {
       });
     }
   };
-  
-
 
   if (loading) {
     return (
@@ -159,7 +152,7 @@ export default function page({}: Props) {
     );
   }
 
-  console.log(data)
+  console.log(data);
 
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
@@ -359,8 +352,8 @@ export default function page({}: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(item.approver.member)
-                    .map((approver: any, index: number) => (
+                  {Object.values(item.approver.member).map(
+                    (approver: any, index: number) => (
                       <tr className="pl-4 w-8" key={approver.index}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
@@ -394,7 +387,8 @@ export default function page({}: Props) {
                           </h5>
                         </td>
                       </tr>
-                    ))}
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -470,7 +464,10 @@ export default function page({}: Props) {
       ))}
 
       <div>
-        <button className="bg-meta-3 text-white p-5 rounded-md" onClick={showAlert}>
+        <button
+          className="bg-meta-3 text-white p-5 rounded-md"
+          onClick={showAlert}
+        >
           ส่งให้ผู้มีส่วนร่วมทำแบบประเมิน
         </button>
       </div>
