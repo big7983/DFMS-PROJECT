@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Training_Form } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ export async function GET(
 
   try {
     // ค้นหาข้อมูลจาก requester_id ที่ระบุ
-    const trainingForms = await prisma.training_Form.findMany({
+    const trainingForms:Training_Form[] = await prisma.training_Form.findMany({
       where: { requester_id: id, active: true },
       orderBy: {
         latestupdate: 'desc', // เรียงลำดับจากล่าสุดเสมอ
@@ -39,7 +39,7 @@ export async function GET(
       const isfullyacknowledged = trainingForm.stakeholders?.isfullyacknowledged ?? "ไม่มีข้อมูล";
       const totalStakeholders = Object.keys(stakeholders).length;
       const acknowledgedStakeholders = Object.values(stakeholders).filter(
-        (stakeholder: any) => stakeholder.acknowledged === true
+        (stakeholder) => stakeholder.acknowledged === true
       ).length;
 
       // คำนวณจำนวน approver ทั้งหมดและที่ approved เป็น "approved"
@@ -47,7 +47,7 @@ export async function GET(
       const isfullyapproved = trainingForm.approver?.isfullyapproved ?? "ไม่มีข้อมูล";
       const totalApprovers = Object.keys(approvers).length;
       const approvedApprovers = Object.values(approvers).filter(
-        (approver: any) => approver.approved === "approved"
+        (approver) => approver.approved === "approved"
       ).length;
 
       return {

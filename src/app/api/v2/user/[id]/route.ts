@@ -8,12 +8,12 @@ export async function PUT(
 ) {
   try {
     // ดึงข้อมูลจาก body ของคำขอ
-    const { name, rank, position, employee_id , department, role } = await req.json();
+    const { name, level, position, employee_id , department, role } = await req.json();
 
     // อัปเดตข้อมูลของผู้ใช้ตาม employee_id
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
-      data: {  name, rank, position, employee_id , department, role },
+      data: {  name, level, position, employee_id , department, role },
     });
 
     // ส่งข้อมูลที่อัปเดตกลับเป็น JSON

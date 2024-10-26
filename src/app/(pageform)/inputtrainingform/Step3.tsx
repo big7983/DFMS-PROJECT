@@ -8,11 +8,23 @@ import { Button } from "@mui/material";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 
+interface User {
+  id: number;
+  name: string;
+  section: string;
+  department: string;
+  employeeid: string;
+  level: string;
+  position: string;
+  email: string;
+  userid: string;
+}
+
+
 const Step3: React.FC<{
   selectedUsers: { id: number; name: string; department: string }[];
-  setSelectedUsers: React.Dispatch<
-    React.SetStateAction<{ id: number; name: string; department: string }[]>
-  >;
+  setSelectedUsers: React.Dispatch<React.SetStateAction<User[]>>;
+
   handlePrevStep: () => void;
   handleNextStep: () => void;
 }> = ({ selectedUsers, setSelectedUsers, handlePrevStep, handleNextStep }) => {
@@ -52,7 +64,7 @@ const Step3: React.FC<{
 
   const toggleUserSelection = (selectionModel: GridRowSelectionModel) => {
     const selected = selectionModel.map(
-      (id) => users.find((user) => user.id === id)!
+      (id) => users.find((user:any) => user.id === id)!
     );
     setSelectedUsers(selected);
   };

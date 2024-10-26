@@ -4,34 +4,72 @@ import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
 
+interface FormData {
+  course: string;
+  location: string;
+  datestart: string;
+  dateend: string;
+  objective: string;
+  received: number;
+  remaining: number;
+  registration: number;
+  room: number;
+  transportation: number;
+  allowance: number;
+  other: number;
+  total: number;
+}
+
+interface User {
+  id: number;
+  name: string;
+  section: string;
+  department: string;
+  employeeid: string;
+  level: string;
+  position: string;
+  email: string;
+  userid: string;
+}
+
 const steps = [
-  { id: "Step 1", component: Step1, name: "ข้อมูลเกี่ยวกับหลักสูตร", fields: ["course", "location", "datestart", "dateend", "objective"] },
-  { id: "Step 2", component: Step2, name: "งบประมาณ", fields: ["received", "remaining", "registration", "room", "transportation", "allowance", "other", "total"] },
-  { id: "Step 3", component: Step3, name: "รายชื่อพนักงานเข้าอบรม", fields: [] },
-  { id: "Step 4", component: Step4, name: "ตรวจสอบ", fields: [] },
+  {
+    id: "Step 1",
+    component: Step1,
+    name: "ข้อมูลเกี่ยวกับหลักสูตร",
+    fields: ["course", "location", "datestart", "dateend", "objective"] as Array<keyof FormData>,
+  },
+  {
+    id: "Step 2",
+    component: Step2,
+    name: "งบประมาณ",
+    fields: ["received", "remaining", "registration", "room", "transportation", "allowance", "other", "total"] as Array<keyof FormData>,
+  },
+  { id: "Step 3", component: Step3, name: "รายชื่อพนักงานเข้าอบรม", fields: [] as Array<keyof FormData> },
+  { id: "Step 4", component: Step4, name: "ตรวจสอบ", fields: [] as Array<keyof FormData> },
 ];
 
 const MultiStepForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     course: "",
     location: "",
     datestart: "",
     dateend: "",
     objective: "",
-    received: '',
-    remaining: '',
-    registration: '',
-    room: '',
-    transportation: '',
-    allowance: '',
-    other: '',
-    total: '',
+    received: 0, 
+    remaining: 0, 
+    registration: 0,
+    room: 0,
+    transportation: 0, 
+    allowance: 0, 
+    other: 0, 
+    total: 0, 
   });
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]); 
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [stepCompleted, setStepCompleted] = useState([false, false, false, false]); // สถานะการเสร็จสิ้นของแต่ละขั้นตอน
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -55,7 +93,10 @@ const MultiStepForm: React.FC = () => {
   };
 
   const isStepComplete = (step: number) => {
-    return steps[step].fields.every((field: any) => formData[field]);
+    return steps[step].fields.every((field: keyof FormData) => {
+      const value = formData[field];
+      return value !== "" && value !== null && value !== undefined;
+    });
   };
 
   const canNavigateToStep = (step: number) => {

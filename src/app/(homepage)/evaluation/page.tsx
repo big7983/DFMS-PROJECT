@@ -4,18 +4,12 @@ import React, { useEffect, useState } from "react";
 
 import {
   DataGrid,
-  gridPageCountSelector,
-  GridPagination,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   TextField,
   Select,
   MenuItem,
-  TablePaginationProps,
 } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import Link from "next/link";
@@ -30,7 +24,7 @@ interface RowData {
   idform: string;
 }
 
-export default function evaluation() {
+const Evaluation = () => {
   const [rows, setRows] = useState<RowData[]>([]); // กำหนดประเภทข้อมูลของ rows เป็นอาร์เรย์ของ RowData
   const [searchText, setSearchText] = useState<string>(""); // state สำหรับค้นหา
   const [statusFilter, setStatusFilter] = useState<string>(""); // state สำหรับกรองสถานะ
@@ -56,32 +50,7 @@ export default function evaluation() {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
-
-  function Pagination({
-    page,
-    onPageChange,
-    className,
-  }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
-    const apiRef = useGridApiContext();
-    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-
-    return (
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    );
-  }
-
-  function CustomPagination(props: any) {
-    return <GridPagination ActionsComponent={Pagination} {...props} />;
-  }
+  }, [session?.user?.email]);
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course
@@ -172,7 +141,7 @@ export default function evaluation() {
               field: "datestart",
               headerName: "วันอบรม",
               width: 200,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.datestart} ถึง {params.row.dateend}
                 </>
@@ -182,7 +151,7 @@ export default function evaluation() {
               field: "workflow",
               headerName: "สถานะ",
               width: 150,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.isevaluated === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
@@ -223,7 +192,7 @@ export default function evaluation() {
               disableColumnMenu: true,
               width: 200,
 
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <Link
                   href={{
                     pathname: "/detaillevaluation",
@@ -238,9 +207,6 @@ export default function evaluation() {
               ),
             },
           ]}
-          slots={{
-            pagination: CustomPagination,
-          }}
           initialState={{
             pagination: {
               paginationModel: {
@@ -265,3 +231,5 @@ export default function evaluation() {
     </div>
   );
 }
+
+export default Evaluation

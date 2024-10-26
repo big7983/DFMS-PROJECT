@@ -1,16 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request,) {
   try {
     // ดึง query parameter จาก URL
     const { searchParams } = new URL(req.url);
     const name = searchParams.get('name');
 
     if (!name) {
-      return NextResponse.json({ message: 'Name parameter is required' }, { status: 400 });
+      return new Response(JSON.stringify({ message: 'Name parameter is required' }), { status: 400 });
     }
 
     // ค้นหา Organization ที่ตรงกับชื่อที่รับมา
@@ -20,7 +19,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!organization || !organization.member) {
-      return NextResponse.json({ message: 'Organization or members not found' }, { status: 404 });
+      return new Response(JSON.stringify({ message: 'Organization or members not found' }), { status: 404 });
     }
 
     // แปลง object ของสมาชิกเป็น array
@@ -30,11 +29,11 @@ export async function GET(req: NextRequest) {
     }));
 
     // ส่งข้อมูล members กลับไป
-    return NextResponse.json(membersArray, { status: 200 });
+    return new Response(JSON.stringify(membersArray), { status: 200 });
 
   } catch (error) {
     console.error('Error fetching organization members:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    return new Response(JSON.stringify({ message: 'Internal server error' }), { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

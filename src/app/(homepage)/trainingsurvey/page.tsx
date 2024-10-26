@@ -4,20 +4,12 @@ import React, { useEffect, useState } from "react";
 
 import {
   DataGrid,
-  gridPageCountSelector,
-  GridPagination,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   TextField,
   Select,
   MenuItem,
-  Button,
-  TablePaginationProps,
 } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import Loader from "@/components/Loader";
@@ -28,6 +20,7 @@ interface RowData {
   course: string; // ฟิลด์นี้ควรมีอยู่
   datestart: string;
   dateend: string;
+  isevaluated: boolean
   isrepoeted: boolean;
   idform: string;
 }
@@ -59,32 +52,7 @@ export default function Trainingsurvey() {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
-
-  function Pagination({
-    page,
-    onPageChange,
-    className,
-  }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
-    const apiRef = useGridApiContext();
-    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-
-    return (
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    );
-  }
-
-  function CustomPagination(props: any) {
-    return <GridPagination ActionsComponent={Pagination} {...props} />;
-  }
+  }, [session?.user?.email]);
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course
@@ -167,7 +135,7 @@ export default function Trainingsurvey() {
               field: "datestart",
               headerName: "วันเริ่มอบรม",
               width: 200,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.datestart} ถึง {params.row.dateend}
                 </>
@@ -177,7 +145,7 @@ export default function Trainingsurvey() {
               field: "workflow",
               headerName: "สถานะ",
               width: 150,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.isrepoeted === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
@@ -226,7 +194,7 @@ export default function Trainingsurvey() {
               disableColumnMenu: true,
               width: 130,
 
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>{params.row.isrepoeted === false ? (
                   <Link
                     href={{
@@ -263,9 +231,6 @@ export default function Trainingsurvey() {
               ),
             },
           ]}
-          slots={{
-            pagination: CustomPagination,
-          }}
           initialState={{
             pagination: {
               paginationModel: {

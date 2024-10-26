@@ -4,16 +4,62 @@ import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
 
+interface FormData {
+  keycontent: string;
+  remaining: string;
+  matchesobjectives: string;
+  course_result: string;
+  course_reason: string;
+  lecturer_result: string;
+  lecturer_reason: string;
+  document_result: string;
+  document_reason: string;
+  service_result: string;
+  service_reason: string;
+  selectedOptions: never[];
+  // Add other necessary fields if needed
+}
 const steps = [
-  { id: "Step 1", component: Step1, name: "เนื้อหา", fields: ["keycontent", "remaining", "matchesobjectives",] },
-  { id: "Step 2", component: Step2, name: "ความเห็น", fields: ["course_result","course_reason","lecturer_result","lecturer_reason","document_result","document_reason","service_result","service_reason"] },
-  { id: "Step 3", component: Step3, name: "เทคนิค", fields: ["selectedOptions"] },
-  { id: "Step 4", component: Step4, name: "ตรวจสอบ", fields: [] },
+  {
+    id: "Step 1",
+    component: Step1,
+    name: "เนื้อหา",
+    fields: ["keycontent", "remaining", "matchesobjectives"] as Array<
+      keyof FormData
+    >,
+  },
+  {
+    id: "Step 2",
+    component: Step2,
+    name: "ความเห็น",
+    fields: [
+      "course_result",
+      "course_reason",
+      "lecturer_result",
+      "lecturer_reason",
+      "document_result",
+      "document_reason",
+      "service_result",
+      "service_reason",
+    ] as Array<keyof FormData>,
+  },
+  {
+    id: "Step 3",
+    component: Step3,
+    name: "เทคนิค",
+    fields: ["selectedOptions"] as Array<keyof FormData>,
+  },
+  {
+    id: "Step 4",
+    component: Step4,
+    name: "ตรวจสอบ",
+    fields: [] as Array<keyof FormData>,
+  },
 ];
 
 const MultiStepForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     keycontent: "",
     remaining: "",
     matchesobjectives: "",
@@ -27,10 +73,9 @@ const MultiStepForm: React.FC = () => {
     service_reason: "",
     selectedOptions: [],
   });
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]); 
   const [stepCompleted, setStepCompleted] = useState([false, false, false]); // สถานะการเสร็จสิ้นของแต่ละขั้นตอน
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -54,7 +99,10 @@ const MultiStepForm: React.FC = () => {
   };
 
   const isStepComplete = (step: number) => {
-    return steps[step].fields.every((field: any) => formData[field]);
+    return steps[step].fields.every((field: keyof FormData) => {
+      const value = formData[field];
+      return value !== "" && value !== null && value !== undefined;
+    });
   };
 
   const canNavigateToStep = (step: number) => {
@@ -77,17 +125,26 @@ const MultiStepForm: React.FC = () => {
             >
               {currentStep > index ? (
                 <div className="group flex w-full flex-col border-l-4 border-primary py-2 pl-4 transition-colors lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4">
-                  <span className="text-sm font-medium text-primary transition-colors ">{step.id}</span>
+                  <span className="text-sm font-medium text-primary transition-colors ">
+                    {step.id}
+                  </span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               ) : currentStep === index ? (
-                <div className="flex w-full flex-col border-l-4 border-primary py-2 pl-4 lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4" aria-current="step">
-                  <span className="text-sm font-medium text-primary">{step.id}</span>
+                <div
+                  className="flex w-full flex-col border-l-4 border-primary py-2 pl-4 lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4"
+                  aria-current="step"
+                >
+                  <span className="text-sm font-medium text-primary">
+                    {step.id}
+                  </span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               ) : (
                 <div className="group flex w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors lg:border-l-0 lg:border-t-4 lg:pb-0 lg:pl-0 lg:pt-4">
-                  <span className="text-sm font-medium text-gray-500 transition-colors">{step.id}</span>
+                  <span className="text-sm font-medium text-gray-500 transition-colors">
+                    {step.id}
+                  </span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               )}
@@ -102,10 +159,7 @@ const MultiStepForm: React.FC = () => {
         handleNextStep={handleNextStep}
         handlePrevStep={handlePrevStep}
         canProceed={isStepComplete(currentStep)}
-        selectedUsers={selectedUsers}
-        setSelectedUsers={setSelectedUsers}
       />
-
     </>
   );
 };

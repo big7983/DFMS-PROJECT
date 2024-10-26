@@ -11,7 +11,7 @@ interface Step1Props {
     dateend: string;
     objective: string;
   };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleNextStep: () => void;
   handlePrevStep: () => void;
   canProceed: boolean;
@@ -21,7 +21,6 @@ const Step1: React.FC<Step1Props> = ({
   formData,
   handleChange,
   handleNextStep,
-  handlePrevStep,
   canProceed,
 }) => {
   useEffect(() => {

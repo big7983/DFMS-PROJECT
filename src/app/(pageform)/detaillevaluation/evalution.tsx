@@ -1,9 +1,19 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 
+interface FormData {
+  objective: string;
+  costEffectiveness: string;
+  workBenefit: string;
+  objectiveAlignment: string;
+  futureRecommendation: string;
+  reasonfutureRecommendation: string;
+  additionalcomments: string;
+}
+
 type Props = {
   handleBack: () => void;
-  handleSubmit: (formData: any) => void;
+  handleSubmit: (formData: FormData) => void;
 };
 
 export default function SecondComponent({ handleBack, handleSubmit }: Props) {
@@ -19,19 +29,15 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
 
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRadioChange = (group: string, option: string) => {
-    handleChange({
-      target: {
-        name: group,
-        value: option, // เก็บค่าเพียงตัวเดียว
-      },
-    } as React.ChangeEvent<HTMLInputElement>);
+  const handleRadioChange = (group: keyof FormData, option: string) => {
+    setFormData((prev) => ({ ...prev, [group]: option }));
   };
+
 
   const Submit = () => {
     Swal.fire({
@@ -61,7 +67,9 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
     }
   };
 
-  const isFormComplete = Object.values(formData).every((value) => value.trim() !== "");
+  const isFormComplete = Object.values(formData).every(
+    (value) => value.trim() !== ""
+  );
 
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">

@@ -5,18 +5,12 @@ import axios from "axios";
 
 import {
   DataGrid,
-  gridPageCountSelector,
-  GridPagination,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   TextField,
   Select,
   MenuItem,
-  TablePaginationProps,
 } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Loader from "@/components/Loader";
@@ -49,9 +43,9 @@ export default function Approveform() {
 
   const { data: session } = useSession();
 
-  const fetchData = async (email: string) => {
+  const fetchData = async () => {
     try {
-      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
+      //const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
       const res = await axios.get(
         `/api/v3/fontend/approveform/6707541eeb1d6f37899f42ac`
       );
@@ -65,51 +59,35 @@ export default function Approveform() {
 
   useEffect(() => {
     if (session?.user?.email) {
-      fetchData(session?.user?.email);
+      fetchData();
     }
 
-    if(!session){
-      
-    }
   }, [session?.user?.email]);
 
-  // useEffect(() => {
-  //   const filtered = rows.filter((row) => {
-  //     const matchesSearch = row.name
-  //       .toLowerCase()
-  //       .includes(searchText.toLowerCase());
-  //     const matchesStatus = statusFilter
-  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
-  //       : true; // กรองตามสถานะ
-  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-  //   });
-  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  // }, [searchText, statusFilter, rows]);
+  // function Pagination({
+  //   page,
+  //   onPageChange,
+  //   className,
+  // }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
+  //   const apiRef = useGridApiContext();
+  //   const pageCount = useGridSelector(apiRef, gridPageCountSelector);
 
-  function Pagination({
-    page,
-    onPageChange,
-    className,
-  }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
-    const apiRef = useGridApiContext();
-    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
+  //   return (
+  //     <MuiPagination
+  //       color="primary"
+  //       className={className}
+  //       count={pageCount}
+  //       page={page + 1}
+  //       onChange={(event, newPage) => {
+  //         onPageChange(event as any, newPage - 1);
+  //       }}
+  //     />
+  //   );
+  // }
 
-    return (
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    );
-  }
-
-  function CustomPagination(props: any) {
-    return <GridPagination ActionsComponent={Pagination} {...props} />;
-  }
+  // function CustomPagination(props: any) {
+  //   return <GridPagination ActionsComponent={Pagination} {...props} />;
+  // }
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course.toLowerCase().includes(searchText.toLowerCase());
@@ -198,7 +176,7 @@ export default function Approveform() {
               field: "datestart",
               headerName: "วันอบรม",
               width: 200,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.datestart} ถึง {params.row.dateend}
                 </>
@@ -232,9 +210,9 @@ export default function Approveform() {
               field: "status",
               headerName: "สถานะแบบอนุมัติ",
               width: 225,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
-                  {params.row.isfullyacknowledged === false ? (
+                  {params.row.isfullyacknowledged == "false" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
                       <div className="font-normal font-['Inter']">
@@ -281,7 +259,7 @@ export default function Approveform() {
               headerName: "สถานะการพิจารณา",
               width: 150,
               headerAlign: "center",
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.approved === "approved" ? (
                     <div className="w-full h-full justify-center items-center inline-flex ">
@@ -359,7 +337,7 @@ export default function Approveform() {
               disableColumnMenu: true,
               width: 150,
 
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   <Link
                     href={{
@@ -376,9 +354,9 @@ export default function Approveform() {
               ),
             },
           ]}
-          slots={{
-            pagination: CustomPagination,
-          }}
+          // slots={{
+          //   pagination: CustomPagination,
+          // }}
           initialState={{
             pagination: {
               paginationModel: {

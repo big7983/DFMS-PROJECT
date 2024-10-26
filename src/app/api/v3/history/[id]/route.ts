@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -34,13 +34,13 @@ export async function GET(
       // ตรวจสอบว่า approver.member เป็นอาร์เรย์และมี iduser หรือไม่
       let approverHasId = false;
       if (Array.isArray(form.approver?.member)) {
-        approverHasId = form.approver.member.some((member: any) => member.id === iduser);
+        approverHasId = form.approver.member.some((member:any) => member.id === iduser);
       }
 
       // ตรวจสอบว่า stakeholders.member เป็นอาร์เรย์และมี iduser หรือไม่
       let stakeholderHasId = false;
       if (Array.isArray(form.stakeholders?.member)) {
-        stakeholderHasId = form.stakeholders.member.some((member: any) => member.id === iduser);
+        stakeholderHasId = form.stakeholders.member.some((member:any) => member.id === iduser);
       }
 
       // คืนค่า true ถ้าพบ iduser ใน requester, approver, หรือ stakeholders

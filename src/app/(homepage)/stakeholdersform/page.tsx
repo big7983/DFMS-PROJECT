@@ -5,18 +5,12 @@ import axios from "axios";
 
 import {
   DataGrid,
-  gridPageCountSelector,
-  GridPagination,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   TextField,
   Select,
   MenuItem,
-  TablePaginationProps,
 } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -66,7 +60,7 @@ export default function Stakeholdersform() {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   // useEffect(() => {
   //   const filtered = rows.filter((row) => {
@@ -80,31 +74,6 @@ export default function Stakeholdersform() {
   //   });
   //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
   // }, [searchText, statusFilter, rows]);
-
-  function Pagination({
-    page,
-    onPageChange,
-    className,
-  }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
-    const apiRef = useGridApiContext();
-    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-
-    return (
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    );
-  }
-
-  function CustomPagination(props: any) {
-    return <GridPagination ActionsComponent={Pagination} {...props} />;
-  }
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course.toLowerCase().includes(searchText.toLowerCase());
@@ -195,7 +164,7 @@ export default function Stakeholdersform() {
               field: "datestart",
               headerName: "วันอบรม",
               width: 200,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.datestart} ถึง {params.row.dateend}
                 </>
@@ -211,7 +180,7 @@ export default function Stakeholdersform() {
               field: "statusfrom",
               headerName: "สถานะแบบคำร้อง",
               width: 250,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
@@ -261,7 +230,7 @@ export default function Stakeholdersform() {
               headerName: "สถานะการรับทราบ",
               headerAlign: "center",
               width: 135,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.acknowledged === true ? (
                     <div className="w-full h-full justify-center items-center inline-flex ">
@@ -322,7 +291,7 @@ export default function Stakeholdersform() {
               disableColumnMenu: true,
               width: 200,
 
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {/* <Button
                     variant="contained"
@@ -347,9 +316,6 @@ export default function Stakeholdersform() {
               ),
             },
           ]}
-          slots={{
-            pagination: CustomPagination,
-          }}
           initialState={{
             pagination: {
               paginationModel: {

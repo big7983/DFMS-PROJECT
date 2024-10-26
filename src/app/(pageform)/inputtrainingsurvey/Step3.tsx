@@ -3,9 +3,8 @@ import React, { useEffect } from "react";
 import { Button } from "@mui/material";
 
 interface Step3Props {
-  formData: {
-    selectedOptions: string[]; // Changed to an array to store multiple selections
-  };
+  formData: { selectedOptions: string[] };
+
   handlePrevStep: () => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNextStep: () => void;
@@ -50,7 +49,9 @@ const Step3: React.FC<Step3Props> = ({
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <form onSubmit={(e) => e.preventDefault()}> {/* Prevent default form submission */}
+      <form onSubmit={(e) => e.preventDefault()}>
+        {" "}
+        {/* Prevent default form submission */}
         <div className="mt-7 py-7">
           <div className="flex flex-col gap-9">
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
@@ -61,7 +62,14 @@ const Step3: React.FC<Step3Props> = ({
               </div>
               <div className="py-6.5 px-[50px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {["บรรยาย", "อภิปราย", "แสดงความคิดเห็น/ปรึกษาหารือ", "กิจกรรมกลุ่ม","แสดงบทบาท (Role-Play)","กรณีศึกษา (Case Study)"].map((option) => (
+                  {[
+                    "บรรยาย",
+                    "อภิปราย",
+                    "แสดงความคิดเห็น/ปรึกษาหารือ",
+                    "กิจกรรมกลุ่ม",
+                    "แสดงบทบาท (Role-Play)",
+                    "กรณีศึกษา (Case Study)",
+                  ].map((option) => (
                     <label className="flex items-center space-x-2" key={option}>
                       <input
                         type="checkbox"

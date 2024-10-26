@@ -2,13 +2,23 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Link from "next/link";
 import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
 
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+  position: string;
+  employee_id: string;
+  department: string;
+  role: string;
+  level: string;
+  section: string;
+}
+
 const List = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -35,10 +45,8 @@ const List = () => {
   //   }
   // };
 
-  const router = useRouter();
-
   const handleClick = (
-    id: String,
+    id: string,
     email: string,
     name: string,
     rank: string,
@@ -221,7 +229,7 @@ const List = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {posts.map((post: any) => (
+            {posts.map((post) => (
               <tr key={post.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">

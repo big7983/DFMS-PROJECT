@@ -12,7 +12,7 @@ interface Step2Props {
     document_reason: string;
     service_result: string;
     service_reason: string;
-  };
+  }
   handlePrevStep: () => void;
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

@@ -4,29 +4,85 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { HiBadgeCheck } from "react-icons/hi";
-import { HiExclamationCircle } from "react-icons/hi";
+import { AiFillCloseCircle } from "react-icons/ai";
+import { BiError } from "react-icons/bi";
+import { BiTime } from "react-icons/bi";
+
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
-type Props = {};
+interface TrainingFormData {
+  id: string
+  idform: string;
+  nameform: string;
+  datesubmiss: string;
+  requester_id: string;
+  requester_name: string;
+  requester_section: string;
+  requester_department: string;
+  requester_position: string;
+  latestupdate: string;
+  active: boolean;
+  trainingstatus: string;
+  history: Array<{
+    name: string;
+    action: string;
+    datetime: string;
+  }>;
+  stakeholders: {
+    member: {
+      [key: string]: {
+        id: string;
+        employeeid: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        acknowledged: boolean;
+      };
+    };
+    isfullyacknowledged: boolean;
+  };
+  approver: {
+    member: {
+      [key: string]: {
+        id: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        approved: string;
+        opinion: string;
+      };
+    };
+    isfullyapproved: string;
+    approvalorder: {
+      $numberLong: string;
+    };
+  };
+  information: {
+    course: string;
+    location: string;
+    datestart: string;
+    dateend: string;
+    objective: string;
+  };
+  budget: {
+    received: number;
+    remaining: number;
+    registration: number;
+    room: number;
+    transportation: number;
+    allowance: number;
+    other: number;
+    total: number;
+  };
+}
 
-const date = new Date();
-const locale = "en-GB";
-const options: Intl.DateTimeFormatOptions = {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-};
-const formatter = new Intl.DateTimeFormat(locale, options);
-const formattedDate = formatter.format(date);
 
-export default function page({}: Props) {
-  const [data, setData] = useState([]);
-  const [stakeholders, setStakeholders] = useState([]);
-
+const Page = () => {
+  const [data, setData] = useState<TrainingFormData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
@@ -82,16 +138,16 @@ export default function page({}: Props) {
 
     try {
       // ฟังก์ชัน trainingsurveyData เพื่อทำการ POST ข้อมูล
-      const trainingsurveyData = async (data: any) => {
+      const trainingsurveyData = async (data:TrainingFormData[]) => {
         // ใช้ Promise.all เพื่อรอให้ axios.post เสร็จในแต่ละการเรียก
         await Promise.all(
-          Object.values(data).map(async (item: any) => {
+          Object.values(data).map(async (item) => {
             // ใช้ Object.values กับ stakeholders
             const stakeholders = Object.values(item.stakeholders?.member || {});
 
             // ส่ง axios.post ตามจำนวน stakeholders
             return Promise.all(
-              stakeholders.map(async (stakeholder: any) => {
+              stakeholders.map(async (stakeholder) => {
                 // สร้างข้อมูลที่ต้องการส่งไป
                 const postData = {
                   trainingform_id: item.id || "ไม่มีข้อมูล",
@@ -156,7 +212,7 @@ export default function page({}: Props) {
 
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
-      {data.map((item: any) => (
+      {data.map((item) => (
         <div
           key={item.id}
           className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
@@ -353,8 +409,8 @@ export default function page({}: Props) {
                 </thead>
                 <tbody>
                   {Object.values(item.approver.member).map(
-                    (approver: any, index: number) => (
-                      <tr className="pl-4 w-8" key={approver.index}>
+                    (approver, index: number) => (
+                      <tr className="pl-4 w-8" key={index}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
                             {index + 1}
@@ -378,11 +434,19 @@ export default function page({}: Props) {
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
                             {approver.approved === "approved" ? (
-                              <HiBadgeCheck />
+                              <HiBadgeCheck
+                                className="fill-success"
+                                size={24}
+                              />
                             ) : approver.approved === "pending" ? (
-                              <HiExclamationCircle />
+                              <BiTime className="fill-warning" size={24} />
+                            ) : approver.approved === "unapproved" ? (
+                              <AiFillCloseCircle
+                                className="fill-danger"
+                                size={24}
+                              />
                             ) : (
-                              <>???</>
+                              <BiError className="fill-danger" size={24} />
                             )}
                           </h5>
                         </td>
@@ -420,7 +484,7 @@ export default function page({}: Props) {
               </thead>
               <tbody>
                 {Object.values(item.stakeholders.member).map(
-                  (stakeholder: any) => (
+                  (stakeholder) => (
                     <tr className="pl-4 w-8" key={stakeholder.id}>
                       <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="font-medium text-black dark:text-white">
@@ -446,11 +510,11 @@ export default function page({}: Props) {
                       <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="flex justify-center font-medium text-black dark:text-white">
                           {stakeholder.acknowledged === true ? (
-                            <HiBadgeCheck />
+                            <HiBadgeCheck className="fill-success" size={24} />
                           ) : stakeholder.acknowledged === false ? (
-                            <HiExclamationCircle />
+                            <BiTime className="fill-warning" size={24} />
                           ) : (
-                            <>???</>
+                            <BiError className="fill-danger" size={24} />
                           )}
                         </h5>
                       </td>
@@ -473,4 +537,6 @@ export default function page({}: Props) {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

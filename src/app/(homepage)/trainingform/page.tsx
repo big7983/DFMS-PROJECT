@@ -6,19 +6,13 @@ import { useSession } from "next-auth/react";
 
 import {
   DataGrid,
-  gridPageCountSelector,
-  GridPagination,
-  useGridApiContext,
-  useGridSelector,
 } from "@mui/x-data-grid";
 import {
   TextField,
   Select,
   MenuItem,
   Button,
-  TablePaginationProps,
 } from "@mui/material";
-import MuiPagination from "@mui/material/Pagination";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Link from "next/link";
 import Loader from "@/components/Loader";
@@ -68,32 +62,7 @@ export default function Trainingform() {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
-
-  function Pagination({
-    page,
-    onPageChange,
-    className,
-  }: Pick<TablePaginationProps, "page" | "onPageChange" | "className">) {
-    const apiRef = useGridApiContext();
-    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-
-    return (
-      <MuiPagination
-        color="primary"
-        className={className}
-        count={pageCount}
-        page={page + 1}
-        onChange={(event, newPage) => {
-          onPageChange(event as any, newPage - 1);
-        }}
-      />
-    );
-  }
-
-  function CustomPagination(props: any) {
-    return <GridPagination ActionsComponent={Pagination} {...props} />;
-  }
+  }, [session?.user?.email]);
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course
@@ -171,10 +140,10 @@ export default function Trainingform() {
                   marginBottom: "1rem",
                   width: "130px",
                   border: 0,
+                  background: "#313D4A"
                 }}
-                className="bg-meta-4"
-              >
-                <AddCircleIcon className="mr-1" />
+                startIcon={<AddCircleIcon />}
+              >               
                 เพิ่มคำร้อง
               </Button>
             </div>
@@ -197,7 +166,7 @@ export default function Trainingform() {
               field: "datestart",
               headerName: "วันอบรม",
               width: 200,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.datestart} ถึง {params.row.dateend}
                 </>
@@ -212,7 +181,7 @@ export default function Trainingform() {
               field: "statusfrom",
               headerName: "สถานะ",
               width: 250,
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
@@ -270,7 +239,7 @@ export default function Trainingform() {
               disableColumnMenu: true,
               width: 200,
 
-              renderCell: (params: any) => (
+              renderCell: (params) => (
                 <>
                   <Link
                     href={{
@@ -279,7 +248,7 @@ export default function Trainingform() {
                         search: params.row.idform,
                       },
                     }}
-                    className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
+                    className="items-center justify-center rounded-full bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-70 "
                   >
                     รายละเอียด
                   </Link>
@@ -287,9 +256,6 @@ export default function Trainingform() {
               ),
             },
           ]}
-          slots={{
-            pagination: CustomPagination,
-          }}
           initialState={{
             pagination: {
               paginationModel: {

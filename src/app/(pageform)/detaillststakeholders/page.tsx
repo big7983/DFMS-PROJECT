@@ -4,14 +4,83 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { HiBadgeCheck } from "react-icons/hi";
-import { HiExclamationCircle } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import Loader from "@/components/Loader";
+import { BiError, BiTime } from "react-icons/bi";
+import { AiFillCloseCircle } from "react-icons/ai";
 
-export default function page() {
-  const [data, setData] = useState([]);
-  const [user, setUser] = useState([]);
+interface TrainingFormData {
+  id: string
+  idform: string;
+  nameform: string;
+  datesubmiss: string;
+  requester_id: string;
+  requester_name: string;
+  requester_section: string;
+  requester_department: string;
+  requester_position: string;
+  latestupdate: string;
+  active: boolean;
+  trainingstatus: string;
+  history: Array<{
+    name: string;
+    action: string;
+    datetime: string;
+  }>;
+  stakeholders: {
+    member: {
+      [key: string]: {
+        id: string;
+        employeeid: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        acknowledged: boolean;
+      };
+    };
+    isfullyacknowledged: boolean;
+  };
+  approver: {
+    member: {
+      [key: string]: {
+        id: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        approved: string;
+        opinion: string;
+      };
+    };
+    isfullyapproved: string;
+    approvalorder: {
+      $numberLong: string;
+    };
+  };
+  information: {
+    course: string;
+    location: string;
+    datestart: string;
+    dateend: string;
+    objective: string;
+  };
+  budget: {
+    received: number;
+    remaining: number;
+    registration: number;
+    room: number;
+    transportation: number;
+    allowance: number;
+    other: number;
+    total: number;
+  };
+}
+
+const Page = () =>  {
+  const [data, setData] = useState<TrainingFormData[]>([]);
+  const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
@@ -50,7 +119,7 @@ export default function page() {
     }
 
     setLoading(false);
-  }, [id]);
+  }, [id,session?.user?.email]);
 
   const UpdateStatus = async (sid: string, formid: string, name:string, course:string) => {
     try {
@@ -127,7 +196,7 @@ export default function page() {
 
   return (
     <div className="w-full p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
-      {data.map((item: any) => (
+      {data.map((item) => (
         <div
           key={item.id}
           className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
@@ -186,7 +255,7 @@ export default function page() {
                 {item.information.course}
               </label>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1  lg:grid-cols-2 gap-2">
               <div>
                 <label className="block mb-1">วันที่เริ่มอบรม</label>
                 <label className="text-left font-medium text-black dark:text-white">
@@ -325,8 +394,8 @@ export default function page() {
                 <tbody>
                   {Object.values(item.approver.member)
                     .sort()
-                    .map((approver: any, index: number) => (
-                      <tr className="pl-4 w-8" key={approver.index}>
+                    .map((approver, index: number) => (
+                      <tr className="pl-4 w-8" key={index}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
                             {index + 1}
@@ -349,12 +418,20 @@ export default function page() {
                         </td>
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
-                            {approver.approved === "approved" ? (
-                              <HiBadgeCheck />
+                          {approver.approved === "approved" ? (
+                              <HiBadgeCheck
+                                className="fill-success"
+                                size={24}
+                              />
                             ) : approver.approved === "pending" ? (
-                              <HiExclamationCircle />
+                              <BiTime className="fill-warning" size={24} />
+                            ) : approver.approved === "unapproved" ? (
+                              <AiFillCloseCircle
+                                className="fill-danger"
+                                size={24}
+                              />
                             ) : (
-                              <>???</>
+                              <BiError className="fill-danger" size={24} />
                             )}
                           </h5>
                         </td>
@@ -390,7 +467,7 @@ export default function page() {
                 </tr>
               </thead>
               <tbody>
-                {Object.values(item.stakeholders.member).map((stakeholder: any) => (
+                {Object.values(item.stakeholders.member).map((stakeholder) => (
                   <tr className="pl-4 w-8" key={stakeholder.id}>
                     <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="font-medium text-black dark:text-white">
@@ -425,37 +502,11 @@ export default function page() {
                             ยืนยัน
                           </button>
                         ) : stakeholder.acknowledged === true ? (
-                          <svg
-                            className="w-6 h-6 text-meta-3 dark:text-white"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <HiBadgeCheck className="fill-success" size={24} />
+                        ) : stakeholder.acknowledged === false ? (
+                          <BiTime className="fill-warning" size={24} />
                         ) : (
-                          <svg
-                            className="w-6 h-6 text-meta-8 dark:text-white"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <BiError className="fill-danger" size={24} />
                         )}
                       </h5>
                     </td>
@@ -469,3 +520,4 @@ export default function page() {
     </div>
   );
 }
+export default Page;

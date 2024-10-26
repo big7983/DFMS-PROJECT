@@ -4,13 +4,46 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { HiBadgeCheck } from "react-icons/hi";
-import { HiExclamationCircle } from "react-icons/hi";
 import Loader from "@/components/Loader";
+import { BiError, BiTime } from "react-icons/bi";
 
-type Props = {};
 
-export default function page({}: Props) {
-  const [data, setData] = useState([]);
+interface TrainingSurveyData {
+  id: string;
+  reporter: { name: string; position: string };
+  department: string;
+  section: string;
+  information: {
+    course: string;
+    datestart: string;
+    dateend: string;
+    location: string;
+    objective: string;
+  };
+  survey: {
+    keycontent: string;
+    remaining: string;
+    matchesobjectives: string;
+    course_result: string;
+    course_reason: string;
+    lecturer_result: string;
+    lecturer_reason: string;
+    document_result: string;
+    document_reason: string;
+    service_result: string;
+    service_reason: string;
+    selectedOptions: string;
+  };
+  evaluator: {
+    name: string;
+    level: string;
+    position: string;
+  };
+  isevaluated: boolean;
+}
+
+const Page = () => {
+  const [data, setData] = useState<TrainingSurveyData[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +77,7 @@ export default function page({}: Props) {
 
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
-      {data.map((item: any) => (
+      {data.map((item) => (
         <div
           key={item.id}
           className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
@@ -91,7 +124,7 @@ export default function page({}: Props) {
                 <label className="block mb-1">ตำแหน่ง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {item.reporter.position} 
+                    {item.reporter.position}
                   </label>
                 </div>
               </div>
@@ -280,7 +313,6 @@ export default function page({}: Props) {
                   </tr>
                 </thead>
                 <tbody>
-
                   <tr className="pl-4 w-8">
                     <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="font-medium text-black dark:text-white">
@@ -304,10 +336,12 @@ export default function page({}: Props) {
                     </td>
                     <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                       <h5 className="flex justify-center font-medium text-black dark:text-white">
-                        {item.isevaluated === false ? (
-                          <HiExclamationCircle />
+                        {item.isevaluated === true ? (
+                          <HiBadgeCheck className="fill-success" size={24} />
+                        ) : item.isevaluated === false ? (
+                          <BiTime className="fill-warning" size={24} />
                         ) : (
-                          <HiBadgeCheck />
+                          <BiError className="fill-danger" size={24} />
                         )}
                       </h5>
                     </td>
@@ -321,3 +355,5 @@ export default function page({}: Props) {
     </div>
   );
 }
+
+export default Page;

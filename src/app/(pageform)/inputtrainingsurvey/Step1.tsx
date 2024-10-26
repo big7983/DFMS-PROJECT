@@ -1,15 +1,17 @@
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Button } from "@mui/material";
 
+interface BaseFormData {
+  keycontent: string;
+  remaining: string;
+  matchesobjectives: string;
+}
+
 interface Step1Props {
-  formData: {
-    keycontent: string;
-    remaining: string;
-    matchesobjectives: string;
-  };
+  formData: BaseFormData;
   handlePrevStep: () => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void; // อัปเดตประเภทที่นี่
   handleNextStep: () => void;
   canProceed: boolean;
 }

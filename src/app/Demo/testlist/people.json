@@ -1,8 +1,0 @@
-[
-    { "id": 1, "name": "John Doe", "department": "Engineering" },
-    { "id": 2, "name": "Jane Smith", "department": "Marketing" },
-    { "id": 3, "name": "Bob Johnson", "department": "Human Resources" },
-    { "id": 4, "name": "Alice Lee", "department": "Engineering" },
-    { "id": 5, "name": "Charlie Brown", "department": "Finance" }
-  ]
-  

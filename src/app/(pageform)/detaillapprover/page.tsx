@@ -4,13 +4,80 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { HiBadgeCheck } from "react-icons/hi";
-import { HiExclamationCircle } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 import Loader from "@/components/Loader";
+import { BiError, BiTime } from "react-icons/bi";
+import { AiFillCloseCircle } from "react-icons/ai";
 
-export default function page() {
-  const [data, setData] = useState([]);
+interface TrainingFormData {
+  id: string
+  idform: string;
+  nameform: string;
+  datesubmiss: string;
+  requester_id: string;
+  requester_name: string;
+  requester_section: string;
+  requester_department: string;
+  requester_position: string;
+  latestupdate: string;
+  active: boolean;
+  trainingstatus: string;
+  history: Array<{
+    name: string;
+    action: string;
+    datetime: string;
+  }>;
+  stakeholders: {
+    member: {
+      [key: string]: {
+        id: string;
+        employeeid: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        acknowledged: boolean;
+      };
+    };
+    isfullyacknowledged: boolean;
+  };
+  approver: {
+    member: {
+      [key: string]: {
+        id: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        approved: string;
+        opinion: string;
+      };
+    };
+    isfullyapproved: string;
+    approvalorder: number
+  };
+  information: {
+    course: string;
+    location: string;
+    datestart: string;
+    dateend: string;
+    objective: string;
+  };
+  budget: {
+    received: number;
+    remaining: number;
+    registration: number;
+    room: number;
+    transportation: number;
+    allowance: number;
+    other: number;
+    total: number;
+  };
+}
+
+export default function Page() {
+  const [data, setData] = useState<TrainingFormData[]>([]);
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -138,7 +205,7 @@ export default function page() {
 
   return (
     <div className="w-full w-[100%] p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
-      {data.map((item: any) => (
+      {data.map((item) => (
         <div
           key={item.id}
           className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
@@ -197,7 +264,7 @@ export default function page() {
                 {item.information.course}
               </label>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1  lg:grid-cols-2 gap-2">
               <div>
                 <label className="block mb-1">วันที่เริ่มอบรม</label>
                 <label className="text-left font-medium text-black dark:text-white">
@@ -332,7 +399,7 @@ export default function page() {
                 </thead>
                 <tbody>
                   {Object.values(item.stakeholders.member).map(
-                    (stakeholder: any) => (
+                    (stakeholder) => (
                       <tr className="pl-4 w-8" key={stakeholder.id}>
                         <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="font-medium text-black dark:text-white">
@@ -389,7 +456,7 @@ export default function page() {
                 </thead>
                 <tbody>
                   {Object.values(item.approver.member)
-                  .map((approver: any, index: number) => (
+                  .map((approver, index: number) => (
                     <tr className="pl-4 w-8" key={index}>
                       <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="font-medium text-black dark:text-white">
@@ -441,11 +508,19 @@ export default function page() {
                               </button>
                             </div>
                           ) : approver.approved === "approved" ? (
-                            <HiBadgeCheck />
+                            <HiBadgeCheck
+                              className="fill-success"
+                              size={24}
+                            />
                           ) : approver.approved === "pending" ? (
-                            <HiExclamationCircle />
+                            <BiTime className="fill-warning" size={24} />
+                          ) : approver.approved === "unapproved" ? (
+                            <AiFillCloseCircle
+                              className="fill-danger"
+                              size={24}
+                            />
                           ) : (
-                            <>???</>
+                            <BiError className="fill-danger" size={24} />
                           )}
                         </div>
                       </td>

@@ -4,10 +4,78 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-export default function ApproverStakeholdersPage() {
-  const [formIds, setFormIds] = useState([]);
+interface TrainingFormData {
+  id: string
+  idform: string;
+  nameform: string;
+  datesubmiss: string;
+  requester_id: string;
+  requester_name: string;
+  requester_section: string;
+  requester_department: string;
+  requester_position: string;
+  latestupdate: string;
+  active: boolean;
+  trainingstatus: string;
+  history: Array<{
+    name: string;
+    action: string;
+    datetime: string;
+  }>;
+  stakeholders: {
+    member: {
+      [key: string]: {
+        id: string;
+        employeeid: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        acknowledged: boolean;
+      };
+    };
+    isfullyacknowledged: boolean;
+  };
+  approver: {
+    member: {
+      [key: string]: {
+        id: string;
+        name: string;
+        level: string;
+        position: string;
+        email: string;
+        approved: string;
+        opinion: string;
+      };
+    };
+    isfullyapproved: string;
+    approvalorder: {
+      $numberLong: string;
+    };
+  };
+  information: {
+    course: string;
+    location: string;
+    datestart: string;
+    dateend: string;
+    objective: string;
+  };
+  budget: {
+    received: number;
+    remaining: number;
+    registration: number;
+    room: number;
+    transportation: number;
+    allowance: number;
+    other: number;
+    total: number;
+  };
+}
+
+export default function Approverstakeholderspage() {
+  const [formIds, setFormIds] = useState<TrainingFormData[]>([]);
   const [selectedFormId, setSelectedFormId] = useState(null);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<TrainingFormData[]>([]);
 
   useEffect(() => {
     const fetchFormIds = async () => {
@@ -21,13 +89,6 @@ export default function ApproverStakeholdersPage() {
     fetchFormIds();
   }, []);
 
-  // Fetch stakeholders and approvers when a form ID is selected
-  useEffect(() => {
-    if (selectedFormId) {
-      fetchData();
-    }
-  }, [selectedFormId]);
-
   const fetchData = async () => {
     try {
       const response = await axios.get(
@@ -40,7 +101,7 @@ export default function ApproverStakeholdersPage() {
     }
   };
 
-  const updateStakeholderStatus = async (sid: any,name:any,course:any) => {
+  const updateStakeholderStatus = async (sid: string,name:string,course:string) => {
     Swal.fire({
       title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
       html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
@@ -154,7 +215,7 @@ export default function ApproverStakeholdersPage() {
 
       {selectedFormId && (
         <div className="space-y-8">
-          {data.map((item: any) => (
+          {data.map((item) => (
             <div key={item.id}>
               <div>
                 <h2 className="text-xl font-semibold mb-2">Stakeholders</h2>
@@ -168,7 +229,7 @@ export default function ApproverStakeholdersPage() {
                   </thead>
                   <tbody>
                     {Object.values(item.stakeholders.member).map(
-                      (stakeholder: any) => (
+                      (stakeholder) => (
                         <tr key={stakeholder.id}>
                           <td className="py-2 px-4 border">
                             {stakeholder.name}
@@ -207,7 +268,7 @@ export default function ApproverStakeholdersPage() {
                   </thead>
                   <tbody>
                     {Object.values(item.approver.member)
-                    .map((approver: any) => (
+                    .map((approver) => (
                       <tr key={approver.id}>
                         <td className="py-2 px-4 border">{approver.name}</td>
                         <td className="py-2 px-4 border">

@@ -1,54 +1,48 @@
-import Loader from "@/components/Loader";
 import { Button } from "@mui/material";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { IoSaveOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
 
+interface FormData {
+  keycontent: string;
+  remaining: string;
+  matchesobjectives: string;
+  course_result: string;
+  course_reason: string;
+  lecturer_result: string;
+  lecturer_reason: string;
+  document_result: string;
+  document_reason: string;
+  service_result: string;
+  service_reason: string;
+  selectedOptions: never[];
+  // Add other necessary fields if needed
+}
+
 interface Step4Props {
-  formData: {
-    course: string;
-    location: string;
-    datestart: string;
-    dateend: string;
-    objective: string;
-    keycontent: string;
-    remaining: string;
-    matchesobjectives: string;
-    course_result: string;
-    course_reason: string;
-    lecturer_result: string;
-    lecturer_reason: string;
-    document_result: string;
-    document_reason: string;
-    service_result: string;
-    service_reason: string;
-    selectedOptions: string[];
-  };
-  selectedUsers: { id: number; name: string; department: string }[];
+  formData: FormData
   handlePrevStep: () => void;
 }
 
 const Step4: React.FC<Step4Props> = ({
   formData,
-  selectedUsers,
   handlePrevStep,
 }) => {
   const router = useRouter();
 
   const date = new Date();
   const locale = "en-GB";
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  const formattedDatetime = formatter.format(date);
+  // const options: Intl.DateTimeFormatOptions = {
+  //   year: "numeric",
+  //   month: "short",
+  //   day: "numeric",
+  //   hour: "2-digit",
+  //   minute: "2-digit",
+  // };
+  // const formatter = new Intl.DateTimeFormat(locale, options);
+  // const formattedDatetime = formatter.format(date);
 
   const options2: Intl.DateTimeFormatOptions = {
     year: "numeric",
@@ -59,30 +53,10 @@ const Step4: React.FC<Step4Props> = ({
   const formattedDate = formatter2.format(date);
 
   console.log(formattedDate);
-  const { data: session } = useSession();
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchdata(session.user.email);
-    }
-  }, [session?.user?.email]);
-
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
   const id = searchParams.get("search");
-
-  const fetchdata = async (email: String) => {
-    try {
-      // const res = await axios.get(`/api/v3/trainingsurvey/${id}`); // แก้ URL ตามที่ต้องการ
-      // setData(res.data); // สมมติว่า res.data เป็นข้อมูลที่คุณได้รับ
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const showAlert = () => {
     Swal.fire({

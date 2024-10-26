@@ -1,14 +1,78 @@
 "use client";
 
+interface TrainingSurvey {
+  id:  string;
+  idform: string;
+  nameform: string;
+  trainingform_id: string;
+  datesubmiss: string;
+  evaluationstatus: string;
+  latestupdate: string;
+  reporter_id: string;
+  evaluator_id: string;
+  section: string;
+  department: string;
+  isreported: boolean;
+  isevaluated: boolean;
+  active: boolean;
+  survey: {
+    keycontent: string;
+    remaining: string;
+    matchesobjectives: string;
+    course_result: string;
+    course_reason: string;
+    lecturer_result: string;
+    lecturer_reason: string;
+    document_result: string;
+    document_reason: string;
+    service_result: string;
+    service_reason: string;
+    selectedOptions: string;
+  };
+  evaluatorfeedback: FormData
+  information: {
+    course: string;
+    datestart: string;
+    dateend: string;
+    location: string;
+    objective: string;
+  };
+  reporter: {
+    name: string;
+    level: string;
+    position: string;
+    email: string;
+
+  };
+  evaluator: {
+    name: string;
+    level: string;
+    position: string;
+    email: string;
+
+  };
+}
+
+interface FormData {
+  objective: string;
+  costEffectiveness: string;
+  workBenefit: string;
+  objectiveAlignment: string;
+  futureRecommendation: string;
+  reasonfutureRecommendation: string;
+  additionalcomments: string;
+}
+
 type Props = {
-  data: any;
+  data: TrainingSurvey[];
   handleNext: () => void;
 };
 
 export default function FirstComponent({ data, handleNext }: Props) {
+
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
-      {data.map((item: any) => (
+      {data.map((item) => (
         <div
           key={item.id}
           className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
@@ -279,18 +343,9 @@ export default function FirstComponent({ data, handleNext }: Props) {
             </div>
           </div>
         </div>
-      ))}
+        ))}
     </div>
   );
 }
 
-{
-  /* <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                          <button
-                            className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                            onClick={handleNext}
-                          >
-                            ประเมิน
-                          </button>
-                        </td> */
-}
+

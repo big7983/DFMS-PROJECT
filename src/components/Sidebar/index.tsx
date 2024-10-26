@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import Link from "next/link";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
@@ -53,21 +52,21 @@ const menuGroups = [
       },
       {
         icon: (
-          <SiGoogleforms />
+          <SiGoogleforms size={18} />
         ),
         label: "รายการขอนุมัติเข้าอบรม",
         route: "/trainingform",
       },
       {
         icon: (
-          <MdSupervisorAccount />
+          <MdSupervisorAccount size={20} />
         ),
         label: "รับทราบการมีส่วนร่วม",
         route: "/stakeholdersform",
       },
       {
         icon: (
-          <MdAppRegistration />
+          <MdAppRegistration size={20} />
 
         ),
         label: "รายการขออนุมัติ",
@@ -106,7 +105,7 @@ const menuGroups = [
       },
       {
         icon: (
-          <MdAppRegistration />
+          <MdAppRegistration size={20} />
         ),
         label: "รายการขอประเมิน",
         route: "/evaluation",

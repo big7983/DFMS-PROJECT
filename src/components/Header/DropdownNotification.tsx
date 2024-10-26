@@ -40,7 +40,7 @@ const DropdownNotification = () => {
     if (session?.user?.email) {
       fetchData(session?.user?.email);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">

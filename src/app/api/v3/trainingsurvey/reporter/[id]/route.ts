@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-async function sendEvaluatorEmail(approverEmail:any, recieverName: string, course:any) {
+async function sendEvaluatorEmail(approverEmail:string, recieverName: string, course:any) {
 
   try {
     const message = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการประเมินจากคุณ.`;

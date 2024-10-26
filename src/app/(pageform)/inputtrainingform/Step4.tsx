@@ -36,21 +36,6 @@ interface Step4Props {
   handlePrevStep: () => void;
 }
 
-interface User {
-  id: number;
-  name: string;
-  department: string;
-  employeeid: string;
-  level: string;
-  position: string;
-  status: string;
-  email: string;
-}
-
-interface Stakeholders {
-  [key: number]: User;
-}
-
 const Step4: React.FC<Step4Props> = ({
   formData,
   selectedUsers,
@@ -79,23 +64,19 @@ const Step4: React.FC<Step4Props> = ({
   }, [session?.user?.email]);
 
   const [user_id, setUserid] = useState("");
-  const [employeeid, setEmployeeid] = useState("");
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
-  const [rank, setRank] = useState("");
   const [section, setsection] = useState("");
   const [department, setdepartment] = useState("");
   const [approvers, setApprovers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchdata = async (email: String) => {
+  const fetchdata = async (email: string) => {
     try {
       const res = await axios.get(`/api/v2/user/select/${email}`);
       setUserid(res.data.id);
-      setEmployeeid(res.data.employeeid);
       setName(res.data.name);
       setPosition(res.data.position);
-      setRank(res.data.level);
       setsection(res.data.section);
       setdepartment(res.data.department);
       const response = await axios.get(
@@ -124,7 +105,7 @@ const Step4: React.FC<Step4Props> = ({
     try {
       // จัดการข้อมูล approvers และ stakeholders
       const approversObject = approvers
-        ? Object.entries(approvers).reduce((acc: any, [_, approver], index) => {
+        ? Object.entries(approvers).reduce((acc: any, [, approver], index) => {
             acc[index] = {
               id: approver.userid,
               name: approver.name,
@@ -132,8 +113,8 @@ const Step4: React.FC<Step4Props> = ({
               position: approver.position,
               email: approver.email,
               approved: "pending",
-              opinion: " ",
-            };
+              opinion: "_"
+            }; 
             return acc;
           }, {})
         : {};
@@ -478,7 +459,7 @@ const Step4: React.FC<Step4Props> = ({
               <tbody>
                 {approvers &&
                   Object.entries(approvers).map(([key, approver], index) => (
-                    <tr className="pl-4 w-8" key={index}>
+                    <tr className="pl-4 w-8" key={key}>
                       <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <h5 className="font-medium text-black dark:text-white">
                           {index + 1}
