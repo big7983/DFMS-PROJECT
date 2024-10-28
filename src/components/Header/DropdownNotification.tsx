@@ -20,7 +20,7 @@ const DropdownNotification = () => {
   const fetchData = async (id: string) => {
     try {
       const historyResponse = await axios.get(`/api/v3/history/${id}`);
-      setNotifying(historyResponse.data.isseen);
+      setNotifying(historyResponse.data.notseen);
       setRows(historyResponse.data.history);
     } catch (error) {
       console.error("Error fetching data:", error);
