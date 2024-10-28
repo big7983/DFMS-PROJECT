@@ -31,12 +31,10 @@ const Evaluation = () => {
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
 
-  const fetchData = async (email: string) => {
+  const fetchData = async (id: string) => {
     try {
-      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
-      console.log("resid = ", resid.data.id);
       const res = await axios.get(
-        `/api/v3/fontend/evaluation/6707541eeb1d6f37899f42ac`
+        `/api/v3/fontend/evaluation/${id}`
       );
       setRows(res.data);
       setLoading(false);
@@ -47,10 +45,10 @@ const Evaluation = () => {
   };
 
   useEffect(() => {
-    if (session?.user?.email) {
-      fetchData(session?.user?.email);
+    if (session?.user?.id) {
+      fetchData(session?.user?.id);
     }
-  }, [session?.user?.email]);
+  }, [session?.user?.id]);
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course
@@ -73,7 +71,7 @@ const Evaluation = () => {
   }
 
   return (
-    <div className="bg-white p-10 rounded-[20px]">
+    <div className="bg-white sm:p-10 py-10 px-4 rounded-[20px]">
       <div className="w-full">
         <p className="text-black font-bold mb-6 text-xl">รายการขอประเมิน</p>
         {/* ช่องค้นหา */}
@@ -200,8 +198,8 @@ const Evaluation = () => {
                       search: params.row.idform,
                     },
                   }}
-                  className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
-                >
+                  className="items-center justify-center rounded-full bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-70 "
+                  >
                   รายละเอียด
                 </Link>
               ),

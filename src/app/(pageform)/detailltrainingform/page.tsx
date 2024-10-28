@@ -13,10 +13,11 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
 interface TrainingFormData {
-  id: string
+  id: string;
   idform: string;
   nameform: string;
   datesubmiss: string;
+  issendrepoeted: boolean;
   requester_id: string;
   requester_name: string;
   requester_section: string;
@@ -80,7 +81,6 @@ interface TrainingFormData {
   };
 }
 
-
 const Page = () => {
   const [data, setData] = useState<TrainingFormData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +138,7 @@ const Page = () => {
 
     try {
       // ฟังก์ชัน trainingsurveyData เพื่อทำการ POST ข้อมูล
-      const trainingsurveyData = async (data:TrainingFormData[]) => {
+      const trainingsurveyData = async (data: TrainingFormData[]) => {
         // ใช้ Promise.all เพื่อรอให้ axios.post เสร็จในแต่ละการเรียก
         await Promise.all(
           Object.values(data).map(async (item) => {
@@ -160,10 +160,10 @@ const Page = () => {
 
                 await axios.post("/api/v3/sendemail", {
                   recipient: stakeholder.email, // อีเมลผู้ใช้
-                  subject: `แจ้งเตือน: มีแบบรายงาน ${item.information.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
+                  subject: `แจ้งเตือน: มีแบบรายงาน ${item.information.course} ให้คุณรายงานผลการอบรม`, // หัวข้อ
                   recieverName: stakeholder.name,
                   message: `
-                  คุณได้แบบรายงาน ${item.information.course} `, // เนื้อหา
+                  คุณได้แบบรายงาน ${item.information.course} ให้คุณรายงานผลการอบรม`, // เนื้อหา
                 });
 
                 // รอ axios.post ในแต่ละรายการ
@@ -483,58 +483,65 @@ const Page = () => {
                 </tr>
               </thead>
               <tbody>
-                {Object.values(item.stakeholders.member).map(
-                  (stakeholder) => (
-                    <tr className="pl-4 w-8" key={stakeholder.id}>
-                      <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {stakeholder.employeeid}
-                        </h5>
-                      </td>
-                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {stakeholder.name}
-                        </h5>
-                      </td>
-                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {stakeholder.level}
-                        </h5>
-                      </td>
-                      <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {stakeholder.position}
-                        </h5>
-                      </td>
+                {Object.values(item.stakeholders.member).map((stakeholder) => (
+                  <tr className="pl-4 w-8" key={stakeholder.id}>
+                    <td className="text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {stakeholder.employeeid}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {stakeholder.name}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {stakeholder.level}
+                      </h5>
+                    </td>
+                    <td className="text-left border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="font-medium text-black dark:text-white">
+                        {stakeholder.position}
+                      </h5>
+                    </td>
 
-                      <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                        <h5 className="flex justify-center font-medium text-black dark:text-white">
-                          {stakeholder.acknowledged === true ? (
-                            <HiBadgeCheck className="fill-success" size={24} />
-                          ) : stakeholder.acknowledged === false ? (
-                            <BiTime className="fill-warning" size={24} />
-                          ) : (
-                            <BiError className="fill-danger" size={24} />
-                          )}
-                        </h5>
-                      </td>
-                    </tr>
-                  )
-                )}
+                    <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
+                      <h5 className="flex justify-center font-medium text-black dark:text-white">
+                        {stakeholder.acknowledged === true ? (
+                          <HiBadgeCheck className="fill-success" size={24} />
+                        ) : stakeholder.acknowledged === false ? (
+                          <BiTime className="fill-warning" size={24} />
+                        ) : (
+                          <BiError className="fill-danger" size={24} />
+                        )}
+                      </h5>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
+          <div className=" flex justify-center my-4.5">
+            {item.approver.isfullyapproved === "fullyapproved"  && item.stakeholders.isfullyacknowledged && !(item.issendrepoeted) ? (
+              <button
+                className="bg-meta-3 text-white p-5 rounded-md hover:bg-opacity-30"
+                onClick={showAlert}
+              >
+                ส่งให้ผู้มีส่วนร่วมทำแบบประเมิน
+              </button>
+            ) : (
+              <></>
+            )}
+            {/* <button
+              className="bg-meta-3 text-white p-5 rounded-md"
+              onClick={showAlert}
+            >
+              ส่งให้ผู้มีส่วนร่วมทำแบบประเมิน
+            </button> */}
+          </div>
         </div>
       ))}
-
-      <div>
-        <button
-          className="bg-meta-3 text-white p-5 rounded-md"
-          onClick={showAlert}
-        >
-          ส่งให้ผู้มีส่วนร่วมทำแบบประเมิน
-        </button>
-      </div>
     </div>
   );
 };

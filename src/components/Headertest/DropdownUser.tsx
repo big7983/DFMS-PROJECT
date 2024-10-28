@@ -5,6 +5,7 @@ import ClickOutside from "@/components/ClickOutside";
 import axios from "axios";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 const DropdownUser = () => {
   const [name, setName] = useState("");
@@ -25,9 +26,6 @@ const DropdownUser = () => {
       fetchdata(session?.user?.email);
     }
 
-    if(!session){
-      router.push('/login');
-    }
   });
 
   const defaultImage = "/images/user/avatar-user.jpg";
@@ -37,6 +35,7 @@ const DropdownUser = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
+    Cookies.remove('userRole'); // เพิ่มการลบ cookie ที่เกี่ยวข้อง
     await signOut({ redirect: false }); // signOut โดยไม่เปลี่ยนหน้าอัตโนมัติ
     router.push("/login"); // เปลี่ยนเส้นทางไปที่หน้า login
   };

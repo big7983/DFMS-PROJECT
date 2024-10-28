@@ -3,14 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-import {
-  DataGrid,
-} from "@mui/x-data-grid";
-import {
-  TextField,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import { TextField, Select, MenuItem } from "@mui/material";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -42,11 +36,10 @@ export default function Stakeholdersform() {
 
   const { data: session } = useSession();
 
-  const fetchData = async (email: string) => {
+  const fetchData = async (id: string) => {
     try {
-      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
       const res = await axios.get(
-        `/api/v3/fontend/stakeholdersform/${resid.data.id}`
+        `/api/v3/fontend/stakeholdersform/${id}`
       );
       setRows(res.data);
       setLoading(false);
@@ -57,27 +50,15 @@ export default function Stakeholdersform() {
   };
 
   useEffect(() => {
-    if (session?.user?.email) {
-      fetchData(session?.user?.email);
+    if (session?.user?.id) {
+      fetchData(session?.user?.id);
     }
-  }, [session?.user?.email]);
-
-  // useEffect(() => {
-  //   const filtered = rows.filter((row) => {
-  //     const matchesSearch = row.name
-  //       .toLowerCase()
-  //       .includes(searchText.toLowerCase());
-  //     const matchesStatus = statusFilter
-  //       ? row.status.toLowerCase() === statusFilter.toLowerCase()
-  //       : true; // กรองตามสถานะ
-  //     return matchesSearch && matchesStatus; // เงื่อนไขการกรอง
-  //   });
-  //   setFilteredRows(filtered); // อัปเดตข้อมูลที่กรองแล้ว
-  // }, [searchText, statusFilter, rows]);
-
+  }, [session?.user?.id]);
   const filteredRows = rows.filter((row) => {
-    const matchesCourse = row.course.toLowerCase().includes(searchText.toLowerCase());
-    
+    const matchesCourse = row.course
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+
     const matchesStatus =
       statusFilter === "fullacknowledged"
         ? row.isfullyacknowledged === true // ตรวจสอบสถานะการรับทราบ
@@ -90,8 +71,8 @@ export default function Stakeholdersform() {
         : statusFilter
         ? row.isfullyapproved === statusFilter // ค้นหาสถานะการอนุมัติ
         : true; // คืนค่า true ถ้าไม่มีการกรอง
-  
-    return matchesCourse && matchesStatus; 
+
+    return matchesCourse && matchesStatus;
   });
 
   if (loading) {
@@ -99,7 +80,7 @@ export default function Stakeholdersform() {
   }
 
   return (
-    <div className="bg-white dark:bg-boxdark-2 p-10 rounded-[20px]">
+    <div className="bg-white dark:bg-boxdark-2 sm:p-10 py-10 px-4 rounded-[20px]">
       <div className="w-full">
         <p className="text-black dark:text-bodydark font-bold mb-6 text-xl">
           รับทราบการมีส่วนร่วม
@@ -184,7 +165,7 @@ export default function Stakeholdersform() {
                 <>
                   {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="w-4 h-4 bg-warning rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         ผู้มีส่วนร่วมรับทราบแล้ว (
                         {params.row.acknowledgedStakeholders}/
@@ -193,7 +174,7 @@ export default function Stakeholdersform() {
                     </div>
                   ) : params.row.isfullyapproved === "pending" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
+                      <div className="w-4 h-4 bg-warning rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         รอผู้อนุมัติ ({params.row.approvedApprovers}/
                         {params.row.totalApprovers})
@@ -201,21 +182,21 @@ export default function Stakeholdersform() {
                     </div>
                   ) : params.row.isfullyapproved === "fullyapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
+                      <div className="w-4 h-4 bg-success rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         อนุมัติแล้ว
                       </div>
                     </div>
                   ) : params.row.isfullyapproved === "unapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="w-4 h-4 bg-danger rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         ไม่ได้รับการอนุมัติ
                       </div>
                     </div>
                   ) : (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
+                      <div className="w-4 h-4 bg-danger rounded-full"></div>
                       <div className="font-normal font-['Inter']">
                         เกิดข้อผิดพลาด
                       </div>
@@ -235,7 +216,7 @@ export default function Stakeholdersform() {
                   {params.row.acknowledged === true ? (
                     <div className="w-full h-full justify-center items-center inline-flex ">
                       <svg
-                        className="w-6 h-6 text-meta-3 dark:text-white"
+                        className="w-6 h-6 text-success dark:text-white"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -253,7 +234,7 @@ export default function Stakeholdersform() {
                   ) : params.row.acknowledged === false ? (
                     <div className="w-full h-full justify-center items-center inline-flex ">
                       <svg
-                        className="w-6 h-6 text-meta-6 dark:text-white"
+                        className="w-6 h-6 text-warning dark:text-white"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -293,14 +274,6 @@ export default function Stakeholdersform() {
 
               renderCell: (params) => (
                 <>
-                  {/* <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(params.row.id)}
-                  >
-                    รายละเอียด
-                  </Button> */}
                   <Link
                     href={{
                       pathname: "/detaillststakeholders",
@@ -308,7 +281,7 @@ export default function Stakeholdersform() {
                         search: params.row.idform,
                       },
                     }}
-                    className="p-2 rounded-2xl bg-meta-6 text-center font-medium text-black hover:bg-meta-8 "
+                    className="items-center justify-center rounded-full bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-70 "
                   >
                     รายละเอียด
                   </Link>

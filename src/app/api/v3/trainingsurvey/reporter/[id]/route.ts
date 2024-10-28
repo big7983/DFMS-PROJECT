@@ -1,6 +1,7 @@
 import { sendEmail } from "@/utils/sendEmail";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
 import { PrismaClient } from "@prisma/client";
+import { history } from "@/utils/history";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,32 @@ async function sendEvaluatorEmail(approverEmail:string, recieverName: string, co
       approverEmail,
       "แจ้งเตือน : แบบประเมินการฝึกอบรมใหม่ต้องได้รับการประเมิน",
       messages
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
+}
+
+async function sendNotificationhistory(
+  userid: string,
+  formid: string,
+  fromname: string,
+  nameuser: string,
+  course: any
+) {
+  try {
+    const action = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการประเมินจากคุณ.`;
+
+    // Send verification email
+    await history(
+      userid,
+      formid,
+      fromname,
+      nameuser,
+      action
     );
   } catch (error) {
     console.error("Failed to send email : 500", error);
@@ -61,17 +88,24 @@ export async function PATCH(
           selectedOptions: survey.selectedOptions,
         },
         isrepoeted: true,
-        latestupdate: new Date().toLocaleString('th-TH', {
+        latestupdate: new Date().toLocaleString('en-GB', {
           day: 'numeric',
           month: 'short',
           year: 'numeric',       
           hour: '2-digit',
           minute: '2-digit',
-        }),
+        }), 
       },
     });
 
     await sendEvaluatorEmail(trainingSurvey.evaluator.email, trainingSurvey.evaluator.name, trainingSurvey.information?.course);
+    await sendNotificationhistory(
+      trainingSurvey.evaluator_id || "",
+      id,
+      "trainingsurvey",
+      trainingSurvey.reporter.name,
+      trainingSurvey.information?.course
+    );
 
     return new Response(JSON.stringify(updatedSurvey), { status: 200 });
   } catch (error) {

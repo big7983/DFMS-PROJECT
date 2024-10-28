@@ -3,7 +3,7 @@ import MultiStepForm from './MultiStepForm';
 
 const Inputtrainingform = () => {
   return (
-    <div className="w-full w-[100%] p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
+    <div className="w-full py-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
       <MultiStepForm />
     </div>
   );

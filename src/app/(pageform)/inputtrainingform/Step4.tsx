@@ -1,10 +1,10 @@
-import { Button } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { IoSaveOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import Loader from "@/components/Loader";
 
 interface Step4Props {
   formData: {
@@ -13,13 +13,13 @@ interface Step4Props {
     datestart: string;
     dateend: string;
     objective: string;
-    received: number;
-    remaining: number;
-    registration: number;
-    room: number;
-    transportation: number;
-    allowance: number;
-    other: number;
+    received?: number;
+    remaining?: number;
+    registration?: number;
+    room?: number;
+    transportation?: number;
+    allowance?: number;
+    other?: number;
     total: number;
   };
   selectedUsers: {
@@ -113,8 +113,8 @@ const Step4: React.FC<Step4Props> = ({
               position: approver.position,
               email: approver.email,
               approved: "pending",
-              opinion: "_"
-            }; 
+              opinion: "",
+            };
             return acc;
           }, {})
         : {};
@@ -128,15 +128,29 @@ const Step4: React.FC<Step4Props> = ({
             level: user.level,
             position: user.position,
             email: user.email,
-            acknowledged: false,
+            acknowledged: user.userid === user_id,
           };
           return acc;
         },
         {}
       );
 
+      let isfullyacknowledged; // ประกาศตัวแปรที่นี่เพื่อให้สามารถเข้าถึงได้จากทั้ง if และ else
+
+      if (Object.values(stakeholdersObject).length <= 1) {
+        const isUserAcknowledged = selectedUsers.reduce(
+          (acc: boolean, user) => {
+            return acc || user.userid === user_id; // ถ้า user.userid ตรงกับ user_id ให้ return true
+          },
+          false
+        );
+        isfullyacknowledged = isUserAcknowledged;
+      } else {
+        isfullyacknowledged = false; // ถ้ามีผู้มีส่วนได้ส่วนเสียมากกว่า 1 คน
+      }
+
       // ส่งข้อมูลไปยัง API
-      await axios.post("/api/v3/trainingform", {
+      const success = await axios.post("/api/v3/trainingform", {
         idform: "T001",
         nameform: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
         datesubmiss: formattedDate,
@@ -151,13 +165,13 @@ const Step4: React.FC<Step4Props> = ({
         },
         stakeholders: {
           member: stakeholdersObject,
-          isfullyacknowledged: false,
+          isfullyacknowledged: isfullyacknowledged,
         },
         information: {
           course: formData.course,
           location: formData.location,
-          datestart: formData.datestart,
-          dateend: formData.dateend,
+          datestart: inputformatDate(formData.datestart),
+          dateend: inputformatDate(formData.dateend),
           objective: formData.objective,
         },
         budget: {
@@ -172,15 +186,11 @@ const Step4: React.FC<Step4Props> = ({
         },
         trainingstatus: "wait_stakeholders", // ตั้งค่า default status
       });
-   
+
+      return success
     } catch (error) {
       console.error("Error creating training form:", error);
-      Swal.fire({
-        title: "เกิดข้อผิดพลาด!",
-        text: "ไม่สามารถบันทึกข้อมูลได้",
-        icon: "error",
-        confirmButtonText: "ตกลง",
-      });
+      return false
     }
   };
 
@@ -197,28 +207,41 @@ const Step4: React.FC<Step4Props> = ({
 
     try {
       // สร้าง array สำหรับการส่งอีเมล
-      const emailPromises = selectedUsers.map(async (user) => {
-        const response = await axios.post("/api/v3/sendemail", {
-          recipient: user.email, // อีเมลผู้ใช้
-          subject: `แจ้งเตือน: มีฟอร์มการฝึกอบรม ${formData.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
-          recieverName: user.name,
-          message: `
-          คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`, // เนื้อหา
+      // const emailPromises = selectedUsers.map(async (user) => {
+      //   const response = await axios.post("/api/v3/sendemail", {
+      //     recipient: user.email, // อีเมลผู้ใช้
+      //     subject: `แจ้งเตือน: มีฟอร์มการฝึกอบรม ${formData.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
+      //     recieverName: user.name,
+      //     message: `
+      //     คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`, // เนื้อหา
+      //   });
+      //   console.log(`Email sent to ${user.email}: ${response.data.message}`);
+      // });
+
+      const hisporyPromises = selectedUsers.map(async (user) => {
+        const response = await axios.patch("/api/v3/history", {
+          userid: user.userid,
+          formid: `newtrainingfrom`,
+          fromname: "trainingfrom",
+          nameuser: user.name,
+          action: `คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`,
+          requesterid: user_id,
         });
         console.log(`Email sent to ${user.email}: ${response.data.message}`);
       });
-
       // รอให้ส่งอีเมลทั้งหมดเสร็จสิ้น
-      await Promise.all(emailPromises);
+      //const emailSuccess await Promise.all(emailPromises);
+      const emailSuccess = true
+      const hisporySuccess = await Promise.all(hisporyPromises);
 
+      if(emailSuccess && hisporySuccess){
+        return true
+      }else{
+        return false
+      }
     } catch (error) {
       console.error("Error sending emails:", error);
-      Swal.fire({
-        title: "เกิดข้อผิดพลาด!",
-        text: "ไม่สามารถส่งอีเมลได้",
-        icon: "error",
-        confirmButtonText: "ตกลง",
-      });
+      return false
     }
   };
 
@@ -236,20 +259,36 @@ const Step4: React.FC<Step4Props> = ({
 
     if (result.isConfirmed) {
       try {
-        await handleSubmit(); // รอการทำงานของ handleSubmit สำเร็จ
-        await sendemail(); // รอการทำงานของ sendemail สำเร็จ
+        const submitSuccess = await handleSubmit(); // รอการทำงานของ handleSubmit สำเร็จ
+        const emailSuccess = await sendemail(); // รอการทำงานของ sendemail สำเร็จ
 
-        // แสดงการแจ้งเตือนสำเร็จ
-        Swal.fire({
-          title: "บันทึกสำเร็จ!",
-          icon: "success",
-          confirmButtonText: "กลับสู่หน้าหลัก",
-          confirmButtonColor: "#219653",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push("/trainingform");
-          }
-        });
+        if (submitSuccess && emailSuccess) {
+          // แสดงการแจ้งเตือนความสำเร็จ
+          Swal.fire({
+            title: "บันทึกสำเร็จ!",
+            icon: "success",
+            confirmButtonText: "กลับสู่หน้าหลัก",
+            confirmButtonColor: "#219653",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push("/trainingform");
+            }
+          });
+        } else {
+          // ถ้ามีปัญหาในการทำงานใด ๆ
+          Swal.fire({
+            title: "เกิดข้อผิดพลาด!",
+            text: "การบันทึกข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง",
+            icon: "error",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#DC3545",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push("/trainingform");
+            }
+          });
+        }
+        
       } catch (error) {
         // แสดงข้อผิดพลาดถ้ามีปัญหาในการทำงาน
         Swal.fire({
@@ -258,24 +297,43 @@ const Step4: React.FC<Step4Props> = ({
           icon: "error",
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#DC3545",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/trainingform");
+          }
         });
         console.log(error);
-      }
+      } 
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const inputformatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", options); // 'en-GB' จะใช้รูปแบบวันที่เป็นวัน-เดือน-ปี
+  };
+
+  if (loading)
+    return (
+      <div className="mt-7 py-7">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="mt-7 py-7">
-      <div className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
+      <div className="flex flex-col gap-9 border py-6.5 px-7 sm:px-[50px] border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
         <div className="border-b border-stroke  dark:border-strokedark">
           <h2 className="font-semibold text-ml text-black dark:text-white mb-4">
             รายละเอียดทั้งหมด
           </h2>
         </div>
         <div className="border-b border-stroke  dark:border-strokedark ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 ">
             <div className="w-35">
               <label className=" block mb-1">วันยืนคำร้อง</label>
               <div className="w-full">
@@ -287,7 +345,7 @@ const Step4: React.FC<Step4Props> = ({
                 </label>
               </div>
             </div>
-            <div className="w-35">
+            <div className="w-full">
               <label className=" block mb-1">ผู้ยื่นคำร้อง</label>
               <div className="w-full">
                 <label className="text-black dark:text-white font-medium">
@@ -295,7 +353,7 @@ const Step4: React.FC<Step4Props> = ({
                 </label>
               </div>
             </div>
-            <div className="w-35">
+            <div className="w-full">
               <label className=" block mb-1">สังกัด/ฝ่าย</label>
               <div className="w-full">
                 <label className="text-black dark:text-white font-medium">
@@ -303,7 +361,7 @@ const Step4: React.FC<Step4Props> = ({
                 </label>
               </div>
             </div>
-            <div className="w-35">
+            <div className="w-full">
               <label className=" block mb-1">ตำแหน่ง</label>
               <div className="w-full">
                 <label className="text-black dark:text-white font-medium">
@@ -324,17 +382,17 @@ const Step4: React.FC<Step4Props> = ({
               {formData.course}
             </label>
           </div>
-          <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ">
+          <div className=" grid grid-cols-1  lg:grid-cols-2 gap-2 ">
             <div>
               <label className=" block mb-1">วันที่เริ่มอบรม</label>
               <label className="text-left font-medium text-black dark:text-white">
-                {formData.datestart}
+                {inputformatDate(formData.datestart)}
               </label>
             </div>
             <div className="text-left ">
               <label className=" block mb-1">วันสุดท้ายของการอบรม</label>
               <label className="font-medium text-black dark:text-white">
-                {formData.dateend}
+                {inputformatDate(formData.dateend)}
               </label>
             </div>
           </div>
@@ -538,10 +596,9 @@ const Step4: React.FC<Step4Props> = ({
         </div>
       </div>
       <div className="flex justify-between mt-9">
-        <Button
+        <button
           onClick={handlePrevStep}
-          variant="contained"
-          className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-50 lg:px-8 xl:px-10"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -558,17 +615,16 @@ const Step4: React.FC<Step4Props> = ({
             />
           </svg>
           Previous
-        </Button>
-        <Button
+        </button>
+        <button
           onClick={showAlert}
-          variant="contained"
-          className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center rounded-full bg-meta-3 px-7 py-4 text-center font-medium text-white hover:bg-opacity-50 lg:px-8 xl:px-10"
         >
           <p className="text-xl">
             <IoSaveOutline />
           </p>{" "}
           <p className="ml-2 text-lg">บันทึก</p>
-        </Button>
+        </button>
       </div>
     </div>
   );

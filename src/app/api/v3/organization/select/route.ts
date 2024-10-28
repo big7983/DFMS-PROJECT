@@ -1,39 +1,39 @@
 import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request,) {
+export async function GET(req: NextRequest) {
   try {
-    // ดึง query parameter จาก URL
-    const { searchParams } = new URL(req.url);
-    const name = searchParams.get('name');
+    // Use nextUrl to get search parameters without triggering dynamic behavior
+    const name = req.nextUrl.searchParams.get('name');
 
     if (!name) {
-      return new Response(JSON.stringify({ message: 'Name parameter is required' }), { status: 400 });
+      return NextResponse.json({ message: 'Name parameter is required' }, { status: 400 });
     }
 
-    // ค้นหา Organization ที่ตรงกับชื่อที่รับมา
+    // Find the organization by name
     const organization = await prisma.organization.findFirst({
-      where: { name: name },
-      select: { member: true }, // ดึงเฉพาะฟิลด์ member
+      where: { name },
+      select: { member: true }, // Select only the member field
     });
 
     if (!organization || !organization.member) {
-      return new Response(JSON.stringify({ message: 'Organization or members not found' }), { status: 404 });
+      return NextResponse.json({ message: 'Organization or members not found' }, { status: 404 });
     }
 
-    // แปลง object ของสมาชิกเป็น array
+    // Convert the member object to an array and add an id field
     const membersArray = Object.values(organization.member).map((member, index) => ({
-      id: index + 1, // เพิ่ม index เป็น id
-      ...member, // กระจายข้อมูลของสมาชิก
+      id: index + 1, // Add an id based on index
+      ...member,
     }));
 
-    // ส่งข้อมูล members กลับไป
-    return new Response(JSON.stringify(membersArray), { status: 200 });
+    // Return the members array as JSON
+    return NextResponse.json(membersArray, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching organization members:', error);
-    return new Response(JSON.stringify({ message: 'Internal server error' }), { status: 500 });
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

@@ -1,4 +1,5 @@
 import { sendEmail } from "@/utils/sendEmail";
+import { history } from "@/utils/history";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
 import { PrismaClient } from "@prisma/client";
 
@@ -26,6 +27,32 @@ async function sendNotificationEmail(
   }
 }
 
+async function sendNotificationhistory(
+  userid: string,
+  formid: string,
+  fromname: string,
+  nameuser: string,
+  course: any
+) {
+  try {
+    const action = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`;
+
+    // Send verification email
+    await history(
+      userid,
+      formid,
+      fromname,
+      nameuser,
+      action
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
+}
+
 export async function PATCH(req: Request) {
   const date = new Date();
   const locale = "en-GB";
@@ -44,6 +71,7 @@ export async function PATCH(req: Request) {
     const trainingForm = await prisma.training_Form.findFirst({
       where: { id: id },
       select: {
+        requester_id: true,
         approver: true,
         information: true,
       },
@@ -97,7 +125,12 @@ export async function PATCH(req: Request) {
       },
     });
 
-    if (statusapproved === "approved") {
+    if (statusapproved === "approved" && !(Object.values(updatedMember).every(
+      (app: { approved: string }) => app.approved === "approved"
+    ))) {
+      const ApproverID = (trainingForm.approver as any)?.member[
+        approver.approvalorder
+      ].id;
       const nextApprover = (trainingForm.approver as any)?.member[
         approver.approvalorder
       ];
@@ -107,6 +140,14 @@ export async function PATCH(req: Request) {
       if (nextApprover && nextApprover.email) {
         await sendNotificationEmail(
           nextApprover.email,
+          recieverName.name,
+          trainingForm.information?.course
+        );
+      
+        await sendNotificationhistory(
+          ApproverID || "",
+          id,
+          "trainingfrom",
           recieverName.name,
           trainingForm.information?.course
         );

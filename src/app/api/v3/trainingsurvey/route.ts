@@ -2,18 +2,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const date = new Date();
-const locale = "en-GB";
-const options: Intl.DateTimeFormatOptions = {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-};
-const formatter = new Intl.DateTimeFormat(locale, options);
-const formattedDate = formatter.format(date);
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -23,7 +11,7 @@ export async function POST(req: Request) {
       reporter_name,
       reporter_level,
       reporter_position,
-      reporter_email
+      reporter_email,
     } = body;
 
     // ค้นหาข้อมูล Training_Form ที่ต้องการ
@@ -40,6 +28,13 @@ export async function POST(req: Request) {
       return new Response("Error: ไม่พบข้อมูล Training Form", { status: 404 });
     }
 
+    await prisma.training_Form.update({
+      where: { id: trainingform_id, active: true },
+      data: {
+        issendrepoeted: true,
+      },
+    });
+    
     const requesterSectionName = trainingForm.requester_section || undefined;
 
     const section = await prisma.organization.findFirst({
@@ -53,7 +48,11 @@ export async function POST(req: Request) {
           idform: "T002",
           nameform: "รายงานผลการฝึกอบรม",
           trainingform_id: trainingform_id || null, // ใส่ null ถ้าไม่มีค่า
-          datesubmiss: "datesubmiss",
+          datesubmiss: new Date().toLocaleString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
           information: {
             course: trainingForm.information?.course || "ไม่มีข้อมูล",
             location: trainingForm.information?.location || "ไม่มีข้อมูล",
@@ -85,13 +84,19 @@ export async function POST(req: Request) {
             additionalcomments: " ",
           },
           evaluationstatus: "รอประเมิน",
-          latestupdate: formattedDate,
+          latestupdate: new Date().toLocaleString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           reporter_id: reporter_id,
           reporter: {
             name: reporter_name,
             level: reporter_level,
             position: reporter_position,
-            email:reporter_email,
+            email: reporter_email,
           },
           evaluator_id: (section.head as any)?.userid || "ไม่มีข้อมูล",
           evaluator: {

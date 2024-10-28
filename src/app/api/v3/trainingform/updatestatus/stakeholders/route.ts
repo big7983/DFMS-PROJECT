@@ -1,4 +1,5 @@
 import { sendEmail } from "@/utils/sendEmail";
+import { history } from "@/utils/history";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
 import { PrismaClient } from "@prisma/client";
 
@@ -17,6 +18,32 @@ async function sendApprovalEmail(
       approverEmail,
       "แจ้งเตือน : แบบฟอร์มการฝึกอบรมใหม่ต้องได้รับการอนุมัติ",
       messages
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
+}
+
+async function sendNotificationhistory(
+  userid: string,
+  formid: string,
+  fromname: string,
+  nameuser: string,
+  course: any
+) {
+  try {
+    const action = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`;
+
+    // Send verification email
+    await history(
+      userid,
+      formid,
+      fromname,
+      nameuser,
+      action
     );
   } catch (error) {
     console.error("Failed to send email : 500", error);
@@ -83,11 +110,19 @@ export async function PATCH(req: Request) {
     });
 
     if (isfullyacknowledged) {
+      const firstApproverID = (trainingForm.approver as any)?.member[0].id; // สมมุติว่าผู้อนุมัติคนแรกอยู่ใน index 0
       const firstApprover = (trainingForm.approver as any)?.member[0]; // สมมุติว่าผู้อนุมัติคนแรกอยู่ใน index 0
       const recieverName = (trainingForm.approver as any)?.member[0];
       if (firstApprover && firstApprover.email) {
         await sendApprovalEmail(
           firstApprover.email,
+          recieverName.name,
+          trainingForm.information?.course
+        );
+        await sendNotificationhistory(
+          firstApproverID || "",
+          id,
+          "trainingfrom",
           recieverName.name,
           trainingForm.information?.course
         );

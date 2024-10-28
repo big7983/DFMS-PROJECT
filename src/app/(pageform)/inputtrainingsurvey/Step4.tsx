@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
@@ -22,38 +21,12 @@ interface FormData {
 }
 
 interface Step4Props {
-  formData: FormData
+  formData: FormData;
   handlePrevStep: () => void;
 }
 
-const Step4: React.FC<Step4Props> = ({
-  formData,
-  handlePrevStep,
-}) => {
+const Step4: React.FC<Step4Props> = ({ formData, handlePrevStep }) => {
   const router = useRouter();
-
-  const date = new Date();
-  const locale = "en-GB";
-  // const options: Intl.DateTimeFormatOptions = {
-  //   year: "numeric",
-  //   month: "short",
-  //   day: "numeric",
-  //   hour: "2-digit",
-  //   minute: "2-digit",
-  // };
-  // const formatter = new Intl.DateTimeFormat(locale, options);
-  // const formattedDatetime = formatter.format(date);
-
-  const options2: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
-  const formatter2 = new Intl.DateTimeFormat(locale, options2);
-  const formattedDate = formatter2.format(date);
-
-  console.log(formattedDate);
-
 
   const searchParams = useSearchParams();
   const id = searchParams.get("search");
@@ -104,6 +77,15 @@ const Step4: React.FC<Step4Props> = ({
         },
       });
 
+      // const response = await axios.patch("/api/v3/history", {
+      //   userid: user.id,
+      //   formid: idform,
+      //   fromname: "trainingfrom",
+      //   nameuser: user.name,
+      //   action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved}`,
+      //   requesterid: "",
+      // });
+
       // Show success alert
       Swal.fire({
         title: "บันทึกสำเร็จ!",
@@ -142,138 +124,134 @@ const Step4: React.FC<Step4Props> = ({
   return (
     <>
       <div className="mt-7 py-7">
-
-        <div
-          className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
-        >
+        <div className="flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
           <div className="border-b border-stroke  dark:border-strokedark">
-            <h2 className="font-semibold text-ml text-black dark:text-white mb-4">
+            <h2 className="font-semibold text-black dark:text-white text-center sm:text-left mb-4.5">
               รายละเอียดทั้งหมด
             </h2>
           </div>
 
-          <div className="border-b border-stroke  dark:border-strokedark ">
-            <h3 className="font-semibold text-black dark:text-white mb-9">
-              รายงานผลการอบรม/สัมมนา
-            </h3>
+          <div className="border-b border-stroke  dark:border-strokedark flex flex-col gap-9">
+            <div className="border-b border-stroke  dark:border-strokedark flex flex-col gap-5">
+              <div className="">
+                <label className="mb-3 block font-medium ">
+                  เนื้อหาสาระสำคัญโดยสรุปของผู้รายงาน
+                </label>
+                <label className="block  font-medium text-black dark:text-white">
+                  {formData.keycontent}
+                </label>
+              </div>
 
-            <div className="mb-9">
-              <label className="mb-3 block font-medium ">
-                เนื้อหาสาระสำคัญโดยสรุปของผู้รายงาน
-              </label>
-              <label className="block text-sm font-medium text-black dark:text-white">
-                {formData.keycontent}
-              </label>
+              <div className="">
+                <label className="mb-3 block font-medium ">
+                  เนื้อหาวิชาที่สอน สอดคล้องกับวัตถุประสงค์ของการอบรม
+                  ของผู้รายงาน
+                </label>
+                <label className="block font-medium text-black dark:text-white">
+                  {formData.remaining}
+                </label>
+              </div>
+
+              <div className=" mb-9">
+                <label className="mb-3 block font-medium ">
+                  เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
+                </label>
+                <label className="block font-medium text-black dark:text-white">
+                  {formData.matchesobjectives}
+                </label>
+              </div>
             </div>
 
-            <div className="mb-9">
-              <label className="mb-3 block font-medium ">
-                เนื้อหาวิชาที่สอน สอดคล้องกับวัตถุประสงค์ของการอบรม ของผู้รายงาน
-              </label>
-              <label className="block text-sm font-medium text-black dark:text-white">
-                {formData.remaining}
-              </label>
+            <div className="border-b border-stroke  dark:border-strokedark flex flex-col gap-7">
+              <div className="flex flex-col md:flex-row gap-5">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">
+                    คุณภาพหลักสูตรหรือหัวข้อวิชา
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {formData.course_result}
+                  </label>
+                </div>
+
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">เหตุผล</label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.course_reason}
+                  </label>
+                </div>
+              </div>
+
+              <div className=" flex flex-col md:flex-row gap-5">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">
+                    คุณภาพหลักสูตรหรือหัวข้อวิชา
+                  </label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.lecturer_result}
+                  </label>
+                </div>
+
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">เหตุผล</label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.lecturer_reason}
+                  </label>
+                </div>
+              </div>
+
+              <div className=" flex flex-col md:flex-row gap-5">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">
+                    คุณภาพของเอกสารประกอบการอบรม
+                  </label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.document_result}
+                  </label>
+                </div>
+
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">เหตุผล</label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.document_reason}
+                  </label>
+                </div>
+              </div>
+
+              <div className=" flex flex-col  md:flex-row mb-9 gap-5">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">
+                    คุณภาพการบริการของสถาบันที่จัดฝึกอบรม
+                  </label>
+                  <label className=" block  font-medium text-black dark:text-white">
+                    {formData.service_result}
+                  </label>
+                </div>
+
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block font-medium ">เหตุผล</label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {formData.service_reason}
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div className="mb-9">
               <label className="mb-3 block font-medium ">
                 เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
               </label>
-              <label className="block text-sm font-medium text-black dark:text-white">
-                {formData.matchesobjectives}
+              <label className="block  font-medium text-black dark:text-white">
+                {formData.selectedOptions.join(", ")}
               </label>
             </div>
 
-            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">
-                  คุณภาพหลักสูตรหรือหัวข้อวิชา
-                </label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.course_result}
-                </label>
-              </div>
-
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">เหตุผล</label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.course_reason}
-                </label>
-              </div>
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">
-                  คุณภาพหลักสูตรหรือหัวข้อวิชา
-                </label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.lecturer_result}
-                </label>
-              </div>
-
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">เหตุผล</label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.lecturer_reason}
-                </label>
-              </div>
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">
-                  คุณภาพของเอกสารประกอบการอบรม
-                </label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.document_result}
-                </label>
-              </div>
-
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">เหตุผล</label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.document_reason}
-                </label>
-              </div>
-            </div>
-
-            <div className="mb-9 flex flex-col gap-6 md:flex-row">
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">
-                  คุณภาพการบริการของสถาบันที่จัดฝึกอบรม
-                </label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.service_result}
-                </label>
-              </div>
-
-              <div className="w-full xl:w-1/2">
-                <label className="mb-3 block font-medium ">เหตุผล</label>
-                <label className=" block text-sm font-medium text-black dark:text-white">
-                  {formData.service_reason}
-                </label>
-              </div>
-            </div>
-
-            <div className="mb-4.5">
-              <label className="mb-3 block font-medium ">
-                เทคนิคหริอวิธีที่ใช้ในการอบรม/สัมมนา
-              </label>
-              <label className="block text-sm font-medium text-black dark:text-white">
-                {formData.selectedOptions}
-              </label>
-            </div>
-
-            <br />
-          </div>          
+          </div>
         </div>
       </div>
 
       <div className="flex justify-between mt-9">
-        <Button
+        <button
           onClick={handlePrevStep}
-          variant="contained"
           className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           <svg
@@ -291,17 +269,16 @@ const Step4: React.FC<Step4Props> = ({
             />
           </svg>
           Previous
-        </Button>
-        <Button
+        </button>
+        <button
           onClick={showAlert}
-          variant="contained"
           className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           <p className="text-xl">
             <IoSaveOutline />
           </p>{" "}
           <p className="ml-2 text-lg">บันทึก</p>
-        </Button>
+        </button>
       </div>
     </>
   );

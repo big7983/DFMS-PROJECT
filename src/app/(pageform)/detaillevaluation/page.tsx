@@ -141,7 +141,7 @@ export default function Page() {
         confirmButtonColor: "#219653",
       }).then((result) => {
         if (result.isConfirmed) {
-          router.push("/dashboard");
+          router.push("/evaluation");
         }
       });
     } catch (error) {

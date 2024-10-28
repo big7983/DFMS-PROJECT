@@ -1,6 +1,5 @@
 "use client";
 import { SessionProvider } from "next-auth/react";
-
 import React, { useEffect, useState } from "react";
 import Loader from "./Loader";
 
@@ -10,7 +9,7 @@ const SessionWrapper = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
   }, []);
-  return <SessionProvider>{loading ? <Loader /> : children}</SessionProvider>;
+  return <SessionProvider >{loading ? <Loader /> : children}</SessionProvider>;
 };
 
 export default SessionWrapper;

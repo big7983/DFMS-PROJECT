@@ -13,12 +13,14 @@ model User {
   id                  String           @id @default(auto()) @map("_id") @db.ObjectId
   employee_id         String           @unique
   email               String           @unique
-  name                String?
-  level               String 
-  position            String
-  section             String
-  department          String
-  role                String
+  name                String           @unique
+  level               String           @unique
+  position            String           @unique
+  section             String           @unique
+  department          String           @unique  
+  role                String           @unique
+  history             Json?             
+  notseen             Boolean          @default(false)           
 }
 
 model Training_Form {
@@ -26,7 +28,7 @@ model Training_Form {
   idform                String          @unique
   nameform              String          @unique
   datesubmiss           String          @unique
-  requester_id          String?         @unique
+  requester_id          String          @unique
   requester_name        String?         @unique 
   requester_section     String?         @unique 
   requester_department  String?         @unique 
@@ -36,9 +38,9 @@ model Training_Form {
   information           Information?    @unique
   budget                Budget?         @unique
   latestupdate          String          @unique
+  issendrepoeted        Boolean         @default(false)
   active                Boolean         @default(true)
   trainingstatus        String          @unique
-  history               Json? 
 }
 
 model Training_Survey {
@@ -52,7 +54,7 @@ model Training_Survey {
   information        Information?     @unique
   evaluationstatus   String
   latestupdate       String
-  reporter_id        String
+  reporter_id        String           @unique
   reporter           detailuser       @unique
   evaluator_id       String
   evaluator          detailuser       @unique

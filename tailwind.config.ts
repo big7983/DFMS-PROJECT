@@ -12,6 +12,7 @@ const config: Config = {
     fontFamily: {
       satoshi: ["Satoshi", "sans-serif"],
       inter: ['Inter', 'sans-serif'],
+      prompt: ['Prompt', 'sans-serif'], // เพิ่มการใช้งานฟอนต์ Prompt
     },
     screens: {
       "2xsm": "375px",
@@ -32,7 +33,7 @@ const config: Config = {
         bodydark: "#AEB7C0",
         bodydark1: "#65676B",
         bodydark2: "#8A99AF",
-        primary: "#3C50E0",
+        primary: "#FF6500", //3C50E0
         secondary: "#80CAEE",
         stroke: "#E2E8F0",
         gray: "#EFF4FB",

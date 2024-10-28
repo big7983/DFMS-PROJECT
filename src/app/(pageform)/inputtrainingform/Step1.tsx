@@ -1,7 +1,7 @@
 // components/Step2.tsx
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-import { Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 interface Step1Props {
   formData: {
@@ -11,7 +11,9 @@ interface Step1Props {
     dateend: string;
     objective: string;
   };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
   handleNextStep: () => void;
   handlePrevStep: () => void;
   canProceed: boolean;
@@ -26,6 +28,12 @@ const Step1: React.FC<Step1Props> = ({
   useEffect(() => {
     console.log("Step 1 Data:", formData);
   }, [formData]);
+
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/trainingform");
+  };
   return (
     <motion.div
       //initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
@@ -33,19 +41,19 @@ const Step1: React.FC<Step1Props> = ({
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <form onSubmit={handleNextStep}>
-        <div className="mt-7 py-7">
+        <div className="mt-7 py-7 ">
           <div className="flex flex-col gap-9">
             {/* <!-- Contact Form --> */}
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
-              <div className="border-b border-stroke px-[50px] py-5.5 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
+              <div className="border-b border-stroke px-4 sm:px-[50px] py-5.5 dark:border-strokedark">
+                <h3 className="font-semibold text-black dark:text-white text-center sm:text-left">
                   ข้อมูลเกี่ยวกับหลักสูตร
                 </h3>
               </div>
-              <div className="py-6.5 px-[50px]">
+              <div className="py-6.5 px-4.5 sm:px-[50px]">
                 <div className="mb-4.5">
                   <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    ชื่อหลักสูตร <span className="text-meta-1">*</span>
+                    ชื่อหลักสูตร
                   </label>
                   <input
                     type="text"
@@ -121,9 +129,9 @@ const Step1: React.FC<Step1Props> = ({
             </div>
 
             <div className="flex justify-between">
-              <Button
-                disabled               
-                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+              <button
+                onClick={handleClick}
+                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -140,11 +148,11 @@ const Step1: React.FC<Step1Props> = ({
                   />
                 </svg>
                 Previous
-              </Button>
-              <Button
+              </button>
+              <button
                 disabled={!canProceed}
                 onClick={canProceed ? handleNextStep : undefined}
-                className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${canProceed ? 'bg-meta-3 hover:bg-opacity-50' : 'bg-slate-300 '}`}
               >
                 Next
                 <svg
@@ -161,14 +169,9 @@ const Step1: React.FC<Step1Props> = ({
                     d="M8.25 4.5l7.5 7.5-7.5 7.5"
                   />
                 </svg>
-              </Button>
+              </button>
             </div>
           </div>
-
-          {/* <label>Email:</label>
-      <input type="email" name="email" value={formData.email} onChange={handleChange} />
-      <label>Name:</label>
-      <input type="text" name="name" value={formData.name} onChange={handleChange} /> */}
         </div>
       </form>
     </motion.div>

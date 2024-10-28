@@ -78,7 +78,7 @@ interface TrainingFormData {
 
 export default function Page() {
   const [data, setData] = useState<TrainingFormData[]>([]);
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
 
   const searchParams = useSearchParams();
@@ -161,16 +161,22 @@ export default function Page() {
           }
         );
 
-        await axios.patch(
-          `/api/v3/history`,{
-            id:idform,
-            name:name,
-            action: "พิจารณาแบบคำร้อง "+course+" สำเร็จ ผลการพิจารณาคือ "+statusapproved+" "
-          }
-        );
+        const hisporyPromises = Object.values(data[0].stakeholders.member).map(async (user) => {
+          await axios.patch("/api/v3/history", {
+            userid: user.id,
+            formid: idform,
+            fromname: "trainingfrom",
+            nameuser: user.name,
+            action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved}`,
+            requesterid: "",
+          });
+          console.log(`Email sent to ${user.email}: ${idform} ${user.id}`);
+        });
+
+        const responsehistory = await Promise.all(hisporyPromises);
 
         // ตรวจสอบสถานะการตอบกลับ
-        if (response.status === 200) {
+        if (response.status === 200 && responsehistory) {
           Swal.fire({
             title: "บันทึกสำเร็จ!",
             icon: "success",
@@ -178,7 +184,7 @@ export default function Page() {
             confirmButtonColor: "#219653",
           }).then((result) => {
             if (result.isConfirmed) {
-              router.push("/dashboard");
+              router.push("/approveform");
             }
           });
         } else {
@@ -200,8 +206,6 @@ export default function Page() {
       </div>
     );
   }
-
-  console.log("data id = ", user);
 
   return (
     <div className="w-full w-[100%] p-4 md:w-[85%] xl:w-[75%] flex flex-col justify-between">
@@ -481,7 +485,7 @@ export default function Page() {
                       <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                         <div className="flex justify-center font-medium text-black dark:text-white">
                           {approver.approved === "pending" &&                        
-                           item.approver.approvalorder == index+1
+                           item.approver.approvalorder == index+1 && user == approver.id
                              ? (
                             <div className="flex space-x-3 ">
                               <button

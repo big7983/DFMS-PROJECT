@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -89,17 +89,24 @@ export default function Approverstakeholderspage() {
     fetchFormIds();
   }, []);
 
-  const fetchData = async () => {
+  // Fetch Data based on selectedFormId
+  const fetchData = useCallback(async () => {
+    if (!selectedFormId) return; // เพิ่มการตรวจสอบ selectedFormId
+
     try {
       const response = await axios.get(
         `/api/v3/trainingform/${selectedFormId}`
       );
-      console.log("dd", response.data);
+      console.log("Fetched data:", response.data);
       setData(response.data);
     } catch (error) {
       console.error("Error fetching form data:", error);
     }
-  };
+  }, [selectedFormId]); // เพิ่ม selectedFormId เป็น dependency
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedFormId, fetchData]);
 
   const updateStakeholderStatus = async (sid: string,name:string,course:string) => {
     Swal.fire({
@@ -120,9 +127,12 @@ export default function Approverstakeholderspage() {
 
       await axios.patch(
         `/api/v3/history`,{
-          id:selectedFormId,
-          name:name,
-          action: "รับทราบการมีส่วนร่วมแล้วแบบคำร้อง "+course+" สำเร็จ"
+          userid : sid,
+          formid:selectedFormId,
+          fromname:"trainingfrom",
+          nameuser:name,
+          action: "รับทราบการมีส่วนร่วมแล้วแบบคำร้อง "+course+" สำเร็จ",
+          requesterid: ""
         }
       );
 
@@ -164,13 +174,30 @@ export default function Approverstakeholderspage() {
         }
       );
 
-      await axios.patch(
-        `/api/v3/history`,{
-          id:idform,
-          name:name,
-          action: "พิจารณาแบบคำร้อง "+course+" สำเร็จ ผลการพิจารณาคือ "+statusapproved+" "
-        }
-      );    
+      const hisporyPromises = Object.values(formIds[0].stakeholders.member).map(async (user) => {
+        await axios.patch("/api/v3/history", {
+          userid: user.id,
+          formid: idform,
+          fromname: "trainingfrom",
+          nameuser: user.name,
+          action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved}`,
+          requesterid: "",
+        });
+        console.log(`Email sent to ${user.email}: ${idform} ${user.id}`);
+      });
+
+      // await axios.patch(
+      //   `/api/v3/history`,{
+      //     userid : userid,
+      //     formid:idform,
+      //     fromname:"trainingfrom",
+      //     nameuser:name,
+      //     action: "พิจารณาแบบคำร้อง "+course+" สำเร็จ ผลการพิจารณาคือ "+statusapproved+" ",
+      //     requesterid: ""
+      //   }
+      // );
+
+      await Promise.all(hisporyPromises);
 
       // ตรวจสอบสถานะการตอบกลับ
       if (response.status === 200) {

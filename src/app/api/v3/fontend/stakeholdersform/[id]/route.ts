@@ -20,7 +20,7 @@ export async function GET(
     // กรองข้อมูลที่มี stakeholders ตรงกับ id ที่กำหนด
     const filteredTrainingForms = trainingForms.filter((trainingForm) =>
       Object.values(trainingForm.stakeholders?.member || {}).some(
-        (stakeholder) => stakeholder.id === id
+        (stakeholder) => stakeholder.id === id && stakeholder.id !== trainingForm.requester_id
       )
     );
 
@@ -38,6 +38,7 @@ export async function GET(
       const datestart = trainingForm.information?.datestart || "ไม่มีข้อมูล";
       const dateend = trainingForm.information?.dateend || "ไม่มีข้อมูล";
       const trainingstatus = trainingForm.trainingstatus;
+      const issendrepoeted = trainingForm.issendrepoeted;
       const latestupdate = trainingForm.latestupdate;
 
       // คำนวณจำนวน stakeholders ทั้งหมดและที่ acknowledged เป็น true
@@ -74,6 +75,7 @@ export async function GET(
         totalApprovers,
         approvedApprovers,
         isfullyapproved,
+        issendrepoeted,
         latestupdate,
       };
     });

@@ -11,7 +11,7 @@ import { BiError, BiTime } from "react-icons/bi";
 import { AiFillCloseCircle } from "react-icons/ai";
 
 interface TrainingFormData {
-  id: string
+  id: string;
   idform: string;
   nameform: string;
   datesubmiss: string;
@@ -78,7 +78,7 @@ interface TrainingFormData {
   };
 }
 
-const Page = () =>  {
+const Page = () => {
   const [data, setData] = useState<TrainingFormData[]>([]);
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(true);
@@ -119,9 +119,14 @@ const Page = () =>  {
     }
 
     setLoading(false);
-  }, [id,session?.user?.email]);
+  }, [id, session?.user?.email]);
 
-  const UpdateStatus = async (sid: string, formid: string, name:string, course:string) => {
+  const UpdateStatus = async (
+    sid: string,
+    formid: string,
+    name: string,
+    course: string
+  ) => {
     try {
       // 1. แสดง SweetAlert2 แบบ loading
       Swal.fire({
@@ -135,40 +140,56 @@ const Page = () =>  {
       });
 
       // 2. เรียกใช้ axios.get เพื่ออัปเดตสถานะ
-      await axios.patch(
-        `/api/v3/trainingform/updatestatus/stakeholders`,{
-          id:formid,
-          stakeholderId:sid
+      const responstatus = await axios.patch(
+        `/api/v3/trainingform/updatestatus/stakeholders`,
+        {
+          id: formid,
+          stakeholderId: sid,
         }
       );
 
-      //เก็บ history
-      await axios.patch(
-        `/api/v3/history`,{
-          id:formid,
-          name:name,
-          action: "รับทราบการมีส่วนร่วมแล้วแบบคำร้อง "+course+" สำเร็จ"
+      const hisporyPromises = Object.values(data[0].stakeholders.member).map(
+        async (user) => {
+           await axios.patch("/api/v3/history", {
+            userid: user.id,
+            formid: formid,
+            fromname: "trainingfrom",
+            nameuser: user.name,
+            action: `รับทราบการมีส่วนร่วมแล้วแบบคำร้อง  ${course} สำเร็จ `,
+            requesterid: "",
+          });
+          console.log(`Email sent to ${user.email}: ${formid} ${user.id}`);
         }
       );
 
-      Swal.fire({
-        title: "บันทึกสำเร็จ!",
-        icon: "success",
-        confirmButtonText: "กลับสู่หน้าหลัก",
-        confirmButtonColor: "#219653",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/stakeholdersform");
-        }
-      });
+      const responsehistory = await Promise.all(hisporyPromises);
+
+      if (responstatus && responsehistory) {
+        Swal.fire({
+          title: "บันทึกสำเร็จ!",
+          icon: "success",
+          confirmButtonText: "กลับสู่หน้าหลัก",
+          confirmButtonColor: "#219653",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/stakeholdersform");
+          }
+        });
+      } else {
+        Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองอีกครั้งในภายหลัง", "error");
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองอีกครั้งในภายหลัง", "error");
     }
   };
 
-
-  const handleSubmit = async (sid: string, formid: string, name:string, course:string) => {
+  const handleSubmit = async (
+    sid: string,
+    formid: string,
+    name: string,
+    course: string
+  ) => {
     Swal.fire({
       title: "ยืนยันการมีส่วนร่วมใช่หรือไม่?",
       icon: "warning",
@@ -418,7 +439,7 @@ const Page = () =>  {
                         </td>
                         <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
                           <h5 className="flex justify-center font-medium text-black dark:text-white">
-                          {approver.approved === "approved" ? (
+                            {approver.approved === "approved" ? (
                               <HiBadgeCheck
                                 className="fill-success"
                                 size={24}
@@ -496,7 +517,12 @@ const Page = () =>  {
                           <button
                             className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
                             onClick={() =>
-                              handleSubmit(item.id, stakeholder.id, stakeholder.name, item.information.course)
+                              handleSubmit(
+                                item.id,
+                                stakeholder.id,
+                                stakeholder.name,
+                                item.information.course
+                              )
                             }
                           >
                             ยืนยัน
@@ -519,5 +545,5 @@ const Page = () =>  {
       ))}
     </div>
   );
-}
+};
 export default Page;

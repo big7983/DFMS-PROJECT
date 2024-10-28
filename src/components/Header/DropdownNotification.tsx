@@ -13,34 +13,38 @@ interface RowData {
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(true); // เพิ่มสถานะสำหรับตรวจสอบการอัปเดต
   const [rows, setRows] = useState<RowData[]>([]);
   const { data: session } = useSession();
 
-  const fetchData = async (email: string) => {
+  const fetchData = async (id: string) => {
     try {
-      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
-      const historyResponse = await axios.get(
-        `/api/v3/history/${resid.data.id}`
-      );
-      const historyData = historyResponse.data;
-
-      // ตรวจสอบโครงสร้างข้อมูลที่ได้รับจาก API
-      if (Array.isArray(historyData)) {
-        setRows(historyData);
-        console.log(historyData);
-      } else {
-        console.error("Unexpected data structure:", historyData);
-      }
+      const historyResponse = await axios.get(`/api/v3/history/${id}`);
+      setNotifying(historyResponse.data.isseen);
+      setRows(historyResponse.data.history);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchData(session?.user?.email);
+  const handleNotificationClick = async (id: string) => {
+    if (isUpdating) {
+      try {
+        await axios.patch(`/api/v3/history/isseen/${id}`);
+        setNotifying(false);
+      } catch (error) {
+        console.error("Error updating notification status:", error);
+      } finally {
+        setIsUpdating(false); // เสร็จสิ้นการอัปเดต
+      }
     }
-  }, [session?.user?.email]);
+  };
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchData(session?.user?.id);
+    }
+  }, [session?.user?.id]);
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -49,6 +53,9 @@ const DropdownNotification = () => {
           onClick={() => {
             setNotifying(false);
             setDropdownOpen(!dropdownOpen);
+            if (session?.user?.id) {
+              handleNotificationClick(session.user.id);
+            }
           }}
           href="#"
           className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white"
@@ -87,29 +94,41 @@ const DropdownNotification = () => {
             </div>
 
             <ul className="flex h-auto flex-col overflow-y-auto">
-              {rows
-                .map((item: any, index: number) => ({ ...item, index })) // เพิ่ม index ลงใน item
-                .sort((a, b) => b.index - a.index) // เรียงลำดับจาก index มากสุดไปน้อยสุด
-                .map((item: any) => (
-                  <>
-                    <li>
-                      <Link
-                        className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                        href="#"
-                        key={item.index}
-                      >
-                        <p className="text-sm">
-                          <span className="text-black dark:text-white">
-                            {item.name}
-                          </span>{" "}
-                          {item.action}
-                        </p>
+              {rows.length === 0 ? (
+                <li className="px-4.5 py-3 text-center text-sm text-gray-500">
+                  ยังไม่มีการแจ้งเตือน
+                </li>
+              ) : (
+                rows
+                  .map((item: any, index: number) => ({ ...item, index })) // เพิ่ม index ลงใน item
+                  .sort((a, b) => b.index - a.index) // เรียงลำดับจาก index มากสุดไปน้อยสุด
+                  .map((item: any) => (
+                    <>
+                      <li>
+                        <Link
+                          className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
+                          href={
+                            item.fromname === "trainingfrom"
+                              ? `/detailltrainingform?search=${item.formid}`
+                              : item.fromname === "trainingsurvey"
+                              ? `/detailltrainingsurvey?search=${item.formid}`
+                              : "#"
+                          }
+                          key={item.index}
+                        >
+                          <p className="text-sm">
+                            <span className="text-black dark:text-white">
+                              {item.name}
+                            </span>{" "}
+                            {item.action}
+                          </p>
 
-                        <p className="text-xs">{item.datetime}</p>
-                      </Link>
-                    </li>
-                  </>
-                ))}
+                          <p className="text-xs">{item.datetime}</p>
+                        </Link>
+                      </li>
+                    </>
+                  ))
+              )}
             </ul>
           </div>
         )}

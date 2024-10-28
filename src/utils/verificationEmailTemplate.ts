@@ -28,7 +28,7 @@ export const verificationEmailTemplate = (
       justify-content: start;
       align-items: center;
       margin-inline: 4px;
-      background-color: #3C50E0;
+      background-color: #FF6500;
       padding: 10px;
       text-align: center;
       color: #ffffff;
@@ -46,7 +46,7 @@ export const verificationEmailTemplate = (
     }
 
     .email-body h2 {
-      color: #3C50E0;
+      color: #FF6500;
       font-size: 20px;
     }
 
@@ -71,7 +71,7 @@ export const verificationEmailTemplate = (
     .green-button {
       display: inline-block;
       padding: 10px 20px;
-      background-color: #3C50E0;
+      background-color: #FF6500;
       color: white;
       text-align: center;
       text-decoration: none;

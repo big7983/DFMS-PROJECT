@@ -81,19 +81,6 @@ export async function POST(req: Request) {
         latestupdate:formattedDate,
         active: active ?? true,
         trainingstatus,
-        history:[
-  
-          {name:requester_name,
-          action: "สร้างคำร้องแบบอนุมัติอบรม"+information.course,
-          datetime:new Date().toLocaleString('th-TH', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',       
-            hour: '2-digit',
-            minute: '2-digit',
-          })}  
-          
-        ]   
         
       },
     });

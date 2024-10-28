@@ -18,6 +18,7 @@ export async function GET(
       select: {
         stakeholders: true,
         approver: true,
+        issendrepoeted: true
       },
     });
 
@@ -44,7 +45,7 @@ export async function GET(
     // คำนวณผลรวมของ notAcknowledgedCount และ approvedCount
     const totals = trainingForms.reduce(
       (acc, form) => {
-        const { stakeholders, approver } = form;
+        const { stakeholders, approver, issendrepoeted } = form;
 
         // คำนวณจำนวนสมาชิกใน stakeholders ที่ acknowledged === false
         const notAcknowledgedCount = Object.values(stakeholders.member as Record<string, { id: string; acknowledged: boolean }>).filter(
@@ -56,7 +57,7 @@ export async function GET(
           (approverMember) => approverMember.id === id && approverMember.approved === 'pending'
         ).length;
 
-        const isfullyapprovedCount = approver.isfullyapproved === 'pending' ? 1 : 0;
+        const isfullyapprovedCount = approver.isfullyapproved === 'pending' && issendrepoeted === false  ? 1 : 0;
 
         // เพิ่มค่าเข้า accumulator
         acc.totalNotAcknowledged += notAcknowledgedCount;

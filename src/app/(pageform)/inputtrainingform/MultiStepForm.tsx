@@ -10,13 +10,13 @@ interface FormData {
   datestart: string;
   dateend: string;
   objective: string;
-  received: number;
-  remaining: number;
-  registration: number;
-  room: number;
-  transportation: number;
-  allowance: number;
-  other: number;
+  received?: number;
+  remaining?: number;
+  registration?: number;
+  room?: number;
+  transportation?: number;
+  allowance?: number;
+  other?: number;
   total: number;
 }
 
@@ -57,13 +57,13 @@ const MultiStepForm: React.FC = () => {
     datestart: "",
     dateend: "",
     objective: "",
-    received: 0, 
-    remaining: 0, 
-    registration: 0,
-    room: 0,
-    transportation: 0, 
-    allowance: 0, 
-    other: 0, 
+    received: undefined, 
+    remaining: undefined, 
+    registration: undefined,
+    room: undefined,
+    transportation: undefined, 
+    allowance: undefined, 
+    other: undefined, 
     total: 0, 
   });
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);

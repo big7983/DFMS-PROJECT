@@ -31,6 +31,7 @@ interface RowData {
   totalApprovers: number;
   latestupdate: string;
   isfullyacknowledged: boolean;
+  issendrepoeted:boolean
   isfullyapproved: string; // เปลี่ยนเป็น string แทนที่จะเป็น boolean
   idform: string;
 }
@@ -43,15 +44,14 @@ export default function Trainingform() {
 
   const { data: session } = useSession();
 
-  const fetchData = async (email: string) => {
+  const fetchData = async (id: string) => {
     try {
-      const resid = await axios.get(`/api/v2/user/select/justid/${email}`);
-      console.log("resid = ", resid.data.id);
       const res = await axios.get(
-        `/api/v3/fontend/trainingform/${resid.data.id}`
+        `/api/v3/fontend/trainingform/${id}`
       );
       setRows(res.data);
       setLoading(false);
+      console.log("id"+id)
     } catch (error) {
       console.error("Error fetching data:", error);
       setLoading(false);
@@ -59,10 +59,10 @@ export default function Trainingform() {
   };
 
   useEffect(() => {
-    if (session?.user?.email) {
-      fetchData(session?.user?.email);
+    if (session?.user?.id) {
+      fetchData(session?.user?.id);
     }
-  }, [session?.user?.email]);
+  }, [session?.user?.id]);
 
   const filteredRows = rows.filter((row) => {
     const matchesCourse = row.course
@@ -86,8 +86,8 @@ export default function Trainingform() {
   }
 
   return (
-    <div className="bg-white p-10 rounded-[20px] font-inter">
-      <div className="w-full">
+    <div className="bg-white sm:p-10 py-10 px-4 rounded-[20px] font-satoshi">
+      <div className="w-full ">
         <p className="text-black font-bold mb-6 text-xl">
           รายการขออนุมัติเข้าอบรม
         </p>
@@ -140,7 +140,7 @@ export default function Trainingform() {
                   marginBottom: "1rem",
                   width: "130px",
                   border: 0,
-                  background: "#313D4A"
+                  background: "#FF6500"
                 }}
                 startIcon={<AddCircleIcon />}
               >               
@@ -185,8 +185,8 @@ export default function Trainingform() {
                 <>
                   {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="w-4 h-4 bg-warning rounded-full"></div>
+                      <div className="font-normal">
                         ผู้มีส่วนร่วมรับทราบแล้ว (
                         {params.row.acknowledgedStakeholders}/
                         {params.row.totalStakeholders})
@@ -194,30 +194,37 @@ export default function Trainingform() {
                     </div>
                   ) : params.row.isfullyapproved === "pending" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="w-4 h-4 bg-warning rounded-full"></div>
+                      <div className="font-normal ">
                         รอผู้อนุมัติ ({params.row.approvedApprovers}/
                         {params.row.totalApprovers})
                       </div>
                     </div>
-                  ) : params.row.isfullyapproved === "fullyapproved" ? (
+                  ) : params.row.issendrepoeted === true && params.row.isfullyapproved === "fullyapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
-                      <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
-                        อนุมัติแล้ว
+                      <div className="w-4 h-4 bg-success rounded-full"></div>
+                      <div className="font-normal ">
+                        สำเร็จ
+                      </div>
+                    </div>
+                  ) : params.row.issendrepoeted === false && params.row.isfullyapproved === "fullyapproved" ? (
+                    <div className="w-full justify-start items-center gap-2 inline-flex ">
+                      <div className="w-4 h-4 bg-warning rounded-full"></div>
+                      <div className="font-normal ">
+                        ยังไม่ส่งแบบประเมิน
                       </div>
                     </div>
                   ) : params.row.isfullyapproved === "unapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         ไม่ได้รับการอนุมัติ
                       </div>
                     </div>
                   ) : (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         เกิดข้อผิดพลาด
                       </div>
                     </div>

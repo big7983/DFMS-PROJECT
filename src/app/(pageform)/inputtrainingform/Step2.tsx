@@ -1,16 +1,15 @@
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-import { Button } from "@mui/material";
 
 interface Step2Props {
   formData: {
-    received: number;
-    remaining: number;
-    registration: number;
-    room: number;
-    transportation: number;
-    allowance: number;
-    other: number;
+    received?: number;
+    remaining?: number;
+    registration?: number;
+    room?: number;
+    transportation?: number;
+    allowance?: number;
+    other?: number;
     total: number;
   };
   handlePrevStep: () => void, 
@@ -18,6 +17,8 @@ interface Step2Props {
   handleNextStep: () => void;
   canProceed: boolean;
 }
+
+
 
 const Step2: React.FC<Step2Props> = ({
   formData,
@@ -29,6 +30,16 @@ const Step2: React.FC<Step2Props> = ({
   useEffect(() => {
     console.log("Step 2 Data:", formData);
   }, [formData]);
+
+  formData.total = 0 +
+  Number(formData.received) +
+  Number(formData.remaining) +
+  Number(formData.registration) +
+  Number(formData.room) +
+  Number(formData.transportation) +
+  Number(formData.allowance) +
+  Number(formData.other);
+
   return (
     <motion.div
       //initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
@@ -41,11 +52,11 @@ const Step2: React.FC<Step2Props> = ({
             {/* <!-- Contact Form --> */}
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
               <div className="border-b border-stroke px-[50px] py-5.5 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
-                  ข้อมูลเกี่ยวกับหลักสูตร
+                <h3 className="text-center sm:text-left font-semibold text-black dark:text-white">
+                  งบประมาณ
                 </h3>
               </div>
-              <div className="py-6.5 px-[50px]">
+              <div className="py-6.5 px-4.5 sm:px-[50px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   <div>
                     <label
@@ -174,6 +185,7 @@ const Step2: React.FC<Step2Props> = ({
                       onChange={handleChange}
                       placeholder="Enter number"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      disabled
                     />
                   </div>
                 </div>
@@ -181,10 +193,10 @@ const Step2: React.FC<Step2Props> = ({
             </div>
 
             <div className="flex justify-between">
-              <Button                
+              <button                
                 type="button"
                 onClick={handlePrevStep}
-                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-50 lg:px-8 xl:px-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -201,12 +213,11 @@ const Step2: React.FC<Step2Props> = ({
                   />
                 </svg>
                 Previous
-              </Button>
-              <Button
-                variant="contained"
+              </button>
+              <button
                 onClick={canProceed ? handleNextStep : undefined}
                 disabled={!canProceed}
-                className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${canProceed ? 'bg-meta-3 hover:bg-opacity-50' : 'bg-slate-300 '}`}
               >
                 Next
                 <svg
@@ -224,7 +235,7 @@ const Step2: React.FC<Step2Props> = ({
                   />
                 </svg>
                 
-              </Button>
+              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-import { Button } from "@mui/material";
+import { useRouter } from "next/navigation";
+
 
 interface BaseFormData {
   keycontent: string;
@@ -18,7 +19,6 @@ interface Step1Props {
 
 const Step1: React.FC<Step1Props> = ({
   formData,
-  handlePrevStep,
   handleChange,
   handleNextStep,
   canProceed,
@@ -26,6 +26,12 @@ const Step1: React.FC<Step1Props> = ({
   useEffect(() => {
     console.log("Step 2 Data:", formData);
   }, [formData]);
+
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/trainingsurvey");
+  };
 
   // ฟังก์ชันในการเลือก checkbox และอัปเดตค่าไปยัง formData
   const handleCheckboxChange = (option: string) => {
@@ -49,7 +55,7 @@ const Step1: React.FC<Step1Props> = ({
           <div className="flex flex-col gap-9">
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
               <div className="border-b border-stroke px-[50px] py-5.5 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
+                <h3 className="font-semibold text-black dark:text-white text-center sm:text-left">
                   เนื้อหา
                 </h3>
               </div>
@@ -74,7 +80,7 @@ const Step1: React.FC<Step1Props> = ({
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      className="form-checkbox w-7 h-7 text-blue-600"
+                      className="form-checkbox w-7 h-7 text-primary"
                       checked={formData.remaining === "สอดคล้อง"} // ตรวจสอบว่าถูกเลือกหรือไม่
                       onChange={() => handleCheckboxChange("สอดคล้อง")} // เมื่อเปลี่ยนสถานะ checkbox
                     />
@@ -84,7 +90,7 @@ const Step1: React.FC<Step1Props> = ({
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      className="form-checkbox w-7 h-7 text-blue-600"
+                      className="form-checkbox w-7 h-7 text-primary"
                       checked={formData.remaining === "ไม่สอดคล้อง"} // ตรวจสอบว่าถูกเลือกหรือไม่
                       onChange={() => handleCheckboxChange("ไม่สอดคล้อง")} // เมื่อเปลี่ยนสถานะ checkbox
                     />
@@ -107,10 +113,10 @@ const Step1: React.FC<Step1Props> = ({
             </div>
 
             <div className="flex justify-between">
-              <Button
+              <button
                 type="button"
-                onClick={handlePrevStep}
-                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                onClick={handleClick}
+                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -127,12 +133,11 @@ const Step1: React.FC<Step1Props> = ({
                   />
                 </svg>
                 Previous
-              </Button>
-              <Button
-                variant="contained"
+              </button>
+              <button
                 onClick={canProceed ? handleNextStep : undefined}
                 disabled={!canProceed}
-                className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${canProceed ? 'bg-meta-3 hover:bg-opacity-50' : 'bg-slate-300 '}`}
               >
                 Next
                 <svg
@@ -149,7 +154,7 @@ const Step1: React.FC<Step1Props> = ({
                     d="M8.25 4.5l7.5 7.5-7.5 7.5"
                   />
                 </svg>
-              </Button>
+              </button>
             </div>
           </div>
         </div>

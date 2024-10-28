@@ -2,9 +2,14 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function PATCH(req: Request) {
+export const history = async (
+    userid: string,
+    formid: string,
+    fromname: string,
+    nameuser: string,
+    action: string
+  ) => {
   try {
-    const { userid, formid, fromname, nameuser, action, requesterid } = await req.json(); // ข้อมูลที่ส่งมา
 
     // ค้นหาโมเดลที่ตรงกับ id
     const existingModel = await prisma.user.findUnique({
@@ -24,7 +29,7 @@ export async function PATCH(req: Request) {
 
     if (formid === "newtrainingfrom") {
       const getid = await prisma.training_Form.findUnique({
-        where: { requester_id: requesterid },
+        where: { id: userid },
         select: { id: true }, // ค้นหาข้อมูล history เดิม
       });
 
@@ -34,9 +39,9 @@ export async function PATCH(req: Request) {
       }
 
       updatedFormId = getid.id;
-    } else if (formid === "newtrainingsurvey") {
+    } else if (formid === "newtrainingfrom") {
       const getid = await prisma.training_Survey.findUnique({
-        where: { reporter_id: requesterid },
+        where: { id: userid },
         select: { id: true }, // ค้นหาข้อมูล history เดิม
       });
 

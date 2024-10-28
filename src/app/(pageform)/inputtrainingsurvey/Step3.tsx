@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-import { Button } from "@mui/material";
 
 interface Step3Props {
   formData: { selectedOptions: string[] };
@@ -56,7 +55,7 @@ const Step3: React.FC<Step3Props> = ({
           <div className="flex flex-col gap-9">
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
               <div className="border-b border-stroke px-[50px] py-5.5 dark:border-strokedark">
-                <h3 className="font-medium text-black dark:text-white">
+                <h3 className="font-semibold text-black dark:text-white text-center sm:text-left">
                   กรุณาเลือกตัวเลือกที่คุณสนใจ
                 </h3>
               </div>
@@ -85,10 +84,10 @@ const Step3: React.FC<Step3Props> = ({
             </div>
 
             <div className="flex justify-between">
-              <Button
+              <button
                 type="button"
                 onClick={handlePrevStep}
-                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-40 lg:px-8 xl:px-10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -105,12 +104,11 @@ const Step3: React.FC<Step3Props> = ({
                   />
                 </svg>
                 Previous
-              </Button>
-              <Button
-                variant="contained"
+              </button>
+              <button
                 onClick={handleNext} // Call the new handleNext function
                 disabled={formData.selectedOptions.length === 0} // Disable if no options are selected
-                className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${formData.selectedOptions.length > 0 ? 'bg-meta-3 hover:bg-opacity-50' : 'bg-slate-300 '}`}
               >
                 Next
                 <svg
@@ -127,7 +125,7 @@ const Step3: React.FC<Step3Props> = ({
                     d="M8.25 4.5l7.5 7.5-7.5 7.5"
                   />
                 </svg>
-              </Button>
+              </button>
             </div>
           </div>
         </div>
