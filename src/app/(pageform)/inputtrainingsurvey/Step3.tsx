@@ -56,7 +56,7 @@ const Step3: React.FC<Step3Props> = ({
             <div className="border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]">
               <div className="border-b border-stroke px-[50px] py-5.5 dark:border-strokedark">
                 <h3 className="font-semibold text-black dark:text-white text-center sm:text-left">
-                  กรุณาเลือกตัวเลือกที่คุณสนใจ
+                  วิธีเทคนิคที่ใช้ในการอบรม/สัมมนา
                 </h3>
               </div>
               <div className="py-6.5 px-[50px]">

@@ -1,24 +1,66 @@
 import { PrismaClient } from "@prisma/client";
+import { history } from "@/utils/history";
+import { verificationEmailTemplate } from "@/utils/verificationEmailTemplate";
+import { sendEmail } from "@/utils/sendEmail";
 
 const prisma = new PrismaClient();
 
+interface Stakeholder {
+  id: string;
+  employeeid: string;
+  name: string;
+  level: string;
+  position: string;
+  email: string;
+  acknowledged: boolean;
+}
+
+async function sendNotificationEmail(
+  approverEmail: any,
+  recieverName: string,
+  course: any
+) {
+  try {
+    const message = `คุณได้ถูกเชิญคุณเข้าร่วมการฝึกอบรม ${course} กรุณาเข้าเว็บไซต์เพื่ออ่านรายละเอียดและรับทราบการมีส่วนร่วม`;
+    const messages = verificationEmailTemplate(recieverName, message);
+    // Send verification email
+    await sendEmail(
+      approverEmail,
+      "แจ้งเตือน : เชิญคุณเข้าร่วมการฝึกอบรม",
+      messages
+    );
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
+}
+
+async function sendNotificationhistory(
+  userid: string,
+  nameuser: string,
+  course: any
+) {
+  try {
+    const action = `ได้เชิญคุณเข้าร่วมการฝึกอบรม ${course} กรุณาเข้าเว็บไซต์เพื่ออ่านรายละเอียดและรับทราบการมีส่วนร่วม`;
+
+    // Send verification email
+    await history(userid, nameuser, action);
+  } catch (error) {
+    console.error("Failed to send email : 500", error);
+    return new Response("Failed to send email : 500  ", {
+      status: 500,
+    });
+  }
+}
+
+
+
 export async function POST(req: Request) {
-
-  const date = new Date();
-  const locale = "en-GB";
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  const formattedDate = formatter.format(date);
-
   try {
     const body = await req.json();
-    
+
     // Destructure required fields from the request body
     const {
       idform,
@@ -37,6 +79,11 @@ export async function POST(req: Request) {
       trainingstatus,
     } = body;
 
+    // if (!Array.isArray(stakeholders.member)) {
+    //   console.error("Invalid stakeholders structure:", stakeholders.member);
+    //   return new Response("Invalid stakeholders structure", { status: 400 });
+    // }
+
     // Create a new Training_Form record
     const newTrainingForm = await prisma.training_Form.create({
       data: {
@@ -52,10 +99,10 @@ export async function POST(req: Request) {
           member: stakeholders.member,
           isfullyacknowledged: stakeholders.isfullyacknowledged,
         },
-        approver:  {
-              member: approver.member,
-              approvalorder: 1,
-              isfullyapproved: approver.isfullyapproved,
+        approver: {
+          member: approver.member,
+          approvalorder: 1,
+          isfullyapproved: approver.isfullyapproved,
         },
         information: information
           ? {
@@ -66,7 +113,7 @@ export async function POST(req: Request) {
               objective: information.objective,
             }
           : undefined,
-          budget: budget
+        budget: budget
           ? {
               received: parseFloat(budget.received) || 0,
               remaining: parseFloat(budget.remaining) || 0,
@@ -78,20 +125,43 @@ export async function POST(req: Request) {
               total: parseFloat(budget.total) || 0,
             }
           : undefined,
-        latestupdate:formattedDate,
+        latestupdate: new Date().toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Bangkok",
+        }),
         active: active ?? true,
         trainingstatus,
-        
       },
     });
 
+    for (const stakeholder of Object.values(stakeholders.member) as Stakeholder[]) {
+      await sendNotificationEmail(
+        stakeholder.email,
+        stakeholder.name,
+        information.course
+      );
+
+      // Check if the stakeholder ID is different from the requester ID
+      if (stakeholder.id !== requester_id) {
+        await sendNotificationhistory(
+          stakeholder.id,
+          requester_name,
+          information.course
+        );
+      }
+    }
+
     return new Response(JSON.stringify(newTrainingForm), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error creating Training_Form:', error);
-    return new Response('Error creating Training_Form', { status: 500 });
+    console.error("Error creating Training_Form:", error);
+    return new Response("Error creating Training_Form", { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

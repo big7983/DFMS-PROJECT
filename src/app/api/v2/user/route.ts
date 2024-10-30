@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     // สร้างผู้ใช้ใหม่
     const newUser = await prisma.user.create({ 
-      data: { email, name, level, position, employee_id, section, department, role },
+      data: { email, name, level, position, employee_id, section, department, role, history:[] },
     });
 
     // หา group โดยใช้ชื่อ

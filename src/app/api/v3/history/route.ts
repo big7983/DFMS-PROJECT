@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function PATCH(req: Request) {
   try {
-    const { userid, formid, fromname, nameuser, action, requesterid } = await req.json(); // ข้อมูลที่ส่งมา
+    const { userid, nameuser, action } = await req.json(); // ข้อมูลที่ส่งมา
 
     // ค้นหาโมเดลที่ตรงกับ id
     const existingModel = await prisma.user.findUnique({
@@ -20,38 +20,36 @@ export async function PATCH(req: Request) {
     const currentHistory = Array.isArray(existingModel.history)
       ? existingModel.history
       : [];
-    let updatedFormId = formid; // Use let to allow reassignment
+    // let updatedFormId = formid; // Use let to allow reassignment
 
-    if (formid === "newtrainingfrom") {
-      const getid = await prisma.training_Form.findUnique({
-        where: { requester_id: requesterid },
-        select: { id: true }, // ค้นหาข้อมูล history เดิม
-      });
+    // if (formid === "newtrainingfrom") {
+    //   const getid = await prisma.training_Form.findUnique({
+    //     where: { requester_id: requesterid },
+    //     select: { id: true }, // ค้นหาข้อมูล history เดิม
+    //   });
 
-      if (!getid) {
-        // เปลี่ยนเป็น getid
-        return new Response("Model not found", { status: 404 });
-      }
+    //   if (!getid) {
+    //     // เปลี่ยนเป็น getid
+    //     return new Response("Model not found", { status: 404 });
+    //   }
 
-      updatedFormId = getid.id;
-    } else if (formid === "newtrainingsurvey") {
-      const getid = await prisma.training_Survey.findUnique({
-        where: { reporter_id: requesterid },
-        select: { id: true }, // ค้นหาข้อมูล history เดิม
-      });
+    //   updatedFormId = getid.id;
+    // } else if (formid === "newtrainingsurvey") {
+    //   const getid = await prisma.training_Survey.findUnique({
+    //     where: { reporter_id: requesterid },
+    //     select: { id: true }, // ค้นหาข้อมูล history เดิม
+    //   });
 
-      if (!getid) {
-        // เปลี่ยนเป็น getid
-        return new Response("Model not found", { status: 404 });
-      }
+    //   if (!getid) {
+    //     // เปลี่ยนเป็น getid
+    //     return new Response("Model not found", { status: 404 });
+    //   }
 
-      updatedFormId = getid.id;
-    }
+    //   updatedFormId = getid.id;
+    // }
 
     // สร้างข้อมูลใหม่สำหรับ history
     const newHistoryEntry = {
-      formid: updatedFormId,
-      fromname: fromname,
       name: nameuser,
       action: action,
       datetime: new Date().toLocaleString("en-GB", {
@@ -60,6 +58,7 @@ export async function PATCH(req: Request) {
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "Asia/Bangkok",
       }),
     };
 

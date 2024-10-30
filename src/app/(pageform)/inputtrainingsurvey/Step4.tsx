@@ -36,7 +36,7 @@ const Step4: React.FC<Step4Props> = ({ formData, handlePrevStep }) => {
       title: "คุณต้องการบันทึกใช่หรือไม่?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "ใช่, บันทึก",
+      confirmButtonText: "บันทึก",
       cancelButtonText: "ยกเลิก",
       reverseButtons: true, // สลับตำแหน่งปุ่ม
       confirmButtonColor: "#219653",
@@ -77,11 +77,12 @@ const Step4: React.FC<Step4Props> = ({ formData, handlePrevStep }) => {
         },
       });
 
+      // const getdata = await axios.patch(`/api/v3/trainingsurvey/${id}`)
       // const response = await axios.patch("/api/v3/history", {
-      //   userid: user.id,
-      //   formid: idform,
-      //   fromname: "trainingfrom",
-      //   nameuser: user.name,
+      //   userid: getdata.data.requester_id,
+      //   formid: getdata.data.id,
+      //   fromname: "trainingsurvey",
+      //   nameuser: getdata.data.requester?.name,
       //   action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved}`,
       //   requesterid: "",
       // });

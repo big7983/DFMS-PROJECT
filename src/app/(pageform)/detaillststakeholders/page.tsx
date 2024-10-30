@@ -152,17 +152,28 @@ const Page = () => {
         async (user) => {
            await axios.patch("/api/v3/history", {
             userid: user.id,
-            formid: formid,
-            fromname: "trainingfrom",
-            nameuser: user.name,
+            nameuser: name,
             action: `รับทราบการมีส่วนร่วมแล้วแบบคำร้อง  ${course} สำเร็จ `,
-            requesterid: "",
           });
           console.log(`Email sent to ${user.email}: ${formid} ${user.id}`);
-        }
+         
+        }   
+      );
+
+      const requesterFound = Object.values(data[0].stakeholders.member).some(
+        (user) => user.id === data[0].requester_id
       );
 
       const responsehistory = await Promise.all(hisporyPromises);
+
+      if (!requesterFound) {
+        await axios.patch("/api/v3/history", {
+          userid: data[0].requester_id,
+          nameuser: name,
+          action: `รับทราบการมีส่วนร่วมแล้วแบบคำร้อง ${course} สำเร็จ `,
+        });
+        console.log(`Email sent to requester: ${data[0].requester_id}`);
+      }
 
       if (responstatus && responsehistory) {
         Swal.fire({
@@ -460,6 +471,30 @@ const Page = () => {
                     ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <div className="border-b border-stroke  dark:border-strokedark ">
+            <div className="mb-9">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-9 ">
+                {Object.values(item.approver.member).map(
+                  (approver, index: number) => (
+                    
+                      <div key={index}>
+                        <label className="block mb-1">
+                          ความเห็นหรือข้อแนะอื่น ๆ เพิ่มเติมจาก ผู้อนุมัติลำดับ {+index +1}
+                        </label>
+                        <label className="text-left font-medium text-black dark:text-white">
+                          {approver.opinion === ""
+                            ? "ยังไม่ได้พิจารณา"
+                            : approver.opinion}
+                        </label>
+                      </div>
+                      
+                    
+                  )
+                )}
+              </div>
             </div>
           </div>
 

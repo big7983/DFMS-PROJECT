@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import DropdownUser from "./DropdownUser";
 
 const Header = () => {
@@ -31,20 +30,7 @@ const Header = () => {
           </Link>
           {/* <!-- Hamburger Toggle BTN --> */}
 
-          <Link className="flex flex-row gap-2 lg:hidden" href="/">
-            <Image
-              width={40}
-              height={40}
-              src={"/images/KMITL.png"}
-              alt="Logo"
-            />
-            <Image
-              width={40}
-              height={40}
-              src={"/images/logo-ssi-clear-01.png"}
-              alt="Logo"
-            />
-          </Link>
+         
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">

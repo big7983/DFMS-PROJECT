@@ -1,7 +1,9 @@
 "use client";
 
+import { HiBadgeCheck } from "react-icons/hi";
+
 interface TrainingSurvey {
-  id:  string;
+  id: string;
   idform: string;
   nameform: string;
   trainingform_id: string;
@@ -29,7 +31,7 @@ interface TrainingSurvey {
     service_reason: string;
     selectedOptions: string;
   };
-  evaluatorfeedback: FormData
+  evaluatorfeedback: FormData;
   information: {
     course: string;
     datestart: string;
@@ -42,14 +44,12 @@ interface TrainingSurvey {
     level: string;
     position: string;
     email: string;
-
   };
   evaluator: {
     name: string;
     level: string;
     position: string;
     email: string;
-
   };
 }
 
@@ -69,7 +69,6 @@ type Props = {
 };
 
 export default function FirstComponent({ data, handleNext }: Props) {
-
   return (
     <div className="font-inter text-base w-full p-4 md:w-[85%] xl:w-[70%] flex flex-col justify-between">
       {data.map((item) => (
@@ -89,13 +88,7 @@ export default function FirstComponent({ data, handleNext }: Props) {
                 <label className="block mb-1">วันยืนคำร้อง</label>
                 <div className="w-full">
                   <label className="text-black dark:text-white font-medium">
-                    {new Date().toLocaleString("th-TH", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {item.datesubmiss}
                   </label>
                 </div>
               </div>
@@ -330,12 +323,16 @@ export default function FirstComponent({ data, handleNext }: Props) {
                       </h5>
                     </td>
                     <td className=" text-center border-b border-[#eee] p-4 dark:border-strokedark">
-                      <button
-                        className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
-                        onClick={handleNext}
-                      >
-                        ประเมิน
-                      </button>
+                      {item.isevaluated === true ? (
+                        <HiBadgeCheck className="fill-success" size={24} />
+                      ) : (
+                        <button
+                          className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
+                          onClick={handleNext}
+                        >
+                          ประเมิน
+                        </button>
+                      )}
                     </td>
                   </tr>
                 </tbody>
@@ -343,9 +340,96 @@ export default function FirstComponent({ data, handleNext }: Props) {
             </div>
           </div>
         </div>
-        ))}
+      ))}
+      {data[0].isevaluated && (
+        <>
+          {data.map((item) => (
+            <div
+              key={item.id}
+              className="mt-10 flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
+            >
+              <div className="border-b border-stroke dark:border-strokedark">
+                <h2 className="font-semibold text-ml text-black dark:text-white mb-4">
+                  ความเห็นของผู้บังคับบัญชา
+                </h2>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <div className="mb-6">
+                  <label className="mb-3 block font-medium ">
+                    วัตถุประสงค์
+                    หรือประโยชน์ของการส่งพนักงานเข้ารับการอบรมในหลักสูตรข้างต้นนีที่คาดว่าจะได้รับ
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.objective}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <label className="flex mb-5 items-center text-left font-medium ">
+                  จากการประเมินของท่าน ท่านคิดว่าผู้เข้ารับการอบรม
+                  ได้รับประโยชน์ในแต่ละด้าน มากน้อยเพียงใด
+                </label>
+                <div className="mb-2">
+                  <label className="flex mb-1 items-center text-left font-medium">
+                    ความสอดคล้องกับวัตถุประสงค์ของการส่งเข้าอบรม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.objectiveAlignment}
+                  </label>
+                </div>
+
+                <div className=" mb-2 ">
+                  <label className="flex mb-1 items-center text-left font-medium ">
+                    ประโยชน์ที่ได้รับต่อการทำงาน
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.workBenefit}
+                  </label>
+                </div>
+
+                <div className="mb-6">
+                  <label className="flex mb-1 items-center text-left font-medium ">
+                    ความคุ้มค่าเมื่อเทียบกับค่าธรรมเนียมในการอบรม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.costEffectiveness}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark ">
+                <label className="mb-1 block font-medium ">
+                  ท่านคิดว่า
+                  บริษัทฯควรส่งพนักงานที่เกี่ยวข้องท่านอื่นเข้ารับการอบรม/สัมมนาในหลักสูตรนี้ในโอกาสต่อไปอีกหรือไม่
+                </label>
+                <label className="mb-6 block font-medium text-black dark:text-white">
+                  {item.evaluatorfeedback.futureRecommendation}
+                </label>
+
+                <div className="mb-6">
+                  <label className="mb-1 block  font-medium ">เหตุผล</label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.reasonfutureRecommendation}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <div className="mb-6">
+                  <label className="mb-3 block font-medium ">
+                    ความคิดเห็นหรือข้อเสนอแนะอื่น ๆ เพิ่มเติม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.additionalcomments}
+                  </label>
+                </div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
-
-

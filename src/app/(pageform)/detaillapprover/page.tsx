@@ -127,12 +127,12 @@ export default function Page() {
     statusapproved: string
   ) => {
     const { value: inputValue } = await Swal.fire({
-      title: `เหตุผลในการ ${statusapproved} แบบขออบรม / สัมมนานี้`,
+      title: `เหตุผลในการ ${statusapproved === "approved" ? "อนุมัติ" : "ไม่อนุมัติ"} แบบขออบรม / สัมมนานี้`,
       input: "textarea",
       inputPlaceholder: "กรอกเหตุผล...",
       showCancelButton: true,
       reverseButtons: true,
-      confirmButtonText: "ส่ง",
+      confirmButtonText: "บันทึก",
       cancelButtonText: "ยกเลิก",
       confirmButtonColor: "#219653",
       cancelButtonColor: "#DC3545",
@@ -141,7 +141,7 @@ export default function Page() {
     if (inputValue) {
       try {
         Swal.fire({
-          title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
+          title: "กำลังบันทึก...", // ข้อความที่แสดงในหัวข้อ
           html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
           allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
           showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
@@ -164,16 +164,26 @@ export default function Page() {
         const hisporyPromises = Object.values(data[0].stakeholders.member).map(async (user) => {
           await axios.patch("/api/v3/history", {
             userid: user.id,
-            formid: idform,
-            fromname: "trainingfrom",
-            nameuser: user.name,
-            action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved}`,
-            requesterid: "",
+            nameuser: name,
+            action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved === "approved" ? "อนุมัติคำร้อง":"ไม่อนุมัติคำร้อง"}`,
           });
-          console.log(`Email sent to ${user.email}: ${idform} ${user.id}`);
+          console.log(`sent to ${user.email}: ${idform} ${user.id}`);
         });
 
+        const requesterFound = Object.values(data[0].stakeholders.member).some(
+          (user) => user.id === data[0].requester_id
+        );
+
         const responsehistory = await Promise.all(hisporyPromises);
+
+        if (!requesterFound) {
+          await axios.patch("/api/v3/history", {
+            userid: data[0].requester_id,
+            nameuser: name,
+            action: `พิจารณาแบบคำร้อง ${course} สำเร็จ ผลการพิจารณาคือ ${statusapproved === "approved" ? "อนุมัติคำร้อง":"ไม่อนุมัติคำร้อง"}`,
+          });
+          console.log(`Email sent to requester: ${data[0].requester_id}`);
+        }
 
         // ตรวจสอบสถานะการตอบกลับ
         if (response.status === 200 && responsehistory) {
@@ -491,7 +501,7 @@ export default function Page() {
                               <button
                                 className="bg-meta-3 text-white px-4 py-2 rounded-[20px]"
                                 onClick={() =>
-                                  handleSubmit(item.id, item.information.course ,"6707541eeb1d6f37899f42ac", approver.name, "approved")
+                                  handleSubmit(item.id, item.information.course ,approver.id, approver.name, "approved")
                                 }
                               >
                                 อนุมัติ
@@ -534,6 +544,31 @@ export default function Page() {
               </table>
             </div>
           </div>
+
+          <div className="border-b border-stroke  dark:border-strokedark ">
+            <div className="mb-9">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-9 ">
+                {Object.values(item.approver.member).map(
+                  (approver, index: number) => (
+                    
+                      <div key={index}>
+                        <label className="block mb-1">
+                          ความเห็นหรือข้อแนะอื่น ๆ เพิ่มเติมจาก ผู้อนุมัติลำดับ {+index +1}
+                        </label>
+                        <label className="text-left font-medium text-black dark:text-white">
+                          {approver.opinion === ""
+                            ? "ยังไม่ได้พิจารณา"
+                            : approver.opinion}
+                        </label>
+                      </div>
+                      
+                    
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+
         </div>
       ))}
     </div>

@@ -82,7 +82,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
 
         <div className="border-b border-stroke dark:border-strokedark">
           <div className="mb-6">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-3 block font-medium text-black dark:text-white">
               1. วัตถุประสงค์
               หรือประโยชน์ของการส่งพนักงานเข้ารับการอบรมในหลักสูตรข้างต้นนีที่คาดว่าจะได้รับ
             </label>
@@ -112,7 +112,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
                 <label key={option} className="flex items-center space-x-2">
                   <input
                     type="radio" // เปลี่ยนจาก checkbox เป็น radio
-                    className="form-radio w-7 h-7 text-primary"
+                    className="form-radio w-7 h-7 accent-primary ring-offset-white"
                     checked={formData.objectiveAlignment === option} // ตรวจสอบว่าถูกเลือกหรือไม่
                     onChange={() =>
                       handleRadioChange("objectiveAlignment", option)
@@ -133,7 +133,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
                 <label key={option} className="flex items-center space-x-2">
                   <input
                     type="radio" // เปลี่ยนจาก checkbox เป็น radio
-                    className="form-radio w-7 h-7 text-primary"
+                    className="form-radio w-7 h-7 accent-primary"
                     checked={formData.workBenefit === option} // ตรวจสอบว่าถูกเลือกหรือไม่
                     onChange={() => handleRadioChange("workBenefit", option)} // เมื่อเปลี่ยนสถานะ radio
                   />
@@ -152,7 +152,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
                 <label key={option} className="flex items-center space-x-2">
                   <input
                     type="radio" // เปลี่ยนจาก checkbox เป็น radio
-                    className="form-radio w-7 h-7 text-primary"
+                    className="form-radio w-7 h-7 accent-primary"
                     checked={formData.costEffectiveness === option} // ตรวจสอบว่าถูกเลือกหรือไม่
                     onChange={() =>
                       handleRadioChange("costEffectiveness", option)
@@ -166,7 +166,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
         </div>
 
         <div className="border-b border-stroke dark:border-strokedark ">
-          <label className="mb-5 block text-sm font-medium text-black dark:text-white">
+          <label className="mb-5 block font-medium text-black dark:text-white">
             3. ท่านคิดว่า
             บริษัทฯควรส่งพนักงานที่เกี่ยวข้องท่านอื่นเข้ารับการอบรม/สัมมนาในหลักสูตรนี้ในโอกาสต่อไปอีกหรือไม่
           </label>
@@ -176,7 +176,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
                 <label key={option} className="flex items-center space-x-2">
                   <input
                     type="radio" // เปลี่ยนจาก checkbox เป็น radio
-                    className="form-radio w-7 h-7 text-primary"
+                    className="form-radio w-7 h-7 accent-primary"
                     checked={formData.futureRecommendation === option} // ตรวจสอบว่าถูกเลือกหรือไม่
                     onChange={() =>
                       handleRadioChange("futureRecommendation", option)
@@ -188,7 +188,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
             )}
           </div>
           <div className="mb-6">
-            <label className="mb-1 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-1 block  font-medium text-black dark:text-white">
               เหตุผล
             </label>
             <textarea
@@ -205,7 +205,7 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
 
         <div className="border-b border-stroke dark:border-strokedark">
           <div className="mb-6">
-            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+            <label className="mb-3 block  font-medium text-black dark:text-white">
               4. ความคิดเห็นหรือข้อเสนอแนะอื่น ๆ เพิ่มเติม
             </label>
             <textarea
@@ -223,14 +223,13 @@ export default function SecondComponent({ handleBack, handleSubmit }: Props) {
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <div className="flex justify-between mt-10">
         <button
-          className="inline-flex items-center justify-center rounded-full bg-meta-6 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+          className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
           onClick={handleBack}
         >
           ย้อนกลับ
         </button>
         <button
-          className="inline-flex items-center justify-center rounded-full bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
-          onClick={Submit}
+className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${isFormComplete ? 'bg-meta-3 hover:bg-opacity-90' : 'bg-slate-300 '}`}          onClick={Submit}
           disabled={!isFormComplete}
         >
           ส่ง

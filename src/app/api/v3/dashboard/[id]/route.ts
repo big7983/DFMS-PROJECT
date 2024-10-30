@@ -12,13 +12,18 @@ export async function GET(
 
     // ดึงหลายฟอร์มตามเงื่อนไข (สามารถเพิ่มเงื่อนไขการค้นหาได้ใน where)
     const trainingForms = await prisma.training_Form.findMany({
-      where: {
-        // เพิ่มเงื่อนไขอื่น ๆ เช่น active: true หากต้องการ
-      },
       select: {
+        requester_id: true,
         stakeholders: true,
         approver: true,
         issendrepoeted: true
+      },
+    });
+
+    const requesterCount = await prisma.training_Form.count({
+      where: {
+        requester_id: id,
+        issendrepoeted: false,  // เช็คว่ามีการรายงานหรือไม่
       },
     });
 
@@ -33,7 +38,8 @@ export async function GET(
     const evaluatorCount = await prisma.training_Survey.count({
       where: {
         evaluator_id: id,
-        isevaluated: false,  // เช็คว่ามีการประเมินหรือไม่
+        isrepoeted: true,
+        isevaluated:false  // เช็คว่ามีการประเมินหรือไม่
       },
     });
 
@@ -45,34 +51,31 @@ export async function GET(
     // คำนวณผลรวมของ notAcknowledgedCount และ approvedCount
     const totals = trainingForms.reduce(
       (acc, form) => {
-        const { stakeholders, approver, issendrepoeted } = form;
+        const { stakeholders, approver, requester_id } = form;
 
         // คำนวณจำนวนสมาชิกใน stakeholders ที่ acknowledged === false
         const notAcknowledgedCount = Object.values(stakeholders.member as Record<string, { id: string; acknowledged: boolean }>).filter(
-          (stakeholder) => stakeholder.id === id && !stakeholder.acknowledged
+          (stakeholder) => stakeholder.id === id && !stakeholder.acknowledged && id !== requester_id
         ).length;
 
         // คำนวณจำนวนสมาชิกใน approver ที่ id ตรงกับที่ได้รับมาและ approved === "approved"
         const approvedCount = Object.values(approver.member as Record<string, { id: string; approved: string }>).filter(
-          (approverMember) => approverMember.id === id && approverMember.approved === 'pending'
+          (approverMember , index) => approverMember.id === id && approverMember.approved === 'pending' && stakeholders.isfullyacknowledged === true && index+1 <= approver.approvalorder
         ).length;
-
-        const isfullyapprovedCount = approver.isfullyapproved === 'pending' && issendrepoeted === false  ? 1 : 0;
 
         // เพิ่มค่าเข้า accumulator
         acc.totalNotAcknowledged += notAcknowledgedCount;
         acc.totalApproved += approvedCount;
-        acc.totalNotFullyApproved += isfullyapprovedCount;
 
         return acc;
       },
-      { totalNotAcknowledged: 0, totalApproved: 0, totalNotFullyApproved: 0 } // ค่าเริ่มต้น
+      { totalNotAcknowledged: 0, totalApproved: 0,  } // ค่าเริ่มต้น
     );
 
     const result = {
-      totalNotAcknowledged: totals.totalNotAcknowledged,
-      totalApproved: totals.totalApproved,
-      totalNotFullyApproved: totals.totalNotFullyApproved,
+      totalNotAcknowledged: totals.totalNotAcknowledged, //สถานะผู้มีส่วนร่วม
+      totalApproved: totals.totalApproved, //สถานะอนุมัติ
+      requesterCount, //สถานะคำร้อง
       reporterCount, 
       evaluatorCount, 
     };

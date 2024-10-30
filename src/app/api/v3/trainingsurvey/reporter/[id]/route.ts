@@ -26,8 +26,6 @@ async function sendEvaluatorEmail(approverEmail:string, recieverName: string, co
 
 async function sendNotificationhistory(
   userid: string,
-  formid: string,
-  fromname: string,
   nameuser: string,
   course: any
 ) {
@@ -37,8 +35,6 @@ async function sendNotificationhistory(
     // Send verification email
     await history(
       userid,
-      formid,
-      fromname,
       nameuser,
       action
     );
@@ -73,6 +69,14 @@ export async function PATCH(
     const updatedSurvey = await prisma.training_Survey.update({
       where: { id },
       data: {
+        datesubmiss: new Date().toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Bangkok",
+        }),
         survey: {
           keycontent: survey.keycontent,
           matchesobjectives: survey.matchesobjectives,
@@ -88,21 +92,20 @@ export async function PATCH(
           selectedOptions: survey.selectedOptions,
         },
         isrepoeted: true,
-        latestupdate: new Date().toLocaleString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',       
-          hour: '2-digit',
-          minute: '2-digit',
-        }), 
+        latestupdate: new Date().toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Bangkok",
+        }),
       },
     });
 
     await sendEvaluatorEmail(trainingSurvey.evaluator.email, trainingSurvey.evaluator.name, trainingSurvey.information?.course);
     await sendNotificationhistory(
       trainingSurvey.evaluator_id || "",
-      id,
-      "trainingsurvey",
       trainingSurvey.reporter.name,
       trainingSurvey.information?.course
     );

@@ -51,10 +51,11 @@ const Step4: React.FC<Step4Props> = ({
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Bangkok",
   };
   const formatter = new Intl.DateTimeFormat(locale, options);
   const formattedDate = formatter.format(date);
-  console.log(formattedDate);
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -149,8 +150,19 @@ const Step4: React.FC<Step4Props> = ({
         isfullyacknowledged = false; // ถ้ามีผู้มีส่วนได้ส่วนเสียมากกว่า 1 คน
       }
 
+      if(isfullyacknowledged){
+        await axios.patch("/api/v3/history", {
+          userid: approversObject[0].id,
+          nameuser: approversObject[0].name,
+          action: `มีแบบฟอร์มฝึกอบรมใหม่ ${formData.course} กำลังรอการอนุมัติจากคุณ.`,
+        });
+
+        
+        console.log(`Email sent to ${approversObject[0].email}`);
+      }
+
       // ส่งข้อมูลไปยัง API
-      const success = await axios.post("/api/v3/trainingform", {
+      await axios.post("/api/v3/trainingform", {
         idform: "T001",
         nameform: "แบบขออนุมัติเข้ารับการอบรมสัมมนา",
         datesubmiss: formattedDate,
@@ -187,70 +199,43 @@ const Step4: React.FC<Step4Props> = ({
         trainingstatus: "wait_stakeholders", // ตั้งค่า default status
       });
 
-      return success
-    } catch (error) {
-      console.error("Error creating training form:", error);
-      return false
-    }
-  };
-
-  const sendemail = async () => {
-    Swal.fire({
-      title: "กำลังบันทึกข้อมูล...",
-      html: '<div class="spinner"></div>',
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
-    try {
-      // สร้าง array สำหรับการส่งอีเมล
-      // const emailPromises = selectedUsers.map(async (user) => {
-      //   const response = await axios.post("/api/v3/sendemail", {
-      //     recipient: user.email, // อีเมลผู้ใช้
-      //     subject: `แจ้งเตือน: มีฟอร์มการฝึกอบรม ${formData.course} ให้คุณรับทราบการมีส่วนร่วม`, // หัวข้อ
-      //     recieverName: user.name,
-      //     message: `
-      //     คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`, // เนื้อหา
-      //   });
-      //   console.log(`Email sent to ${user.email}: ${response.data.message}`);
-      // });
-
-      const hisporyPromises = selectedUsers.map(async (user) => {
-        const response = await axios.patch("/api/v3/history", {
-          userid: user.userid,
-          formid: `newtrainingfrom`,
-          fromname: "trainingfrom",
-          nameuser: user.name,
-          action: `คุณได้รับเชิญเข้าร่วมการฝึกอบรม ${formData.course} กรุณาเข้าไปอ่านรายละเอียดและยืนยันการมีส่วนร่วม`,
-          requesterid: user_id,
-        });
-        console.log(`Email sent to ${user.email}: ${response.data.message}`);
+      Swal.fire({
+        title: "บันทึกสำเร็จ!",
+        icon: "success",
+        confirmButtonText: "กลับสู่หน้าหลัก",
+        confirmButtonColor: "#219653",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: "กำลังโหลด...", // ข้อความที่แสดงในหัวข้อ
+            html: '<div class="spinner"></div>', // แสดง HTML สำหรับ loading spinner
+            allowOutsideClick: false, // ไม่ให้ปิดกล่องแจ้งเตือนเมื่อคลิกข้างนอก
+            showConfirmButton: false, // ไม่แสดงปุ่มยืนยัน
+            didOpen: () => {
+              Swal.showLoading();
+            },
+          });
+          router.push("/trainingform");
+        }
       });
-      // รอให้ส่งอีเมลทั้งหมดเสร็จสิ้น
-      //const emailSuccess await Promise.all(emailPromises);
-      const emailSuccess = true
-      const hisporySuccess = await Promise.all(hisporyPromises);
-
-      if(emailSuccess && hisporySuccess){
-        return true
-      }else{
-        return false
-      }
     } catch (error) {
-      console.error("Error sending emails:", error);
-      return false
+      Swal.fire(
+        "เกิดข้อผิดพลาด",
+        "ไม่สามารถบันทึกแบบคำร้องได้",
+        "error"
+      ); 
+      console.error("Error creating training form:", error);
+      return false;
     }
   };
 
   const showAlert = async () => {
     const result = await Swal.fire({
       title: "คุณต้องการบันทึกใช่หรือไม่?",
+      text: "ระบบจะบันทึกแบบฟอร์มและส่งอีเมลหาผู้เกี่ยวข้อง",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "ใช่, บันทึก",
+      confirmButtonText: "บันทึก",
       cancelButtonText: "ยกเลิก",
       reverseButtons: true, // สลับตำแหน่งปุ่ม
       confirmButtonColor: "#219653",
@@ -259,51 +244,14 @@ const Step4: React.FC<Step4Props> = ({
 
     if (result.isConfirmed) {
       try {
-        const submitSuccess = await handleSubmit(); // รอการทำงานของ handleSubmit สำเร็จ
-        const emailSuccess = await sendemail(); // รอการทำงานของ sendemail สำเร็จ
+        handleSubmit(); 
 
-        if (submitSuccess && emailSuccess) {
-          // แสดงการแจ้งเตือนความสำเร็จ
-          Swal.fire({
-            title: "บันทึกสำเร็จ!",
-            icon: "success",
-            confirmButtonText: "กลับสู่หน้าหลัก",
-            confirmButtonColor: "#219653",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              router.push("/trainingform");
-            }
-          });
-        } else {
-          // ถ้ามีปัญหาในการทำงานใด ๆ
-          Swal.fire({
-            title: "เกิดข้อผิดพลาด!",
-            text: "การบันทึกข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง",
-            icon: "error",
-            confirmButtonText: "ตกลง",
-            confirmButtonColor: "#DC3545",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              router.push("/trainingform");
-            }
-          });
-        }
-        
       } catch (error) {
         // แสดงข้อผิดพลาดถ้ามีปัญหาในการทำงาน
-        Swal.fire({
-          title: "เกิดข้อผิดพลาด!",
-          text: "การบันทึกข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง",
-          icon: "error",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#DC3545",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push("/trainingform");
-          }
-        });
+        Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+
         console.log(error);
-      } 
+      }
     }
   };
 

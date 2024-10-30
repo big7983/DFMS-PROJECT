@@ -6,43 +6,44 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/Loader";
 import { MdEditDocument } from "react-icons/md";
-import { useRouter } from "next/navigation";
 
 const Dashboard: React.FC = () => {
   const { data: session } = useSession();
-  const [totalNotFullyApproved, setTotalNotFullyApproved] = useState("");
+  const [requesterCount, setrequesterCount] = useState("");
   const [totalNotAcknowledged, setTotalNotAcknowledged] = useState("");
   const [totalApproved, setTotalApproved] = useState("");
   const [reporterCount, setReporterCount] = useState("");
   const [evaluatorCount, setEvaluatorCount] = useState("");
 
   const [loading, setLoading] = useState(true);
-
-  const [role, setRole] = useState("user");
-
-  const router = useRouter();
+  const [role, setRole] = useState("enduser");
 
   const fetchData = async (email: string) => {
     try {
       const resid = await axios.get(`/api/v2/user/select/${email}`);
       console.log("resid = ", resid.data.id);
+      setRole(resid.data.role);
 
       const res = await axios.get(`/api/v3/dashboard/${resid.data.id}`);
-      setTotalNotFullyApproved(res.data.totalNotFullyApproved + " คำร้อง");
+      console.log("res dashboard = ", res);
+
+      setrequesterCount(res.data.requesterCount + " คำร้อง");
       setTotalNotAcknowledged(res.data.totalNotAcknowledged + " คำร้อง");
       setTotalApproved(res.data.totalApproved + " คำร้อง");
       setReporterCount(res.data.reporterCount + " รายงาน");
       setEvaluatorCount(res.data.evaluatorCount + " คำร้อง");
+      setLoading(false);
 
-      setRole(resid.data.role);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         // ถ้าเป็น 404 ให้ตั้งค่าทั้งหมดเป็น 0
-        setTotalNotFullyApproved("0 คำร้อง");
+        setrequesterCount("0 คำร้อง");
         setTotalNotAcknowledged("0 คำร้อง");
         setTotalApproved("0 คำร้อง");
         setReporterCount("0 รายงาน");
         setEvaluatorCount("0 คำร้อง");
+        console.error("ไม่พบคำร้อง 404");
+        setLoading(false);
       } else {
         console.error("Error fetching data:", error);
       }
@@ -56,9 +57,6 @@ const Dashboard: React.FC = () => {
       fetchData(session?.user?.email);
     }
 
-    if (!session) {
-      router.push("/login");
-    }
   });
 
   if (loading) {
@@ -66,13 +64,13 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div>
-      {role === "user" ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5 ">
+    <div >
+      {role === "enduser" ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5 ">
           <Link href="/trainingform">
             <CardDataStats
               title="แบบอนุมัติของฉัน"
-              total={totalNotFullyApproved}
+              total={requesterCount}
             >
               <svg
                 className="w-6 h-6 text-primary dark:text-white"
@@ -123,28 +121,6 @@ const Dashboard: React.FC = () => {
               <MdEditDocument className="fill-primary" size={24} />
             </CardDataStats>
           </Link>
-
-          <Link href="/inputtrainingform">
-            <CardDataStats
-              title="แบบขออนุมัติเข้ารับการอบรมสัมมนา"
-              total="เพิ่มแบบคำร้อง"
-            >
-              <svg
-                className="fill-primary dark:fill-white"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </CardDataStats>
-          </Link>
         </div>
       ) : (
         <div className="grid gap-5">
@@ -152,7 +128,7 @@ const Dashboard: React.FC = () => {
             <Link href="/trainingform">
               <CardDataStats
                 title="แบบอนุมัติของฉัน"
-                total={totalNotFullyApproved}
+                total={requesterCount}
               >
                 <svg
                   className="w-6 h-6 text-primary dark:text-white"
@@ -205,7 +181,7 @@ const Dashboard: React.FC = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5 ">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5 ">
             <Link href="/approveform">
               <CardDataStats
                 title="คำร้องขออนุมัติถึงฉัน"
@@ -255,31 +231,36 @@ const Dashboard: React.FC = () => {
                 </svg>
               </CardDataStats>
             </Link>
-
-            <Link href="/inputtrainingform">
-              <CardDataStats
-                title="แบบขออนุมัติเข้ารับการอบรมสัมมนา"
-                total="เพิ่มแบบคำร้อง"
-              >
-                <svg
-                  className="fill-primary dark:fill-white"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </CardDataStats>
-            </Link>
           </div>
         </div>
       )}
+      <div className="border-t border-meta-9 my-6" />
+
+      <div className="">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5 ">
+          <Link href="/inputtrainingform">
+            <CardDataStats
+              title="แบบขออนุมัติเข้ารับการอบรมสัมมนา"
+              total="เพิ่มแบบคำร้อง"
+            >
+              <svg
+                className="fill-primary dark:fill-white"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </CardDataStats>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

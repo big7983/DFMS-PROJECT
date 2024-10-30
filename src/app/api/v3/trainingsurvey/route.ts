@@ -48,11 +48,7 @@ export async function POST(req: Request) {
           idform: "T002",
           nameform: "รายงานผลการฝึกอบรม",
           trainingform_id: trainingform_id || null, // ใส่ null ถ้าไม่มีค่า
-          datesubmiss: new Date().toLocaleString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }),
+          datesubmiss: "",
           information: {
             course: trainingForm.information?.course || "ไม่มีข้อมูล",
             location: trainingForm.information?.location || "ไม่มีข้อมูล",
@@ -90,6 +86,7 @@ export async function POST(req: Request) {
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
+            timeZone: "Asia/Bangkok",
           }),
           reporter_id: reporter_id,
           reporter: {

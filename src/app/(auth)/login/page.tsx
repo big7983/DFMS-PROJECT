@@ -126,7 +126,7 @@ export default function Login() {
 
   return (
     <div className="w-full px-5 h-screen bg-whiten flex justify-center items-center">
-      <div className="w-[450px] p-10 rounded-[20px] bg-white">
+      <div className="w-[450px] sm:p-10 py-10 px-5.5 rounded-[20px] bg-white">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-center gap-3.5 ">
             <Image

@@ -107,13 +107,7 @@ const DropdownNotification = () => {
                       <li>
                         <Link
                           className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                          href={
-                            item.fromname === "trainingfrom"
-                              ? `/detailltrainingform?search=${item.formid}`
-                              : item.fromname === "trainingsurvey"
-                              ? `/detailltrainingsurvey?search=${item.formid}`
-                              : "#"
-                          }
+                          href={"#"}
                           key={item.index}
                         >
                           <p className="text-sm">

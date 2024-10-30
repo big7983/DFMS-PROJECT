@@ -29,8 +29,6 @@ async function sendApprovalEmail(
 
 async function sendNotificationhistory(
   userid: string,
-  formid: string,
-  fromname: string,
   nameuser: string,
   course: any
 ) {
@@ -40,8 +38,6 @@ async function sendNotificationhistory(
     // Send verification email
     await history(
       userid,
-      formid,
-      fromname,
       nameuser,
       action
     );
@@ -54,17 +50,6 @@ async function sendNotificationhistory(
 }
 
 export async function PATCH(req: Request) {
-  const date = new Date();
-  const locale = "en-GB";
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  const formattedDate = formatter.format(date);
 
   try {
     const { id, stakeholderId } = await req.json();
@@ -105,7 +90,14 @@ export async function PATCH(req: Request) {
           member: updatedMember,
           isfullyacknowledged: isfullyacknowledged,
         },
-        latestupdate: formattedDate,
+        latestupdate: new Date().toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Bangkok",
+        }),
       },
     });
 
@@ -121,8 +113,6 @@ export async function PATCH(req: Request) {
         );
         await sendNotificationhistory(
           firstApproverID || "",
-          id,
-          "trainingfrom",
           recieverName.name,
           trainingForm.information?.course
         );

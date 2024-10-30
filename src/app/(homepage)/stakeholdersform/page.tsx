@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import { DataGrid } from "@mui/x-data-grid";
-import { TextField, Select, MenuItem } from "@mui/material";
+import { TextField, Select, MenuItem, createTheme, ThemeProvider } from "@mui/material";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -75,11 +75,33 @@ export default function Stakeholdersform() {
     return matchesCourse && matchesStatus;
   });
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#FF6500',
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#FF6500',
+            },
+          },
+        },
+      },
+      
+    },
+  });
+
   if (loading) {
     return <Loader />;
   }
 
   return (
+    <ThemeProvider theme={theme}>
+
     <div className="bg-white dark:bg-boxdark-2 sm:p-10 py-10 px-4 rounded-[20px]">
       <div className="w-full">
         <p className="text-black dark:text-bodydark font-bold mb-6 text-xl">
@@ -166,7 +188,7 @@ export default function Stakeholdersform() {
                   {params.row.isfullyacknowledged === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-warning rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         ผู้มีส่วนร่วมรับทราบแล้ว (
                         {params.row.acknowledgedStakeholders}/
                         {params.row.totalStakeholders})
@@ -175,7 +197,7 @@ export default function Stakeholdersform() {
                   ) : params.row.isfullyapproved === "pending" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-warning rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         รอผู้อนุมัติ ({params.row.approvedApprovers}/
                         {params.row.totalApprovers})
                       </div>
@@ -183,21 +205,21 @@ export default function Stakeholdersform() {
                   ) : params.row.isfullyapproved === "fullyapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-success rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         อนุมัติแล้ว
                       </div>
                     </div>
                   ) : params.row.isfullyapproved === "unapproved" ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-danger rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         ไม่ได้รับการอนุมัติ
                       </div>
                     </div>
                   ) : (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-danger rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         เกิดข้อผิดพลาด
                       </div>
                     </div>
@@ -305,5 +327,7 @@ export default function Stakeholdersform() {
         />
       </div>
     </div>
+    </ThemeProvider>
+
   );
 }

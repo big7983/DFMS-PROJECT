@@ -4,8 +4,6 @@ const prisma = new PrismaClient();
 
 export const history = async (
     userid: string,
-    formid: string,
-    fromname: string,
     nameuser: string,
     action: string
   ) => {
@@ -25,38 +23,10 @@ export const history = async (
     const currentHistory = Array.isArray(existingModel.history)
       ? existingModel.history
       : [];
-    let updatedFormId = formid; // Use let to allow reassignment
-
-    if (formid === "newtrainingfrom") {
-      const getid = await prisma.training_Form.findUnique({
-        where: { id: userid },
-        select: { id: true }, // ค้นหาข้อมูล history เดิม
-      });
-
-      if (!getid) {
-        // เปลี่ยนเป็น getid
-        return new Response("Model not found", { status: 404 });
-      }
-
-      updatedFormId = getid.id;
-    } else if (formid === "newtrainingfrom") {
-      const getid = await prisma.training_Survey.findUnique({
-        where: { id: userid },
-        select: { id: true }, // ค้นหาข้อมูล history เดิม
-      });
-
-      if (!getid) {
-        // เปลี่ยนเป็น getid
-        return new Response("Model not found", { status: 404 });
-      }
-
-      updatedFormId = getid.id;
-    }
+   
 
     // สร้างข้อมูลใหม่สำหรับ history
     const newHistoryEntry = {
-      formid: updatedFormId,
-      fromname: fromname,
       name: nameuser,
       action: action,
       datetime: new Date().toLocaleString("en-GB", {

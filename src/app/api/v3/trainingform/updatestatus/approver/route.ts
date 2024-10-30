@@ -38,13 +38,7 @@ async function sendNotificationhistory(
     const action = `มีแบบฟอร์มฝึกอบรมใหม่ ${course} กำลังรอการอนุมัติจากคุณ.`;
 
     // Send verification email
-    await history(
-      userid,
-      formid,
-      fromname,
-      nameuser,
-      action
-    );
+    await history(userid, nameuser, action);
   } catch (error) {
     console.error("Failed to send email : 500", error);
     return new Response("Failed to send email : 500  ", {
@@ -54,17 +48,6 @@ async function sendNotificationhistory(
 }
 
 export async function PATCH(req: Request) {
-  const date = new Date();
-  const locale = "en-GB";
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  const formattedDate = formatter.format(date);
 
   try {
     const { id, approverId, opinion, statusapproved } = await req.json();
@@ -121,13 +104,23 @@ export async function PATCH(req: Request) {
           isfullyapproved: isfullyapproved,
           approvalorder: trainingForm.approver.approvalorder + 1,
         },
-        latestupdate: formattedDate,
+        latestupdate: new Date().toLocaleString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Bangkok",
+        }),
       },
     });
 
-    if (statusapproved === "approved" && !(Object.values(updatedMember).every(
-      (app: { approved: string }) => app.approved === "approved"
-    ))) {
+    if (
+      statusapproved === "approved" &&
+      !Object.values(updatedMember).every(
+        (app: { approved: string }) => app.approved === "approved"
+      )
+    ) {
       const ApproverID = (trainingForm.approver as any)?.member[
         approver.approvalorder
       ].id;
@@ -143,7 +136,7 @@ export async function PATCH(req: Request) {
           recieverName.name,
           trainingForm.information?.course
         );
-      
+
         await sendNotificationhistory(
           ApproverID || "",
           id,

@@ -7,7 +7,6 @@ import { HiBadgeCheck } from "react-icons/hi";
 import Loader from "@/components/Loader";
 import { BiError, BiTime } from "react-icons/bi";
 
-
 interface TrainingSurveyData {
   id: string;
   reporter: { name: string; position: string };
@@ -34,12 +33,24 @@ interface TrainingSurveyData {
     service_reason: string;
     selectedOptions: string;
   };
+  evaluatorfeedback: FormData;
+
   evaluator: {
     name: string;
     level: string;
     position: string;
   };
   isevaluated: boolean;
+}
+
+interface FormData {
+  objective: string;
+  costEffectiveness: string;
+  workBenefit: string;
+  objectiveAlignment: string;
+  futureRecommendation: string;
+  reasonfutureRecommendation: string;
+  additionalcomments: string;
 }
 
 const Page = () => {
@@ -352,8 +363,97 @@ const Page = () => {
           </div>
         </div>
       ))}
+      {data[0].isevaluated && (
+        <>
+          {data.map((item) => (
+            <div
+              key={item.id}
+              className="mt-10 flex flex-col gap-9 border px-[50px] py-5.5 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark rounded-[20px]"
+            >
+              <div className="border-b border-stroke dark:border-strokedark">
+                <h2 className="font-semibold text-ml text-black dark:text-white mb-4">
+                  ความเห็นของผู้บังคับบัญชา
+                </h2>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <div className="mb-6">
+                  <label className="mb-3 block font-medium ">
+                    วัตถุประสงค์
+                    หรือประโยชน์ของการส่งพนักงานเข้ารับการอบรมในหลักสูตรข้างต้นนีที่คาดว่าจะได้รับ
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.objective}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <label className="flex mb-5 items-center text-left font-medium ">
+                  จากการประเมินของท่าน ท่านคิดว่าผู้เข้ารับการอบรม
+                  ได้รับประโยชน์ในแต่ละด้าน มากน้อยเพียงใด
+                </label>
+                <div className="mb-2">
+                  <label className="flex mb-1 items-center text-left font-medium">
+                    ความสอดคล้องกับวัตถุประสงค์ของการส่งเข้าอบรม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.objectiveAlignment}
+                  </label>
+                </div>
+
+                <div className=" mb-2 ">
+                  <label className="flex mb-1 items-center text-left font-medium ">
+                    ประโยชน์ที่ได้รับต่อการทำงาน
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.workBenefit}
+                  </label>
+                </div>
+
+                <div className="mb-6">
+                  <label className="flex mb-1 items-center text-left font-medium ">
+                    ความคุ้มค่าเมื่อเทียบกับค่าธรรมเนียมในการอบรม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.costEffectiveness}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark ">
+                <label className="mb-1 block font-medium ">
+                  ท่านคิดว่า
+                  บริษัทฯควรส่งพนักงานที่เกี่ยวข้องท่านอื่นเข้ารับการอบรม/สัมมนาในหลักสูตรนี้ในโอกาสต่อไปอีกหรือไม่
+                </label>
+                <label className="mb-6 block font-medium text-black dark:text-white">
+                  {item.evaluatorfeedback.futureRecommendation}
+                </label>
+
+                <div className="mb-6">
+                  <label className="mb-1 block  font-medium ">เหตุผล</label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.reasonfutureRecommendation}
+                  </label>
+                </div>
+              </div>
+
+              <div className="border-b border-stroke dark:border-strokedark">
+                <div className="mb-6">
+                  <label className="mb-3 block font-medium ">
+                    ความคิดเห็นหรือข้อเสนอแนะอื่น ๆ เพิ่มเติม
+                  </label>
+                  <label className=" block font-medium text-black dark:text-white">
+                    {item.evaluatorfeedback.additionalcomments}
+                  </label>
+                </div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
-}
+};
 
 export default Page;

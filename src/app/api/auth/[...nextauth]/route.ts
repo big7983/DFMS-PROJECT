@@ -93,7 +93,6 @@ const handler = NextAuth({
           session.user.id = existingUser.id
         }
       }
-      console.log(session)
       return session;
     },
     

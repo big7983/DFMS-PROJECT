@@ -12,13 +12,11 @@ interface Step2Props {
     other?: number;
     total: number;
   };
-  handlePrevStep: () => void, 
+  handlePrevStep: () => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNextStep: () => void;
   canProceed: boolean;
 }
-
-
 
 const Step2: React.FC<Step2Props> = ({
   formData,
@@ -31,14 +29,17 @@ const Step2: React.FC<Step2Props> = ({
     console.log("Step 2 Data:", formData);
   }, [formData]);
 
-  formData.total = 0 +
-  Number(formData.received) +
-  Number(formData.remaining) +
-  Number(formData.registration) +
-  Number(formData.room) +
-  Number(formData.transportation) +
-  Number(formData.allowance) +
-  Number(formData.other);
+  formData.total =
+    0 +
+    Number(formData.registration || 0) +
+    Number(formData.room || 0) +
+    Number(formData.transportation || 0) +
+    Number(formData.allowance || 0) +
+    Number(formData.other || 0);
+
+  formData.remaining = Number(formData.received || 0) - formData.total;
+
+  const checkremaining = formData.remaining >= 0;
 
   return (
     <motion.div
@@ -57,143 +58,159 @@ const Step2: React.FC<Step2Props> = ({
                 </h3>
               </div>
               <div className="py-6.5 px-4.5 sm:px-[50px]">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number2"
-                    >
-                      งบประมาณที่ได้รับ
-                    </label>
-                    <input
-                      name="received"
-                      id="received"
-                      type="number"
-                      value={formData.received}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                <div className="border-b border-stroke dark:border-strokedark">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number2"
+                      >
+                        งบประมาณที่ได้รับ
+                      </label>
+                      <input
+                        name="received"
+                        id="received"
+                        type="number"
+                        value={formData.received}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number3"
-                    >
-                      งบประมาณคงเหลือ
-                    </label>
-                    <input
-                      name="remaining"
-                      type="number"
-                      value={formData.remaining}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                </div>
+                <div className="border-b border-stroke dark:border-strokedark">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-4 my-5">
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number4"
+                      >
+                        ค่าลงทะเบียน
+                      </label>
+                      <input
+                        name="registration"
+                        type="number"
+                        value={formData.registration}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number5"
+                      >
+                        ค่าที่พัก
+                      </label>
+                      <input
+                        name="room"
+                        type="number"
+                        value={formData.room}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number6"
+                      >
+                        ค่าพาหนะ
+                      </label>
+                      <input
+                        name="transportation"
+                        type="number"
+                        value={formData.transportation}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number7"
+                      >
+                        ค่าเบี้ยเลี้ยง
+                      </label>
+                      <input
+                        name="allowance"
+                        type="number"
+                        value={formData.allowance}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number8"
+                      >
+                        ค่าอื่น ๆ รวม
+                      </label>
+                      <input
+                        name="other"
+                        type="number"
+                        value={formData.other}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number9"
+                      >
+                        ค่าใช้จ่ายรวมทั้งหมด
+                      </label>
+                      <input
+                        name="total"
+                        type="number"
+                        value={formData.total}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number4"
-                    >
-                      ค่าลงทะเบียน
-                    </label>
-                    <input
-                      name="registration"
-                      type="number"
-                      value={formData.registration}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number5"
-                    >
-                      ค่าที่พัก
-                    </label>
-                    <input
-                      name="room"
-                      type="number"
-                      value={formData.room}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number6"
-                    >
-                      ค่าพาหนะ
-                    </label>
-                    <input
-                      name="transportation"
-                      type="number"
-                      value={formData.transportation}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number7"
-                    >
-                      ค่าเบี้ยเลี้ยง
-                    </label>
-                    <input
-                      name="allowance"
-                      type="number"
-                      value={formData.allowance}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                     className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number8"
-                    >
-                      ค่าอื่น ๆ รวม
-                    </label>
-                    <input
-                      name="other"
-                      type="number"
-                      value={formData.other}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="text-black dark:text-white block mb-1"
-                      htmlFor="number9"
-                    >
-                      รวมทั้งหมด
-                    </label>
-                    <input
-                      name="total"
-                      type="number"
-                      value={formData.total}
-                      onChange={handleChange}
-                      placeholder="Enter number"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      disabled
-                    />
+                </div>
+                <div className="border-b border-stroke dark:border-strokedark">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-5">
+                    <div>
+                      <label
+                        className="text-black dark:text-white block mb-1"
+                        htmlFor="number3"
+                      >
+                        งบประมาณคงเหลือ
+                      </label>
+                      <input
+                        name="remaining"
+                        type="number"
+                        value={formData.remaining}
+                        onChange={handleChange}
+                        placeholder="Enter number"
+                        disabled
+                        className={`w-full rounded border-[1.5px] bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter 
+                      ${
+                        formData.remaining < 0
+                          ? "border-red "
+                          : "border-stroke dark:border-form-strokedark"
+                      }`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-between">
-              <button                
+              <button
                 type="button"
                 onClick={handlePrevStep}
                 className="inline-flex items-center justify-center rounded-full bg-meta-6 px-7 py-4 text-center font-medium text-white hover:bg-opacity-50 lg:px-8 xl:px-10"
@@ -215,9 +232,15 @@ const Step2: React.FC<Step2Props> = ({
                 Previous
               </button>
               <button
-                onClick={canProceed ? handleNextStep : undefined}
-                disabled={!canProceed}
-                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${canProceed ? 'bg-meta-3 hover:bg-opacity-50' : 'bg-slate-300 '}`}
+                onClick={
+                  canProceed && checkremaining ? handleNextStep : undefined
+                }
+                disabled={!canProceed && checkremaining}
+                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-center font-medium text-white lg:px-8 xl:px-10 ${
+                  canProceed && checkremaining
+                    ? "bg-meta-3 hover:bg-opacity-50"
+                    : "bg-slate-300 "
+                }`}
               >
                 Next
                 <svg
@@ -234,7 +257,6 @@ const Step2: React.FC<Step2Props> = ({
                     d="M8.25 4.5l7.5 7.5-7.5 7.5"
                   />
                 </svg>
-                
               </button>
             </div>
           </div>

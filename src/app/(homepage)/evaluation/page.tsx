@@ -2,14 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 
-import {
-  DataGrid,
-} from "@mui/x-data-grid";
-import {
-  TextField,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import { TextField, Select, MenuItem, createTheme, ThemeProvider } from "@mui/material";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import Link from "next/link";
@@ -33,9 +27,7 @@ const Evaluation = () => {
 
   const fetchData = async (id: string) => {
     try {
-      const res = await axios.get(
-        `/api/v3/fontend/evaluation/${id}`
-      );
+      const res = await axios.get(`/api/v3/fontend/evaluation/${id}`);
       setRows(res.data);
       setLoading(false);
     } catch (error) {
@@ -54,16 +46,36 @@ const Evaluation = () => {
     const matchesCourse = row.course
       .toLowerCase()
       .includes(searchText.toLowerCase());
-  
+
     let matchesStatus = true; // เริ่มต้นด้วยค่า true
-  
+
     if (statusFilter === "true") {
       matchesStatus = row.isevaluated === true; // ตรวจสอบสถานะการรับทราบ
     } else if (statusFilter === "false") {
       matchesStatus = row.isevaluated === false; // ตรวจสอบสถานะการไม่รับทราบ
     }
-  
+
     return matchesCourse && matchesStatus;
+  });
+
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#FF6500',
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#FF6500',
+            },
+          },
+        },
+      },
+      
+    },
   });
 
   if (loading) {
@@ -71,6 +83,8 @@ const Evaluation = () => {
   }
 
   return (
+    <ThemeProvider theme={theme}>
+
     <div className="bg-white sm:p-10 py-10 px-4 rounded-[20px]">
       <div className="w-full">
         <p className="text-black font-bold mb-6 text-xl">รายการขอประเมิน</p>
@@ -79,7 +93,7 @@ const Evaluation = () => {
           <TextField
             label="ค้นหา"
             variant="outlined"
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => setSearchText(e.target.value)} // ค้นหาจากชื่อหลักสูตร
             size="small"
             style={{
               marginBottom: "1rem",
@@ -87,11 +101,6 @@ const Evaluation = () => {
               minWidth: "225px",
               width: "100%",
               maxWidth: "350px",
-            }}
-            InputProps={{
-              sx: {
-                borderRadius: "20px",
-              },
             }}
           />
           <div className="flex justify-between max-w-[350px]">
@@ -108,13 +117,9 @@ const Evaluation = () => {
               }}
             >
               <MenuItem value="">ทั้งหมด</MenuItem>
-              <MenuItem value="true">
-                ประเมินแล้ว
-              </MenuItem>
-              <MenuItem value="false">
-                ยังไม่ได้ประเมิน
-              </MenuItem>
-            </Select>          
+              <MenuItem value="true">ประเมินแล้ว</MenuItem>
+              <MenuItem value="false">ยังไม่ได้ประเมิน</MenuItem>
+            </Select>
           </div>
         </div>
 
@@ -154,21 +159,21 @@ const Evaluation = () => {
                   {params.row.isevaluated === false ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-6 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         รอประเมิน
                       </div>
                     </div>
                   ) : params.row.isevaluated === true ? (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-3 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         ประเมินสำเร็จ
                       </div>
                     </div>
                   ) : (
                     <div className="w-full justify-start items-center gap-2 inline-flex ">
                       <div className="w-4 h-4 bg-meta-1 rounded-full"></div>
-                      <div className="font-normal font-['Inter']">
+                      <div className="font-normal ">
                         เกิดข้อผิดพลาด
                       </div>
                     </div>
@@ -179,7 +184,7 @@ const Evaluation = () => {
             {
               field: "latestupdate",
               headerName: "อัพเดทล่าสุด",
-              width: 150,             
+              width: 150,
             },
             {
               field: "actions",
@@ -199,7 +204,7 @@ const Evaluation = () => {
                     },
                   }}
                   className="items-center justify-center rounded-full bg-primary px-4 py-2.5 text-center font-medium text-white hover:bg-opacity-70 "
-                  >
+                >
                   รายละเอียด
                 </Link>
               ),
@@ -227,7 +232,9 @@ const Evaluation = () => {
         />
       </div>
     </div>
-  );
-}
+    </ThemeProvider>
 
-export default Evaluation
+  );
+};
+
+export default Evaluation;

@@ -166,6 +166,17 @@ const Page = () => {
                   คุณได้แบบรายงาน ${item.information.course} ให้คุณรายงานผลการอบรม`, // เนื้อหา
                 });
 
+                if (stakeholder.id !== item.requester_id) {
+                  await axios.patch("/api/v3/history", {
+                    userid: stakeholder.id,
+                    formid: `newtrainingsurvey`,
+                    fromname: "trainingsurvey",
+                    nameuser: item.requester_name,
+                    action: `ส่งแบบรายงาน ${item.information.course} ให้คุณ`,
+                    requesterid: item.requester_id,
+                  });
+                }
+
                 // รอ axios.post ในแต่ละรายการ
                 await axios.post("/api/v3/trainingsurvey", postData);
               })
@@ -382,7 +393,7 @@ const Page = () => {
             <br />
           </div>
 
-          <div className=" ">
+          <div className="border-b border-stroke  dark:border-strokedark ">
             <div className="max-w-full overflow-x-auto">
               <h3 className="font-semibold text-black dark:text-white mb-4">
                 ผู้อนุมัติแบบอบรม / สัมมนา
@@ -458,6 +469,28 @@ const Page = () => {
             </div>
           </div>
 
+          <div className="border-b border-stroke  dark:border-strokedark ">
+            <div className="mb-9">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-9 ">
+                {Object.values(item.approver.member).map(
+                  (approver, index: number) => (
+                    <div key={index}>
+                      <label className="block mb-1">
+                        ความเห็นหรือข้อแนะอื่น ๆ เพิ่มเติมจาก ผู้อนุมัติลำดับ{" "}
+                        {+index + 1}
+                      </label>
+                      <label className="text-left font-medium text-black dark:text-white">
+                        {approver.opinion === ""
+                          ? "ยังไม่ได้พิจารณา"
+                          : approver.opinion}
+                      </label>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="max-w-full overflow-x-auto">
             <h3 className="font-semibold text-black dark:text-white mb-4">
               รายชื่อพนักงานทั้งหมดที่เข้ารับการอบรม
@@ -523,7 +556,9 @@ const Page = () => {
             </table>
           </div>
           <div className=" flex justify-center my-4.5">
-            {item.approver.isfullyapproved === "fullyapproved"  && item.stakeholders.isfullyacknowledged && !(item.issendrepoeted) ? (
+            {item.approver.isfullyapproved === "fullyapproved" &&
+            item.stakeholders.isfullyacknowledged &&
+            !item.issendrepoeted ? (
               <button
                 className="bg-meta-3 text-white p-5 rounded-md hover:bg-opacity-30"
                 onClick={showAlert}

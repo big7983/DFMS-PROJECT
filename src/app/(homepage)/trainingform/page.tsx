@@ -12,6 +12,8 @@ import {
   Select,
   MenuItem,
   Button,
+  createTheme,
+  ThemeProvider,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Link from "next/link";
@@ -81,11 +83,32 @@ export default function Trainingform() {
     return matchesCourse && matchesStatus;
   });
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#FF6500',
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#FF6500',
+            },
+          },
+        },
+      },
+      
+    },
+  });
+
   if (loading) {
     return <Loader />;
   }
 
   return (
+    <ThemeProvider theme={theme}>
     <div className="bg-white sm:p-10 py-10 px-4 rounded-[20px] font-satoshi">
       <div className="w-full ">
         <p className="text-black font-bold mb-6 text-xl">
@@ -140,7 +163,8 @@ export default function Trainingform() {
                   marginBottom: "1rem",
                   width: "130px",
                   border: 0,
-                  background: "#FF6500"
+                  background: "#FF6500",
+                  color: "#FFF"
                 }}
                 startIcon={<AddCircleIcon />}
               >               
@@ -279,5 +303,6 @@ export default function Trainingform() {
         />
       </div>
     </div>
+    </ThemeProvider>
   );
 }
